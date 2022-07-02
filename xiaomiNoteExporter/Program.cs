@@ -1,4 +1,7 @@
-﻿using System.Drawing;
+﻿using System.Runtime.InteropServices;
+using System.Management;
+using System.ComponentModel;
+using System.Drawing;
 using System.Diagnostics;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -9,7 +12,7 @@ using Pastel;
 
 namespace xiaomiNoteExporter
 {
-    internal class Program
+    internal static class Program
     {
         public static Version appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         static ChromeDriver PrepareDriver()
@@ -73,6 +76,7 @@ namespace xiaomiNoteExporter
             if (driver.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]")).Count > 0)
             {
                 driver.Close();
+                driver.Quit();
                 Console.WriteLine($"\n{"Provided session token was invalid or no longer active and couldn't access Mi Cloud.".Pastel(Color.Red)}");
                 Console.WriteLine("Application will exit now...".Pastel(Color.Gray));
                 Console.ReadKey();
@@ -98,6 +102,7 @@ namespace xiaomiNoteExporter
                     if (control == notesAmount)
                     {
                         driver.Close();
+                        driver.Quit();
                         Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory + "");
                         break;
                     } else
@@ -131,12 +136,14 @@ namespace xiaomiNoteExporter
                     }
                 }
 
+
                 Console.Clear();
                 Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
                 Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
                 Console.ReadKey();
             } catch (Exception ex) {
                 driver.Close();
+                driver.Quit();
                 Console.WriteLine($"\n{ex.ToString().Pastel(Color.Red)}");
                 Console.ReadKey();
             }
