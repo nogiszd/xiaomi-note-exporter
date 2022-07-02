@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>link</TrimMode>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pastel" Version="3.0.1" />
+    <PackageReference Include="Selenium.Support" Version="4.3.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.3.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="103.0.5060.5300" />
+  </ItemGroup>
+
+</Project>
