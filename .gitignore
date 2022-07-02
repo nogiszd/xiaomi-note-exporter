@@ -2,3 +2,4 @@
 .vs/
 xiaomiNoteExporter/bin
 xiaomiNoteExporter/obj
+*.user
