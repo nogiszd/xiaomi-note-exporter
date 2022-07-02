@@ -12,6 +12,9 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 --------------------
 **DISCLAIMER: This software will work only if you have your notes stored on [Mi Cloud](https://i.mi.com/)**
 
+**Prerequisites :**
+ - **Windows machine with _.NET Framework 6.x.x_ installed**
+
 Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), extract the contents **to the same folder** and run `xiaomiNoteExporter.exe` executable.
 
 For this to work you'll need `serviceToken` (session) and `userId`.  
