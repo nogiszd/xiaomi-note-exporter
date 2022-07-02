@@ -1,7 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System.Management;
-using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Diagnostics;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -28,7 +25,7 @@ namespace xiaomiNoteExporter
 
         static void Main()
         {
-            Console.Title = $"Xiaomi Note Exporter {appVersion.Major}.{appVersion.Minor}.{appVersion.MinorRevision}";
+            Console.Title = $"Xiaomi Note Exporter {appVersion.Major}.{appVersion.Minor}.{appVersion.Build}";
             Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n");
             string token = "";
             string userId = "";
