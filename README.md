@@ -29,18 +29,6 @@ Here's how you can obtain them:
  5. **Do not close your browser as `serviceToken` is refreshing after every session is ended.**
  6. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
-⭐ Contribution
----------------------
-Feel free to contribute to this open source project!  You can help by:
-
- - Forking this project
- - Creating your own branch
- - Commiting and opening pull requests
-
-Just remember to check if everything work as intended.
-
-> I would like to see your approach and implementations of my code in a different way 😄
-
 📜 License
 ---------------
 This repository is distributed mainly under the [MIT license](https://github.com/nogiszd/xiaomi-note-exporter/blob/master/LICENSE.txt). 
