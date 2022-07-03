@@ -11,7 +11,7 @@ namespace xiaomiNoteExporter
 {
     internal static class Program
     {
-        public static Version appVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         static ChromeDriver PrepareDriver()
         {
             ChromeOptions options = new ChromeOptions();
@@ -25,7 +25,7 @@ namespace xiaomiNoteExporter
 
         static void Main()
         {
-            Console.Title = $"Xiaomi Note Exporter {appVersion.Major}.{appVersion.Minor}.{appVersion.Build}";
+            Console.Title = $"Xiaomi Note Exporter {appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build}";
             Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n");
             string? token = "";
             string? userId = "";
@@ -80,11 +80,13 @@ namespace xiaomiNoteExporter
                 Environment.Exit(0);
             }
 
-            wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
             wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
+            wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
             Console.Clear();
 
             try {
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
                 string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
                 notesAmount = int.Parse(Regex.Replace(notesAmountEl, @"[^\d]", ""));
                 IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
@@ -98,6 +100,7 @@ namespace xiaomiNoteExporter
                     Console.Write($"\rParsed {control} notes out of {notesAmount}... ({(int)(0.5f + ((100f * control) / notesAmount))}%)");
                     if (control == notesAmount)
                     {
+                        watch.Stop();
                         driver.Close();
                         driver.Quit();
                         Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory + "");
@@ -115,7 +118,7 @@ namespace xiaomiNoteExporter
                         }
 
                         el.Click();
-                        Thread.Sleep(200);
+                        Thread.Sleep(200); // fallback for fetching optimization
                         wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'ql-editor')]")).Text.Length > 0); // additional check for loading note timespan
 
                         string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input"))).GetAttribute("value");
@@ -133,8 +136,9 @@ namespace xiaomiNoteExporter
                     }
                 }
 
-
                 Console.Clear();
+                Console.Title = String.Format("Completed! (took {0:00}:{1:00}:{2:00})", 
+                    watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds);
                 Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
                 Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
                 Console.ReadKey();
