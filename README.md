@@ -27,7 +27,7 @@ Here's how you can obtain them:
  2. Choose Notes, when page is loaded press F12
  3. Go to the Application > Storage > Cookies and choose current URL
  4. Copy `serviceToken` and `userId` content and paste as prompted in application.
- 5. **Do not close your browser as `serviceToken` is refreshing after every session is ended.**
+ 5. **Do not close your browser as `serviceToken` is refreshed after every session is ended.**
  6. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
 📜 License
