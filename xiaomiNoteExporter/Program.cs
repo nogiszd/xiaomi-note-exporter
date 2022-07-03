@@ -27,8 +27,8 @@ namespace xiaomiNoteExporter
         {
             Console.Title = $"Xiaomi Note Exporter {appVersion.Major}.{appVersion.Minor}.{appVersion.Build}";
             Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n");
-            string token = "";
-            string userId = "";
+            string? token = "";
+            string? userId = "";
             int notesAmount;
 
             Console.WriteLine("Input session token: ");
