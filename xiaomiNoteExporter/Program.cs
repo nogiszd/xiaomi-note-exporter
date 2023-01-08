@@ -9,62 +9,25 @@ using Pastel;
 
 namespace xiaomiNoteExporter
 {
-    internal static class Program
+    class Program
     {
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        static ChromeDriver PrepareDriver()
-        {
-            ChromeOptions options = new ChromeOptions();
-            string[] args = {"--headless"}; // here put optional chrome args (eg. "--headless" - makes chrome working in background without showing window)
-            options.AddArguments(args);
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            ChromeDriver driver = new ChromeDriver(service, options);
-            return driver;
-        }
+        readonly static Driver _driver = new(new string[] {"--headless"});
 
         static void Main()
         {
             Console.Title = $"Xiaomi Note Exporter {appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build}";
             Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n");
-            string? token = "";
-            string? userId = "";
+            string? token = new Prompt("Input session token").Ask();
+            string? userId = new Prompt("Input userId").Ask();
             int notesAmount;
 
-            Console.WriteLine("Input session token: ");
-            while (true)
-            {
-                token = Console.ReadLine();
-                if (token == "")
-                {
-                    Console.Clear();
-                    Console.WriteLine($"Input {"valid".Pastel(Color.Red)} session token: ");
-                } else
-                {
-                    break;
-                }
-            }
-
-            Console.WriteLine("Input userId: ");
-            while (true)
-            {
-                userId = Console.ReadLine();
-                if (userId == "")
-                {
-                    Console.Clear();
-                    Console.WriteLine($"Input {"valid".Pastel(Color.Red)} userId: ");
-                } else
-                {
-                    break;
-                }
-            }
-
-            ChromeDriver driver = PrepareDriver();
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            ChromeDriver driver = _driver.Prepare();
+            WebDriverWait wait = new(driver, TimeSpan.FromSeconds(10));
 
             driver.Navigate().GoToUrl("https://us.i.mi.com/note/h5#");
-            driver.Manage().Cookies.AddCookie(new OpenQA.Selenium.Cookie("serviceToken", token));
-            driver.Manage().Cookies.AddCookie(new OpenQA.Selenium.Cookie("userId", userId));
+            driver.Manage().Cookies.AddCookie(new Cookie("serviceToken", token));
+            driver.Manage().Cookies.AddCookie(new Cookie("userId", userId));
             driver.Navigate().GoToUrl("https://us.i.mi.com/note/h5#");
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
@@ -85,12 +48,12 @@ namespace xiaomiNoteExporter
             Console.Clear();
 
             try {
-                Stopwatch watch = new Stopwatch();
+                Stopwatch watch = new();
                 watch.Start();
                 string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
                 notesAmount = int.Parse(Regex.Replace(notesAmountEl, @"[^\d]", ""));
                 IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
-                string fName = $"exported_notes_{DateTime.Now.ToString("dd-MM-yy_HH-mm-ss")}.md";
+                string fName = $"exported_notes_{DateTime.Now:dd-MM-yy_HH-mm-ss}.md";
                 
                 int control = 0;
                 bool isFirst = true; // check is needed because it usually opens first note automatically
@@ -137,7 +100,7 @@ namespace xiaomiNoteExporter
                 }
 
                 Console.Clear();
-                Console.Title = String.Format("Completed! (took {0:00}:{1:00}:{2:00})", 
+                Console.Title = string.Format("Completed! (took {0:00}:{1:00}:{2:00})", 
                     watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds);
                 Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
                 Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
