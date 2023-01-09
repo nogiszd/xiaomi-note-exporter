@@ -12,7 +12,7 @@ namespace xiaomiNoteExporter
     class Program
     {
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        readonly static Driver _driver = new(new string[] {"--headless"});
+        readonly static Driver _driver = new(new string[] {});
 
         static void Main()
         {
@@ -33,15 +33,26 @@ namespace xiaomiNoteExporter
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
             // if token is invalid then show error
-            if (driver.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]")).Count > 0)
+            try
+            {
+                if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0)
+                {
+                    driver.Close();
+                    driver.Quit();
+                    Console.WriteLine($"\n{"Provided session token was invalid or no longer active and couldn't access Mi Cloud.".Pastel(Color.Red)}");
+                    Console.WriteLine("Application will exit now...".Pastel(Color.Gray));
+                    Console.ReadKey();
+                    Environment.Exit(0);
+                }
+            } 
+            catch (Exception ex)
             {
                 driver.Close();
                 driver.Quit();
-                Console.WriteLine($"\n{"Provided session token was invalid or no longer active and couldn't access Mi Cloud.".Pastel(Color.Red)}");
-                Console.WriteLine("Application will exit now...".Pastel(Color.Gray));
+                Console.WriteLine($"\n{ex.Message.ToString().Pastel(Color.Red)}");
                 Console.ReadKey();
-                Environment.Exit(0);
             }
+
 
             wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
@@ -108,6 +119,7 @@ namespace xiaomiNoteExporter
             } catch (Exception ex) {
                 driver.Close();
                 driver.Quit();
+                Console.WriteLine($"\nPlease report this error on GitHub".Pastel(Color.Gray));
                 Console.WriteLine($"\n{ex.ToString().Pastel(Color.Red)}");
                 Console.ReadKey();
             }
