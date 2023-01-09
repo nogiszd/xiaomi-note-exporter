@@ -12,7 +12,7 @@ namespace xiaomiNoteExporter
     class Program
     {
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        readonly static Driver _driver = new(new string[] {});
+        readonly static Driver _driver = new(new string[] {"--headless"});
 
         static void Main()
         {
