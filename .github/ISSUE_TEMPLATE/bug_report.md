@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create report to help with keeping this app running fine
-title: "[BUG]:"
+title: "[BUG]: "
 labels: bug
 assignees: nogiszd
 

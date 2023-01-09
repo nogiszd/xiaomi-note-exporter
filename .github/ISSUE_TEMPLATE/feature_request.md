@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a new function or idea for this app
-title: "[REQUEST]:"
+title: "[FEATURE]: "
 labels: enhancement
 assignees: nogiszd
 
