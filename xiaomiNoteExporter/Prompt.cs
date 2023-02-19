@@ -6,10 +6,12 @@ namespace xiaomiNoteExporter
     class Prompt
     {
         private readonly string _message;
+        private readonly string _defaultValue;
 
-        public Prompt(string message)
+        public Prompt(string message, string? defaultValue = "")
         {
-            _message= message;
+            _message = message;
+            _defaultValue = defaultValue!;
         }
 
        private static string InsertAfterSpace(string str, string insertion, Color? color = null)
@@ -33,11 +35,18 @@ namespace xiaomiNoteExporter
             while(true)
             {
                 var result = Console.ReadLine();
-
+                 
                 if (string.IsNullOrEmpty(result))
                 {
-                    Console.Clear();
-                    Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
+                    if (!string.IsNullOrEmpty(_defaultValue))
+                    {
+                        Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
+                        return _defaultValue;
+                    } else
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
+                    }
                 }
                 else
                 {

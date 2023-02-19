@@ -45,6 +45,7 @@ namespace xiaomiNoteExporter
         }
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        public static string defaultDomain = "us.i.mi.com";
         readonly static Driver _driver = new(new string[] {"--headless"});
         static ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
@@ -62,16 +63,20 @@ namespace xiaomiNoteExporter
 
             Console.Title = $"Xiaomi Note Exporter {appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build}";
             Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n");
-            string? token = new Prompt("Input serviceToken").Ask();
-            string? userId = new Prompt("Input userId").Ask();
+            string? domain = new Prompt(
+                $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input Mi Notes domain that you were redirected to (default \"{defaultDomain}\"):",
+                defaultDomain
+                ).Ask();
+            string? token = new Prompt("Input serviceToken:").Ask();
+            string? userId = new Prompt("Input userId:").Ask();
             int notesAmount;
 
             WebDriverWait wait = new(driver, TimeSpan.FromSeconds(10));
 
-            driver.Navigate().GoToUrl("https://us.i.mi.com/note/h5#");
+            driver.Navigate().GoToUrl($"https://{domain}/note/h5#");
             driver.Manage().Cookies.AddCookie(new Cookie("serviceToken", token));
             driver.Manage().Cookies.AddCookie(new Cookie("userId", userId));
-            driver.Navigate().GoToUrl("https://us.i.mi.com/note/h5#");
+            driver.Navigate().GoToUrl($"https://{domain}/note/h5#");
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
@@ -86,7 +91,7 @@ namespace xiaomiNoteExporter
                     Console.ReadKey();
                     Environment.Exit(0);
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 shutdownHandler();
