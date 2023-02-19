@@ -45,7 +45,7 @@ namespace xiaomiNoteExporter
         }
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        readonly static Driver _driver = new(new string[] {});
+        readonly static Driver _driver = new(new string[] {"--headless"});
         static ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
 
