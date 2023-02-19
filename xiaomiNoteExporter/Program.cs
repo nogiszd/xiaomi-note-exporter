@@ -45,7 +45,7 @@ namespace xiaomiNoteExporter
         }
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        readonly static Driver _driver = new(new string[] {"--headless"});
+        readonly static Driver _driver = new(new string[] {});
         static ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
 
@@ -133,7 +133,7 @@ namespace xiaomiNoteExporter
 
                         el.Click();
                         Thread.Sleep(200); // fallback for fetching optimization
-                        wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input")));
+                        wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input")).Displayed);
 
                         string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input"))).GetAttribute("value");
                         string value = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'ql-editor')]"))).Text;

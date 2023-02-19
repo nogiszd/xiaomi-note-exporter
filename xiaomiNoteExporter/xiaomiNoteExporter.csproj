@@ -8,8 +8,8 @@
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyVersion>1.0.6</AssemblyVersion>
-    <FileVersion>1.0.6</FileVersion>
+    <AssemblyVersion>1.0.7</AssemblyVersion>
+    <FileVersion>1.0.7</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +18,8 @@
 
   <ItemGroup>
     <PackageReference Include="Pastel" Version="4.1.0" />
-    <PackageReference Include="Selenium.Support" Version="4.8.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.8.0" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="109.0.5414.7400" />
+    <PackageReference Include="Selenium.Support" Version="4.8.1" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.8.1" />
   </ItemGroup>
 
 </Project>
