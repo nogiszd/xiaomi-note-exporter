@@ -138,10 +138,10 @@ namespace xiaomiNoteExporter
 
                         el.Click();
                         Thread.Sleep(200); // fallback for fetching optimization
-                        wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input")).Displayed);
+                        wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
-                        string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'title-bar')]/input"))).GetAttribute("value");
-                        string value = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'ql-editor')]"))).Text;
+                        string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
+                        string value = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
 
                         using (StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}"))
                         {
