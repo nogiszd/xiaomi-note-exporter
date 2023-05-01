@@ -38,4 +38,3 @@ Used libraries:
 
  - [Selenium](https://www.selenium.dev/) - `Apache License 2.0`
  - [Pastel](https://github.com/silkfire/Pastel) - `MIT License`
- - [nupkg-selenium-webdriver-chromedriver](https://github.com/jsakamoto/nupkg-selenium-webdriver-chromedriver/) - `Unlicense`
