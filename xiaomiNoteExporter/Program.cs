@@ -102,6 +102,7 @@ namespace xiaomiNoteExporter
 
             wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
+            var editorsContainer = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-content')]/div")));
             Console.Clear();
 
             try {
@@ -137,7 +138,21 @@ namespace xiaomiNoteExporter
                         }
 
                         el.Click();
-                        Thread.Sleep(200); // fallback for fetching optimization
+                        Thread.Sleep(200); // timeout for fetching optimization
+
+                        if (editorsContainer.FindElement(By.XPath(@".//div[1]")).GetAttribute("class").Contains("hidden"))
+                        {
+                            string createdAt = el.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
+                            using StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}");
+                            sw.WriteLine("****");
+                            sw.WriteLine($"** Unsupported note type (Mind-map or Sound note) (Created at: {createdAt})**");
+
+                            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
+                            control++;
+
+                            continue;
+                        }
+                        
                         wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
                         string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
