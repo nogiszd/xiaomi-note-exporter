@@ -46,7 +46,7 @@ namespace xiaomiNoteExporter
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         public static string defaultDomain = "us.i.mi.com";
-        readonly static Driver _driver = new(new string[] {"--headless"});
+        readonly static Driver _driver = new(new string[] { "--headless" });
         static ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
 
@@ -102,17 +102,17 @@ namespace xiaomiNoteExporter
 
             wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
-            var editorsContainer = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-content')]/div")));
             Console.Clear();
 
             try {
                 Stopwatch watch = new();
+                WebDriverWait innerWait = new(driver, TimeSpan.FromMilliseconds(50));
                 watch.Start();
                 string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
                 notesAmount = int.Parse(Regex.Replace(notesAmountEl, @"[^\d]", ""));
                 IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
                 string fName = $"exported_notes_{DateTime.Now:dd-MM-yy_HH-mm-ss}.md";
-                
+
                 int control = 0;
                 bool isFirst = true; // check is needed because it usually opens first note automatically
                 while (true)
@@ -140,7 +140,10 @@ namespace xiaomiNoteExporter
                         el.Click();
                         Thread.Sleep(200); // timeout for fetching optimization
 
-                        if (editorsContainer.FindElement(By.XPath(@".//div[1]")).GetAttribute("class").Contains("hidden"))
+                        try
+                        {
+                            innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i)]")).Count == 1);
+                        } catch
                         {
                             string createdAt = el.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
                             using StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}");
@@ -149,10 +152,9 @@ namespace xiaomiNoteExporter
 
                             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
                             control++;
-
                             continue;
                         }
-                        
+              
                         wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
                         string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
