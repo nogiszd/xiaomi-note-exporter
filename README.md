@@ -30,8 +30,6 @@ Here's how you can obtain them:
  5. **Do not close your browser as `serviceToken` is refreshed after every session ends.**
  6. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
-
-
 Import to other apps
 ------------
 After you have received your md file you will probably want to use it to import it into an application that does not restrict you to export the notes.
@@ -65,6 +63,14 @@ To
 
 ![image](https://github.com/aviv926/xiaomi-note-exporter/assets/51673860/2dbb4b59-3e09-4eeb-be6c-02b210ad9de0)
 
+
+🔗 Importing into other apps (Advanced)
+---------------
+There is an **[fork](https://github.com/aviv926/xiaomi-note-exporter)** with additional scripts written in Python which are made to split complete markdown file into one per note, and convert them into JSON format file. 
+
+More details are described in this fork's `readme.md`.
+
+Credits are going to [aviv926](https://github.com/aviv926)
 
 📜 License
 ---------------
