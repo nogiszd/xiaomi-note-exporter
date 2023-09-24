@@ -63,15 +63,6 @@ To
 
 ![image](https://github.com/aviv926/xiaomi-note-exporter/assets/51673860/2dbb4b59-3e09-4eeb-be6c-02b210ad9de0)
 
-
-🔗 Importing into other apps (Advanced)
----------------
-There is an **[fork](https://github.com/aviv926/xiaomi-note-exporter)** with additional scripts written in Python which are made to split complete markdown file into one per note, and convert them into JSON format file. 
-
-More details are described in this fork's `readme.md`.
-
-Credits are going to [aviv926](https://github.com/aviv926)
-
 📜 License
 ---------------
 This repository is distributed mainly under the [MIT license](https://github.com/nogiszd/xiaomi-note-exporter/blob/master/LICENSE.txt). 
