@@ -34,7 +34,7 @@ Here's how you can obtain them:
 ---------------
 There is an **[fork](https://github.com/aviv926/xiaomi-note-exporter)** with additional scripts written in Python which are made to split complete markdown file into one per note, and convert them into JSON format file. 
 
-More details are described in fork's `readme.md` which has been mentioned above.
+More details are described in this fork's `readme.md`.
 
 Credits are going to [aviv926](https://github.com/aviv926)
 
