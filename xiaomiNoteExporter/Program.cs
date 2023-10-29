@@ -46,7 +46,7 @@ namespace xiaomiNoteExporter
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         public static string defaultDomain = "us.i.mi.com";
-        readonly static Driver _driver = new(new string[] { "--headless" });
+        readonly static Driver _driver = new(new string[] { /*"--headless"*/ });
         static ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
 
@@ -67,26 +67,24 @@ namespace xiaomiNoteExporter
                 $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input Mi Notes domain that you were redirected to (default \"{defaultDomain}\"):",
                 defaultDomain
                 ).Ask();
-            string? token = new Prompt("Input serviceToken:").Ask();
-            string? userId = new Prompt("Input userId:").Ask();
+
             int notesAmount;
 
             WebDriverWait wait = new(driver, TimeSpan.FromSeconds(10));
 
             driver.Navigate().GoToUrl($"https://{domain}/note/h5#");
-            driver.Manage().Cookies.AddCookie(new Cookie("serviceToken", token));
-            driver.Manage().Cookies.AddCookie(new Cookie("userId", userId));
-            driver.Navigate().GoToUrl($"https://{domain}/note/h5#");
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
-            // if token is invalid then show error
+            new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you do so...").Ask(true);
+
+            // if account didnt sign in then show error
             try
             {
                 if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0)
                 {
-                    shutdownHandler();
-                    Console.WriteLine($"\n{"Provided session token was invalid or no longer active and couldn't access Mi Cloud.".Pastel(Color.Red)}");
+                    //shutdownHandler();
+                    Console.WriteLine($"\n{"User didn't sign into Mi Cloud or account is invalid.".Pastel(Color.Red)}");
                     Console.WriteLine("Application will exit now...".Pastel(Color.Gray));
                     Console.ReadKey();
                     Environment.Exit(0);
