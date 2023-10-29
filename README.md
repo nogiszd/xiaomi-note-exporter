@@ -18,17 +18,11 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), extract the contents **to the same folder** and run `xiaomiNoteExporter.exe` executable.
 
-For this to work you'll need `serviceToken` (session) and `userId`.  
-As this software uses Selenium for automation, and thus it is Chrome WebDriver based, we need to provide session data manually to access cloud content. 
-
-Here's how you can obtain them:
-
- 1. Go to the https://i.mi.com and sign in.
- 2. Choose Notes, when page is loaded press F12
- 3. Go to the Application > Storage > Cookies and choose current URL
- 4. Copy `serviceToken` and `userId` content and paste as prompted in application.
- 5. **Do not close your browser as `serviceToken` is refreshed after every session ends.**
- 6. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
+**Steps how to use**:
+ 1. Launch the app - you will be prompted to input domain address (if it differs from the default one).
+ 2. Sign into your account via browser window that popped up.
+ 3. After succeeding, press any key as requested.
+ 4. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
 🔗 Importing into other apps (Advanced)
 ---------------
