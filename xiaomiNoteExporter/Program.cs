@@ -46,8 +46,8 @@ namespace xiaomiNoteExporter
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         public static string defaultDomain = "us.i.mi.com";
-        readonly static Driver _driver = new(new string[] { /*"--headless"*/ });
-        static ChromeDriver driver = _driver.Prepare();
+        readonly static Driver _driver = new(Array.Empty<string>());
+        static readonly ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
 
         static void HandleShutdown()
@@ -76,7 +76,7 @@ namespace xiaomiNoteExporter
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
-            new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you do so...").Ask(true);
+            new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you succeed...").Ask(true);
 
             // if account didnt sign in then show error
             try
