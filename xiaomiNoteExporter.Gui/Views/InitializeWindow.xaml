@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:local="clr-namespace:xiaomiNoteExporter.Gui.Validation"
+        xmlns:validators="clr-namespace:xiaomiNoteExporter.Gui.Validators"
         mc:Ignorable="d"
         Title="{Binding WindowTitle, Mode=OneWay}" Height="450" Width="550" ResizeMode="NoResize">
     <Grid x:Name="MainGrid">
@@ -16,25 +16,35 @@
             <Label Content="Xiaomi Note Exporter" FontSize="22" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,0,0,0"/>
         </Grid>
         <Grid x:Name="DomainInput" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,40,0,0" Grid.Row="1">
-            <TextBox
-                Name="Domain"
-                VerticalAlignment="Top"
-                HorizontalAlignment="Left" 
-                Margin="101,4,0,0" 
-                TextWrapping="NoWrap" 
-                FontSize="14"
-                Width="150"
-                Height="25"
-                MaxLines="1">
-                <Binding Path="DomainUrl" UpdateSourceTrigger="PropertyChanged">
-                    <Binding.ValidationRules>
-                        <local:DomainValidationRule />
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox>
+            <Grid >
+                <TextBox
+                    Name="Domain"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Left" 
+                    Margin="101,4,0,0" 
+                    TextWrapping="NoWrap" 
+                    FontSize="14"
+                    Width="150"
+                    Height="25"
+                    MaxLines="1" 
+                    TextChanged="Domain_TextChanged">
+                    <Binding Path="DomainUrl" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <validators:DomainValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <TextBlock 
+                    x:Name="ErrorLabel" 
+                    TextWrapping="Wrap" 
+                    Foreground="Red" 
+                    HorizontalAlignment="Stretch" 
+                    Margin="0,34,0,-23" />
+            </Grid>
             <Label Content="Enter domain:" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Center" />
         </Grid>
         <Button 
+            Name="SubmitButton"
             Content="Continue"
             FontSize="14"
             HorizontalAlignment="Center" 
@@ -42,6 +52,6 @@
             VerticalAlignment="Top" 
             Margin="0,120,0,0" 
             Padding="10" 
-            Width="120" Click="Button_Click" />
+            Width="120" Click="SubmitButton_Click" />
     </Grid>
 </Window>
