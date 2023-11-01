@@ -28,29 +28,35 @@ namespace xiaomiNoteExporter
             }
         }
 
-        public string Ask()
+        public string Ask(bool isToggle = false)
         {
             Console.WriteLine(_message);
 
-            while(true)
+            if (isToggle)
             {
-                var result = Console.ReadLine();
-                 
-                if (string.IsNullOrEmpty(result))
+                Console.ReadKey();
+                return _defaultValue;
+            } else
+            {
+                while (true)
                 {
-                    if (!string.IsNullOrEmpty(_defaultValue))
+                    var result = Console.ReadLine();
+
+                    if (string.IsNullOrEmpty(result))
                     {
-                        Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
-                        return _defaultValue;
+                        if (!string.IsNullOrEmpty(_defaultValue))
+                        {
+                            Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
+                            return _defaultValue;
+                        } else
+                        {
+                            Console.Clear();
+                            Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
+                        }
                     } else
                     {
-                        Console.Clear();
-                        Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
+                        return result;
                     }
-                }
-                else
-                {
-                    return result;
                 }
             }
         }
