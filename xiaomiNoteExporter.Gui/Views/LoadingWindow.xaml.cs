@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace xiaomiNoteExporter.Gui.Views
 {
@@ -23,19 +24,33 @@ namespace xiaomiNoteExporter.Gui.Views
         private async void Window_Initialized(object sender, System.EventArgs e)
         {
             UpdateCheck updateCheck = new();
-            var (version, isNewer) = await updateCheck.Check();
 
-            Hide();
-
-            if (isNewer)
+            try
             {
-                OutdatedWindow outdatedWindow = new(version);
-                outdatedWindow.Show();
+                var (version, isNewer) = await updateCheck.Check();
 
-            } else
+                Hide();
+
+                if (isNewer)
+                {
+                    OutdatedWindow outdatedWindow = new(version);
+                    outdatedWindow.Show();
+
+                }
+                else
+                {
+                    InitializeWindow initializeWindow = new();
+                    initializeWindow.Show();
+                }
+            } catch (Exception ex)
             {
-                InitializeWindow initializeWindow = new();
-                initializeWindow.Show();
+                MessageBox.Show(
+                    $"An error occured during checking for update. More details below:\n\n{ex.Message}", 
+                    "Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error
+                    );
+                Application.Current.Shutdown();
             }
         }
     }
