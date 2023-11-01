@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xiaomiNoteExporter", "xiaomiNoteExporter\xiaomiNoteExporter.csproj", "{73CD5547-413C-4BBD-A3A4-9D8F109DB5BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xiaomiNoteExporter", "xiaomiNoteExporter\xiaomiNoteExporter.csproj", "{73CD5547-413C-4BBD-A3A4-9D8F109DB5BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xiaomiNoteExporter.Gui", "xiaomiNoteExporter.Gui\xiaomiNoteExporter.Gui.csproj", "{947F3AEC-90BE-4446-8304-986E8837F441}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{73CD5547-413C-4BBD-A3A4-9D8F109DB5BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73CD5547-413C-4BBD-A3A4-9D8F109DB5BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73CD5547-413C-4BBD-A3A4-9D8F109DB5BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{947F3AEC-90BE-4446-8304-986E8837F441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{947F3AEC-90BE-4446-8304-986E8837F441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{947F3AEC-90BE-4446-8304-986E8837F441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{947F3AEC-90BE-4446-8304-986E8837F441}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
