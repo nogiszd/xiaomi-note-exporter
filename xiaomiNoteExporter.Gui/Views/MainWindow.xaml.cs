@@ -6,6 +6,8 @@ namespace xiaomiNoteExporter.Gui
     {
         public string WindowTitle { get; private set; }
 
+        public bool CanContinue { get; private set; } = false;
+
         private string Domain { get; set; }
 
         public MainWindow(string domain)
