@@ -1,13 +1,10 @@
-﻿using System;
-using System.Reflection;
-
-namespace xiaomiNoteExporter.Gui.Common
+﻿namespace xiaomiNoteExporter.Gui.Common
 {
     public sealed class Title
     {
-        private static readonly Version? CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static readonly Version CurrentVersion = new();
 
-        private static readonly string VersionString = $"{CurrentVersion?.Major}.{CurrentVersion?.Minor}.{CurrentVersion?.Build}";
+        private static readonly string VersionString = $"{CurrentVersion.Current?.Major}.{CurrentVersion.Current?.Minor}.{CurrentVersion.Current?.Build}";
 
         public string Value => $"Xiaomi Note Exporter {VersionString}";
     }

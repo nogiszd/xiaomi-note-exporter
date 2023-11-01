@@ -21,9 +21,9 @@ namespace xiaomiNoteExporter.Gui.Views
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            Hide();
 
-            MainWindow mainWindow = new MainWindow(DomainUrl);
+            MainWindow mainWindow = new(DomainUrl);
 
             mainWindow.Show();
         }
@@ -42,6 +42,11 @@ namespace xiaomiNoteExporter.Gui.Views
                 SubmitButton.IsEnabled = true;
                 ErrorLabel.Text = string.Empty;
             }
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

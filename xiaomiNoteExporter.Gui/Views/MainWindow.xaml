@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:xiaomiNoteExporter.Gui"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode = OneWay}" Height="500" Width="850" Closed="Window_Closed">
+        Title="{Binding WindowTitle, Mode=OneWay}" Height="500" Width="850" Closed="Window_Closed">
     <Grid x:Name="MainGrid">
-
+        <TabControl>
+            <TabItem Header="Viewer">
+                <Grid></Grid>
+            </TabItem>
+            <TabItem Header="Converters">
+                <Grid></Grid>
+            </TabItem>
+        </TabControl>
+        <StatusBar Name="Statusbar" VerticalAlignment="Bottom" Height="25">
+            <StatusBarItem></StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

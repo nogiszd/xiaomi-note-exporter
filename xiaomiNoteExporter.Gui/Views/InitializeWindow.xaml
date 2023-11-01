@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:validators="clr-namespace:xiaomiNoteExporter.Gui.Validators"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode=OneWay}" Height="450" Width="550" ResizeMode="NoResize">
+        Title="{Binding WindowTitle, Mode=OneWay}" Height="450" Width="550" ResizeMode="CanMinimize" Closed="Window_Closed">
     <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="75*"/>
