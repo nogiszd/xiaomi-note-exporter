@@ -5,31 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:xiaomiNoteExporter.Gui"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closed="Window_Closed">
+        Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closed="Window_Closed" MinHeight="300" MinWidth="400" Loaded="Window_Loaded">
     <Grid x:Name="MainGrid">
         <TabControl FontSize="14">
             <TabItem Header="Viewer">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="30*" MaxWidth="180"/>
-                        <ColumnDefinition Width="120*"/>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="-3,-3,0,21" SelectionMode="Single">
-                        <ListView.View>
-                            <GridView AllowsColumnReorder="False">
-                                <GridViewColumn Header="Notes" />
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                    <Grid Grid.Column="1" Margin="0,-3,0,0"></Grid>
+                    <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData}" Margin="-5,-3,0,25" SelectionMode="Single" />
+                    <Grid Grid.Column="1" Margin="0,0,0,25">
+                        <Frame x:Name="MainFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </Grid>
                 </Grid>
             </TabItem>
             <TabItem Header="Converters" IsEnabled="{Binding CanContinue, Mode=OneWay}">
                 <Grid></Grid>
             </TabItem>
         </TabControl>
-        <StatusBar Name="Statusbar" VerticalAlignment="Bottom" MinHeight="24">
-            <StatusBarItem></StatusBarItem>
-        </StatusBar>
+        <StatusBar Name="Statusbar" VerticalAlignment="Bottom" Height="28"></StatusBar>
     </Grid>
 </Window>

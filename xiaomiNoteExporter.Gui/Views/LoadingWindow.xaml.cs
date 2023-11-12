@@ -16,11 +16,6 @@ namespace xiaomiNoteExporter.Gui.Views
             DataContext = this;
         }
 
-        private void Window_Closed(object sender, System.EventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
         private async void Window_Initialized(object sender, System.EventArgs e)
         {
             UpdateCheck updateCheck = new();
@@ -52,6 +47,11 @@ namespace xiaomiNoteExporter.Gui.Views
                     );
                 Application.Current.Shutdown();
             }
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

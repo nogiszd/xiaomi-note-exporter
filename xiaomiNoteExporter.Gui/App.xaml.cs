@@ -9,9 +9,9 @@ namespace xiaomiNoteExporter.Gui
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
             Title = new Title().Value;
+
+            base.OnStartup(e);
         }
     }
 }

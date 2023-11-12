@@ -12,7 +12,7 @@ namespace xiaomiNoteExporter.Gui
             _args = args;
         }
 
-        public static ChromeDriver Prepare()
+        public ChromeDriver Prepare()
         {
             ChromeOptions options = new();
             options.AddArguments(_args);

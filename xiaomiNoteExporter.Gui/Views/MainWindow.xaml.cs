@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using OpenQA.Selenium.Chrome;
+using xiaomiNoteExporter.Gui.Pages;
 
 namespace xiaomiNoteExporter.Gui
 {
@@ -10,9 +13,15 @@ namespace xiaomiNoteExporter.Gui
 
         private string Domain { get; set; }
 
+        static readonly Driver _driver = new(Array.Empty<string>());
+
+        public readonly ChromeDriver driver;
+
         public MainWindow(string domain)
         {
             InitializeComponent();
+
+            driver = _driver.Prepare();
 
             WindowTitle = ((App)Application.Current).Title;
 
@@ -21,8 +30,23 @@ namespace xiaomiNoteExporter.Gui
             DataContext = this;
         }
 
-        private void Window_Closed(object sender, System.EventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            MainFrame.Navigate(new SignInPage(Domain, driver));
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            try
+            {
+                driver.Close();
+                driver.Quit();
+            } 
+            catch (Exception)
+            {
+                // do nothing
+            }
+
             Application.Current.Shutdown();
         }
     }
