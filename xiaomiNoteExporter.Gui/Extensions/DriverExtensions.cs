@@ -24,9 +24,6 @@ namespace xiaomiNoteExporter.Gui.Extensions
             return flag;
         }
 
-        public static WebDriverWait GetWait(this WebDriver driver, TimeSpan timeSpan) 
-        {
-            return new WebDriverWait(driver, timeSpan);
-        }
+        public static WebDriverWait GetWait(this WebDriver driver, TimeSpan timeSpan) => new(driver, timeSpan);
     }
 }

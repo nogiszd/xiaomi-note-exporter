@@ -37,7 +37,7 @@ namespace xiaomiNoteExporter.Gui.Pages
                 if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0)
                 {
                     MessageBox.Show(
-                        $"User didn't sign into Mi Cloud or account is invalid.\nPlease try again.", 
+                        $"You didn't sign into Mi Cloud or account is invalid.\nPlease try again.", 
                         "Oops", 
                         MessageBoxButton.OK, 
                         MessageBoxImage.Warning
