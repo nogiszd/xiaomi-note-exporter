@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using xiaomiNoteExporter.Gui.Pages;
 
 namespace xiaomiNoteExporter.Gui
@@ -44,7 +45,7 @@ namespace xiaomiNoteExporter.Gui
             } 
             catch (Exception)
             {
-                // do nothing
+                // apparently driver is not longer running - ignore it
             }
 
             Application.Current.Shutdown();
