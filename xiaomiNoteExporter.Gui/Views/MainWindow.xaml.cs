@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using xiaomiNoteExporter.Gui.Pages;
 
 namespace xiaomiNoteExporter.Gui
@@ -45,7 +46,9 @@ namespace xiaomiNoteExporter.Gui
             } 
             catch (Exception)
             {
-                // apparently driver is not longer running - ignore it
+                // apparently driver is not longer running
+                // try to kill chromedriver.exe manually if exist
+                Process.GetProcessesByName("chromedriver").ToList().ForEach(p => p.Kill());
             }
 
             Application.Current.Shutdown();
