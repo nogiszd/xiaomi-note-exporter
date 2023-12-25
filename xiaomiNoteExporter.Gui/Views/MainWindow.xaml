@@ -16,7 +16,7 @@
                     </Grid.ColumnDefinitions>
                     <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData}" Margin="-5,-3,0,25" SelectionMode="Single" />
                     <Grid Grid.Column="1" Margin="0,0,0,25">
-                        <Frame x:Name="MainFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                     </Grid>
                 </Grid>
             </TabItem>

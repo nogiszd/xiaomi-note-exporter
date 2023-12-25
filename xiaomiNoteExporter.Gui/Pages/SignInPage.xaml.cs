@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using xiaomiNoteExporter.Gui.Events;
 using xiaomiNoteExporter.Gui.Extensions;
 
 namespace xiaomiNoteExporter.Gui.Pages
@@ -11,21 +12,35 @@ namespace xiaomiNoteExporter.Gui.Pages
     {
         private readonly ChromeDriver Driver;
 
+        private readonly SignedInEvent signedInEvent = new();
+
+        private readonly BrowserWorker _worker;
+
         private string Domain { get; set; }
 
-        public SignInPage(string domain, ChromeDriver driver)
+        public SignInPage(string domain, ChromeDriver driver, BrowserWorker worker)
         {
             InitializeComponent();
 
             Driver = driver;
 
             Domain = domain;
+
+            _worker = worker;
+
+            signedInEvent.SignedIn += SignedIn_Handler;
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private void SignedIn_Handler(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new ParsePage(Driver));
+        }
+
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             NavigateToDomain();
+            await _worker.Start();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -44,10 +59,18 @@ namespace xiaomiNoteExporter.Gui.Pages
                         );
                     NavigateToDomain();
                 } 
+                else if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'identity-verifyPhone-')]"))).Count != 0)
+                {
+                    MessageBox.Show(
+                        $"You need to complete 2FA verification.",
+                        "Oops",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                        );
+                } 
                 else
-                {                    
-                    ParsePage parsePage = new(Driver);
-                    NavigationService.Navigate(parsePage);
+                {
+                    signedInEvent.Raise();
                 }
             } 
             catch (Exception ex) 

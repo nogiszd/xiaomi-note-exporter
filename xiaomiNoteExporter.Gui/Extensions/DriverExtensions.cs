@@ -12,12 +12,14 @@ namespace xiaomiNoteExporter.Gui.Extensions
 
             try
             {
-                if (driver.Title != null)
+                var title = driver.Title;
+
+                if (title != null) 
                 {
                     flag = false;
                 }
             } catch (Exception)
-            {
+            {   
                 flag = true;
             }
 

@@ -19,6 +19,8 @@ namespace xiaomiNoteExporter.Gui
 
         public readonly ChromeDriver driver;
 
+        private readonly BrowserWorker worker;
+
         public MainWindow(string domain)
         {
             InitializeComponent();
@@ -29,16 +31,27 @@ namespace xiaomiNoteExporter.Gui
 
             Domain = domain;
 
+            worker = new BrowserWorker(driver, this);
+
             DataContext = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new SignInPage(Domain, driver));
+            MainFrame.Navigate(new SignInPage(Domain, driver, worker));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            try
+            {
+                worker.Stop();
+            } 
+            catch (Exception)
+            {
+                // ignore this exception
+            }
+
             try
             {
                 driver.Close();
