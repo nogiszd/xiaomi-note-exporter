@@ -37,13 +37,13 @@ namespace xiaomiNoteExporter.Gui
             MainFrame.Navigate(new SignInPage(Domain, driver));
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             try
             {
                 driver.Close();
                 driver.Quit();
-            } 
+            }
             catch (Exception)
             {
                 // apparently driver is not longer running

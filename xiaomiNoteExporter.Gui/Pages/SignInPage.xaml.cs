@@ -43,6 +43,11 @@ namespace xiaomiNoteExporter.Gui.Pages
                         MessageBoxImage.Warning
                         );
                     NavigateToDomain();
+                } 
+                else
+                {                    
+                    ParsePage parsePage = new(Driver);
+                    NavigationService.Navigate(parsePage);
                 }
             } 
             catch (Exception ex) 

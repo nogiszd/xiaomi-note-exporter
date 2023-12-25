@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:xiaomiNoteExporter.Gui"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closed="Window_Closed" MinHeight="300" MinWidth="400" Loaded="Window_Loaded">
+        Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closing="Window_Closing" MinHeight="300" MinWidth="400" Loaded="Window_Loaded">
     <Grid x:Name="MainGrid">
         <TabControl FontSize="14">
             <TabItem Header="Viewer">
