@@ -28,7 +28,7 @@ namespace xiaomiNoteExporter.Gui.Services
             var span = _driver.GetWait(TimeSpan.FromMilliseconds(10));
             var wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 
-            watch.Start();
+            InitializeTimer();
 
             string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
             int notesAmount = int.Parse(DigitRegex().Replace(notesAmountEl, ""));
@@ -107,6 +107,12 @@ namespace xiaomiNoteExporter.Gui.Services
                 note.CreatedAt, 
                 note.Type
                 );
+        }
+
+        private void InitializeTimer()
+        {
+            watch.Reset();
+            watch.Start();
         }
 
         [GeneratedRegex("[^\\d]")]
