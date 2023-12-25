@@ -6,14 +6,15 @@ namespace xiaomiNoteExporter.Gui.Events
     {
         public delegate void SignedInHandler(object sender, EventArgs e);
 
-        public event SignedInHandler SignedIn;
+        public event SignedInHandler? SignedIn;
 
         protected virtual void OnSignedIn()
         {
-            SignedInHandler handler = SignedIn;
+            SignedInHandler? handler = SignedIn;
+
             if (handler != null)
             {
-                EventArgs e = new EventArgs();
+                EventArgs e = new();
                 handler(this, e);
             }
         }
