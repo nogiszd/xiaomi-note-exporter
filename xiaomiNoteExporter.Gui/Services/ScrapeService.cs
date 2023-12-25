@@ -43,7 +43,7 @@ namespace xiaomiNoteExporter.Gui.Services
 
             while (true)
             {
-                StatusbarService.SetStatus($"Parsed: {control}/{notesAmount} ({(int)(.5f + 100f * control / notesAmount)}%)");
+                StatusbarService.SetStatus($"Parsing: {control}/{notesAmount} ({(int)(.5f + 100f * control / notesAmount)}%)");
 
                 if (control == notesAmount)
                 {
@@ -94,6 +94,13 @@ namespace xiaomiNoteExporter.Gui.Services
             }
 
             doc.Save($"{fileName}.xml");
+
+            StatusbarService.SetStatus(
+                string.Format(
+                    "Done in {0:00}:{0:00}:{0:00}", 
+                    watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds
+                    )
+                );
         }
 
         private void Insert(XmlDocument doc, Note note)

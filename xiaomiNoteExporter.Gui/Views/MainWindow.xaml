@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:xiaomiNoteExporter.Gui"
         mc:Ignorable="d"
+        Name="GuiWindow"
         Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closing="Window_Closing" MinHeight="300" MinWidth="400" Loaded="Window_Loaded">
     <Grid x:Name="MainGrid">
         <TabControl FontSize="14">
@@ -14,7 +15,8 @@
                         <ColumnDefinition Width="180" />
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData}" Margin="-5,-3,0,25" SelectionMode="Single" />
+                    <ComboBox Name="ScrapeSelect" Grid.Column="0" MaxWidth="180" Height="30" VerticalAlignment="Top" Margin="-5, 0, 0, 0"/>
+                    <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData}" Margin="-5, 30, 0, 25" SelectionMode="Single" />
                     <Grid Grid.Column="1" Margin="0,0,0,25">
                         <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                     </Grid>

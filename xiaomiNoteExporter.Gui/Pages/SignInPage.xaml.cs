@@ -5,6 +5,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using xiaomiNoteExporter.Gui.Events;
 using xiaomiNoteExporter.Gui.Extensions;
+using xiaomiNoteExporter.Gui.Services;
 
 namespace xiaomiNoteExporter.Gui.Pages
 {
@@ -38,6 +39,7 @@ namespace xiaomiNoteExporter.Gui.Pages
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            StatusbarService.SetStatus("Ready and waiting");
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             NavigateToDomain();
             await _worker.Start();
