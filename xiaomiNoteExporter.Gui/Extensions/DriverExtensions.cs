@@ -18,7 +18,8 @@ namespace xiaomiNoteExporter.Gui.Extensions
                 {
                     flag = false;
                 }
-            } catch (Exception)
+            } 
+            catch (Exception)
             {   
                 flag = true;
             }

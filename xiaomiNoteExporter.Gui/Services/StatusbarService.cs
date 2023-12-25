@@ -8,7 +8,7 @@ namespace xiaomiNoteExporter.Gui.Services
     {
         private static StatusBar? statusBar;
 
-        private static string WindowName { get; set; } = "GuiWindow";
+        private static string WindowName { get; } = "GuiWindow";
 
         private static void FindStatusBar(string name)
         {

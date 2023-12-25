@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace xiaomiNoteExporter.Gui.Entities
+﻿namespace xiaomiNoteExporter.Gui.Entities
 {
     public sealed class Note
     {
