@@ -7,7 +7,11 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ParsePage" Background="White" Loaded="Page_Loaded">
-    <Grid>
-        
+    <Grid VerticalAlignment="Center">
+        <StackPanel>
+            <TextBlock Text="{Binding ProgressText, StringFormat={}Parsed: {0}}" FontSize="18" TextAlignment="Center" Margin="0, 0, 0, 20" />
+            <ProgressBar x:Name="ExportProgress" Maximum="{Binding Total}" Value="{Binding Current}" Height="30" Margin="80, 0, 80, 20" />
+            <Button Content="Stop exporting" HorizontalAlignment="Center" Padding="10" FontSize="16" Click="Button_Click" />
+        </StackPanel>
     </Grid>
 </Page>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using OpenQA.Selenium;
@@ -45,13 +46,13 @@ namespace xiaomiNoteExporter.Gui.Pages
             await _worker.Start();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             var wait = Driver.GetWait(TimeSpan.FromSeconds(10));
 
             try
             {
-                if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0)
+                if (await Task.Run(() => wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0))
                 {
                     MessageBox.Show(
                         $"You didn't sign into Mi Cloud or account is invalid.\nPlease try again.", 
@@ -61,7 +62,7 @@ namespace xiaomiNoteExporter.Gui.Pages
                         );
                     NavigateToDomain();
                 } 
-                else if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'identity-verifyPhone-')]"))).Count != 0)
+                else if (await Task.Run(() => wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'identity-verifyPhone-')]"))).Count != 0))
                 {
                     MessageBox.Show(
                         $"You need to complete 2FA verification.",

@@ -35,7 +35,6 @@ namespace xiaomiNoteExporter.Gui.Extensions
             var typeAttr = doc.CreateAttribute("type");
             typeAttr.Value = type.ToString();
 
-            // append the attribute to the node
             note.Attributes.Append(typeAttr);
             note.AppendChild(titleNode);
             note.AppendChild(contentNode);

@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using xiaomiNoteExporter.Gui.Entities;
 using xiaomiNoteExporter.Gui.Extensions;
@@ -16,6 +17,12 @@ namespace xiaomiNoteExporter.Gui.Services
 
         public readonly Stopwatch watch;
 
+        public int NotesAmount { get; private set; }
+
+        public int CurrentNote { get; private set; }
+
+        public bool IsRunning { get; private set; }
+
         public ScrapeService(ChromeDriver driver)
         {
             _driver = driver;
@@ -23,7 +30,12 @@ namespace xiaomiNoteExporter.Gui.Services
             watch = new();
         }
 
-        public void Scrape()
+        public async Task Start()
+        {
+            await Task.Run(Scrape);   
+        }
+
+        private void Scrape()
         {
             var span = _driver.GetWait(TimeSpan.FromMilliseconds(10));
             var wait = _driver.GetWait(TimeSpan.FromSeconds(10));
@@ -31,21 +43,24 @@ namespace xiaomiNoteExporter.Gui.Services
             InitializeTimer();
 
             string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
-            int notesAmount = int.Parse(DigitRegex().Replace(notesAmountEl, ""));
+            NotesAmount = int.Parse(DigitRegex().Replace(notesAmountEl, ""));
 
             IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
 
             string fileName = $"{DateTime.Now:dd-MM-yy_HH-mm-ss}";
             XmlDocument doc = XmlExtensions.Initialize("notes");
 
-            int control = 0;
+            CurrentNote = 0;
             bool isFirst = true; // check is needed because it usually opens first note automatically
+            IsRunning = true;
 
-            while (true)
+            while (IsRunning)
             {
-                StatusbarService.SetStatus($"Parsing: {control}/{notesAmount} ({(int)(.5f + 100f * control / notesAmount)}%)");
+                StatusbarService.SetStatus(
+                    $"Parsing: {CurrentNote}/{NotesAmount} ({(int)(.5f + 100f * CurrentNote / NotesAmount)}%)"
+                    );
 
-                if (control == notesAmount)
+                if (CurrentNote == NotesAmount)
                 {
                     watch.Stop();
                     break;
@@ -77,7 +92,7 @@ namespace xiaomiNoteExporter.Gui.Services
                         Insert(doc, Note.Create(null, null, createdAt, NoteType.Unsupported));
 
                         ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
-                        control++;
+                        CurrentNote++;
                         continue;
                     }
 
@@ -89,7 +104,7 @@ namespace xiaomiNoteExporter.Gui.Services
                     Insert(doc, Note.Create(title, value, createdAt, NoteType.Normal));
 
                     ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
-                    control++;
+                    CurrentNote++;
                 }
             }
 
@@ -101,6 +116,11 @@ namespace xiaomiNoteExporter.Gui.Services
                     watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds
                     )
                 );
+        }
+
+        public async Task Stop()
+        {
+            await Task.Run(() => IsRunning = false);
         }
 
         private void Insert(XmlDocument doc, Note note)
