@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using xiaomiNoteExporter.Gui.Events;
+using xiaomiNoteExporter.Gui.Events.SignedIn;
 using xiaomiNoteExporter.Gui.Extensions;
 using xiaomiNoteExporter.Gui.Services;
 

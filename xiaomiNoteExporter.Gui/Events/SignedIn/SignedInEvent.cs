@@ -1,4 +1,4 @@
-﻿namespace xiaomiNoteExporter.Gui.Events
+﻿namespace xiaomiNoteExporter.Gui.Events.SignedIn
 {
     public class SignedInEvent : Event
     {
