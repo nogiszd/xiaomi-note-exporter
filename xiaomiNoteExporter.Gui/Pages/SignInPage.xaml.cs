@@ -30,7 +30,7 @@ namespace xiaomiNoteExporter.Gui.Pages
 
             _worker = worker;
 
-            signedInEvent.SignedIn += SignedIn_Handler;
+            signedInEvent.Handler += SignedIn_Handler;
         }
 
         private void SignedIn_Handler(object sender, EventArgs e)
