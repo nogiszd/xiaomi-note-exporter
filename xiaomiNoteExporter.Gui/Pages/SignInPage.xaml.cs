@@ -73,7 +73,7 @@ namespace xiaomiNoteExporter.Gui.Pages
                 } 
                 else
                 {
-                    signedInEvent.Raise();
+                    await signedInEvent.Raise();
                 }
             } 
             catch (Exception ex) 

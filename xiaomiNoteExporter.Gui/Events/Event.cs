@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace xiaomiNoteExporter.Gui.Events
 {
@@ -19,9 +20,9 @@ namespace xiaomiNoteExporter.Gui.Events
             }
         }
 
-        public void Raise()
+        public async Task Raise()
         {
-            OnEvent();
+            await Task.Run(OnEvent);
         }
     }
 }
