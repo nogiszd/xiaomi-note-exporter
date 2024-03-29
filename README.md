@@ -1,8 +1,12 @@
 Xiaomi Note Exporter
-![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/build.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
+![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/build.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-mainenance--mode-yellow.svg)
 =================================
 
 > Export your notes from Mi Cloud directly to Markdown file! 📝➡️🧾
+
+🔧 Maintenance mode
+------------
+**I dont have much time to maintain this repository, and I don't use Mi Cloud myself no more. That's why I'm placing this project in a maintenance mode. This means that I will fix any major bugs, if any will occur, and update libraries that this app is using, but there won't be any feature updates soon.**
 
 🤔 Why?
 ------------
