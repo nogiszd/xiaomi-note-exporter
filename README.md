@@ -6,7 +6,7 @@ Xiaomi Note Exporter
 
 🔧 Maintenance mode
 ------------
-**I dont have much time to maintain this repository, and I don't use Mi Cloud myself no more. That's why I'm placing this project in a maintenance mode. This means that I will fix any major bugs, if any will occur, and update libraries that this app is using, but there won't be any feature updates soon.**
+**I don't have much time to maintain this repository, and I don't use Mi Cloud myself no more. That's why I'm placing this project in a maintenance mode. This means that I will fix any major bugs, if any will occur, and update libraries that this app is using, but there won't be any feature updates soon.**
 
 🤔 Why?
 ------------
