@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using Pastel;
 using System.Runtime.InteropServices;
+using System.Globalization;
 
 namespace xiaomiNoteExporter
 {
@@ -46,6 +47,7 @@ namespace xiaomiNoteExporter
 
         public static Version? appVersion = Assembly.GetExecutingAssembly().GetName().Version;
         public static string defaultDomain = "us.i.mi.com";
+        public static string defaultTimestampOutputFormat = "yyyy_MMMM_dd_[HH-mm]";
         readonly static Driver _driver = new(Array.Empty<string>());
         static readonly ChromeDriver driver = _driver.Prepare();
         public delegate void ShutdownHandler();
@@ -78,6 +80,8 @@ namespace xiaomiNoteExporter
 
             new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you succeed...").Ask(true);
 
+            Console.Clear();
+
             // if account didnt sign in then show error
             try
             {
@@ -97,22 +101,37 @@ namespace xiaomiNoteExporter
                 Console.ReadKey();
             }
 
-
             wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
+
             Console.Clear();
 
-            try {
+            Console.WriteLine("Input date formats as in xiaomi cloud service." +
+                "Check this link for more info about date formats: \"https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings\"\n");
+            string? parse_string_full = new Prompt(
+                $"{"[EXPLICIT]".Pastel(Color.GreenYellow)} Input full-length date format (day, month and year). (examples: \"M/d/yyyy HH:mm\", \"d.M.yyyy HH:mm\"):"
+                ).Ask();
+            string? parse_string_short = new Prompt(
+                $"{"[EXPLICIT]".Pastel(Color.GreenYellow)} Input short date format (day and month). (examples: \"M/d HH:mm\", \"d.M HH:mm\"):"
+                ).Ask();
+            string? parse_output_string = new Prompt(
+                $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input output timestamp format. (default is: \"{defaultTimestampOutputFormat}\"):",
+                defaultTimestampOutputFormat
+                ).Ask();
+
+            try
+            {
                 Stopwatch watch = new();
                 WebDriverWait innerWait = new(driver, TimeSpan.FromMilliseconds(50));
                 watch.Start();
                 string notesAmountEl = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'note-count-select')]"))).Text;
                 notesAmount = int.Parse(Regex.Replace(notesAmountEl, @"[^\d]", ""));
                 IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
-                string fName = $"exported_notes_{DateTime.Now:dd-MM-yy_HH-mm-ss}.md";
 
                 int control = 0;
                 bool isFirst = true; // check is needed because it usually opens first note automatically
+                System.IO.Directory.CreateDirectory("exported_notes");
+
                 while (true)
                 {
                     Console.Title = $"Parsed {control} notes out of {notesAmount}...";
@@ -121,10 +140,11 @@ namespace xiaomiNoteExporter
                     {
                         watch.Stop();
                         shutdownHandler();
-                        Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory + "");
+                        Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory + "exported_notes");
                         break;
                     } else
                     {
+                        DateTime currentTime = DateTime.Now;
                         IWebElement el;
                         if ( !isFirst )
                         {
@@ -136,23 +156,46 @@ namespace xiaomiNoteExporter
                         }
 
                         el.Click();
-                        Thread.Sleep(200); // timeout for fetching optimization
+                        Thread.Sleep(200);  // timeout for fetching optimization
+                        wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none")); // make sure it's loaded
+
+                        string lastModifiedTimeRaw = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'open')]/div[2]/div/span"))).Text; // get last modification time string
+
+                        //// parse last modification time string
+                        string lastModifiedTime;
+                        try
+                        {
+                            lastModifiedTime = DateTime.ParseExact(lastModifiedTimeRaw, parse_string_full, CultureInfo.InvariantCulture).ToString(parse_output_string);
+                        } catch
+                        {
+                            try
+                            {
+                                DateTime tempDate = DateTime.ParseExact(lastModifiedTimeRaw, parse_string_short, CultureInfo.InvariantCulture);
+                                tempDate.AddYears(currentTime.Year - tempDate.Year); // set current year
+                                lastModifiedTime = tempDate.ToString(parse_output_string);
+                            }
+                            catch
+                            {
+                                lastModifiedTime = currentTime.ToString(parse_output_string) + "_" + lastModifiedTimeRaw.Replace(' ', '_').Replace('\\', '_').Replace('.', '_');
+                            }
+                        }
+
+                        string fName = "exported_notes/" + $"{lastModifiedTime}.md";
 
                         try
                         {
-                            innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i)]")).Count == 1);
+                            innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i[contains(@class, 'mind')])]")).Count == 1); // mind maps are unsopported (TODO: add check for pictures and audio samples)
                         } catch
                         {
                             string createdAt = el.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
                             using StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}");
-                            sw.WriteLine("****");
-                            sw.WriteLine($"** Unsupported note type (Mind-map or Sound note) (Created at: {createdAt})**");
+                            sw.WriteLine($"**Unsupported note type (Mind-map or Sound note) (Created at: {createdAt})**");
 
                             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
                             control++;
                             continue;
                         }
-              
+
                         wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
                         string title = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
@@ -160,21 +203,19 @@ namespace xiaomiNoteExporter
 
                         using (StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}"))
                         {
-                            sw.WriteLine("****");
-                            if (title != "") { sw.WriteLine($"**{title}**"); }
+                            if (title != "") { sw.WriteLine($"***{title}***"); }
                             sw.WriteLine(value);
                         }
 
-                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
+                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height); // scroll down one note
                         control++;
                     }
                 }
 
-                Console.Clear();
                 Console.Title = string.Format("Completed! (took {0:00}:{1:00}:{2:00})", 
                     watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds);
-                Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
-                Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
+                // Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
+                Console.WriteLine("\n\nPress any key to close application...".Pastel(Color.Gray));
                 Console.ReadKey();
             } catch (Exception ex) {
                 shutdownHandler();
