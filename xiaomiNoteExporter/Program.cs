@@ -102,7 +102,8 @@ namespace xiaomiNoteExporter
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
             Console.Clear();
 
-            try {
+            try 
+            {
                 Stopwatch watch = new();
                 WebDriverWait innerWait = new(driver, TimeSpan.FromMilliseconds(50));
                 watch.Start();
@@ -123,7 +124,8 @@ namespace xiaomiNoteExporter
                         shutdownHandler();
                         Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory + "");
                         break;
-                    } else
+                    } 
+                    else
                     {
                         IWebElement el;
                         if ( !isFirst )
@@ -141,7 +143,8 @@ namespace xiaomiNoteExporter
                         try
                         {
                             innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i)]")).Count == 1);
-                        } catch
+                        } 
+                        catch
                         {
                             string createdAt = el.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
                             using StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + $"{fName}");
@@ -176,7 +179,9 @@ namespace xiaomiNoteExporter
                 Console.WriteLine($"Successfully exported notes to {fName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
                 Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
                 Console.ReadKey();
-            } catch (Exception ex) {
+            } 
+            catch (Exception ex) 
+            {
                 shutdownHandler();
                 Console.WriteLine($"\nPlease report this error on GitHub".Pastel(Color.Gray));
                 Console.WriteLine($"\n{ex.ToString().Pastel(Color.Red)}");

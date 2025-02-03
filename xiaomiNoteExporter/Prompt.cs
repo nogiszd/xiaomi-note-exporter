@@ -36,7 +36,8 @@ namespace xiaomiNoteExporter
             {
                 Console.ReadKey();
                 return _defaultValue;
-            } else
+            } 
+            else
             {
                 while (true)
                 {
@@ -48,12 +49,14 @@ namespace xiaomiNoteExporter
                         {
                             Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
                             return _defaultValue;
-                        } else
+                        } 
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
                         }
-                    } else
+                    } 
+                    else
                     {
                         return result;
                     }
