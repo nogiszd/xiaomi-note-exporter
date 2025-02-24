@@ -1,57 +1,56 @@
 ﻿using System;
 using System.Windows;
 
-namespace xiaomiNoteExporter.Gui.Views
+namespace xiaomiNoteExporter.Gui.Views;
+
+public partial class LoadingWindow : Window
 {
-    public partial class LoadingWindow : Window
+    public string WindowTitle { get; private set; }
+
+    public LoadingWindow()
     {
-        public string WindowTitle { get; private set; }
+        InitializeComponent();
 
-        public LoadingWindow()
+        WindowTitle = ((App)Application.Current).Title;
+
+        DataContext = this;
+    }
+
+    private async void Window_Initialized(object sender, EventArgs e)
+    {
+        UpdateCheck updateCheck = new();
+
+        try
         {
-            InitializeComponent();
+            var (version, isNewer) = await updateCheck.Check();
 
-            WindowTitle = ((App)Application.Current).Title;
+            Hide();
 
-            DataContext = this;
-        }
-
-        private async void Window_Initialized(object sender, System.EventArgs e)
-        {
-            UpdateCheck updateCheck = new();
-
-            try
+            if (isNewer)
             {
-                var (version, isNewer) = await updateCheck.Check();
+                OutdatedWindow outdatedWindow = new(version);
+                outdatedWindow.Show();
 
-                Hide();
-
-                if (isNewer)
-                {
-                    OutdatedWindow outdatedWindow = new(version);
-                    outdatedWindow.Show();
-
-                }
-                else
-                {
-                    InitializeWindow initializeWindow = new();
-                    initializeWindow.Show();
-                }
-            } catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"An error occured during checking for update. More details below:\n\n{ex.Message}", 
-                    "Error", 
-                    MessageBoxButton.OK, 
-                    MessageBoxImage.Error
-                    );
-                Application.Current.Shutdown();
             }
-        }
-
-        private void Window_Closed(object sender, System.EventArgs e)
+            else
+            {
+                InitializeWindow initializeWindow = new();
+                initializeWindow.Show();
+            }
+        } catch (Exception ex)
         {
+            MessageBox.Show(
+                $"An error occured during checking for update. More details below:\n\n{ex.Message}", 
+                "Error", 
+                MessageBoxButton.OK, 
+                MessageBoxImage.Error
+                );
             Application.Current.Shutdown();
         }
+    }
+
+    private void Window_Closed(object sender, System.EventArgs e)
+    {
+        Application.Current.Shutdown();
     }
 }

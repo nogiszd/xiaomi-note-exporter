@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:xiaomiNoteExporter.Gui.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="SignInPage" Background="White" Loaded="Page_Loaded">
+      Title="SignInPage" Background="White" Loaded="Page_Loaded" Unloaded="Page_Unloaded">
     <Page.Content>
         <Grid>
             <TextBlock TextAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,50" FontSize="16">

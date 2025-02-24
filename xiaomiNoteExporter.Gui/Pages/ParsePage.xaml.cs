@@ -2,74 +2,68 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+
+using xiaomiNoteExporter.Gui.Extensions;
 using xiaomiNoteExporter.Gui.Services;
 
-namespace xiaomiNoteExporter.Gui.Pages
+namespace xiaomiNoteExporter.Gui.Pages;
+
+public partial class ParsePage : Page, INotifyPropertyChanged
 {
-    public partial class ParsePage : Page, INotifyPropertyChanged
+    private readonly ScrapeService _scrapeService;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public int Current => _scrapeService.CurrentNote;
+
+    public int Total => _scrapeService.NotesAmount;
+
+    public string ProgressText => $"{Current}/{Total}";
+
+    public bool IsRunning => _scrapeService.IsRunning;
+
+    public ParsePage(ChromeDriver driver)
     {
-        private readonly ScrapeService _scrapeService;
+        InitializeComponent();
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        _scrapeService = new(driver);
 
-        private int _current;
-        public int Current
+        _scrapeService.PropertyChanged += ScrapeService_PropertyChanged;
+
+        DataContext = this;
+    }
+
+    private void ScrapeService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName.Includes(nameof(ScrapeService.CurrentNote), nameof(ScrapeService.NotesAmount), nameof(ScrapeService.IsRunning)))
         {
-            get { return _current; }
-            set
-            {
-                if (_current != value)
-                {
-                    _current = value;
-                    OnPropertyChanged(nameof(Current));
-                }
-            }
+            OnPropertyChanged(nameof(Current));
+            OnPropertyChanged(nameof(Total));
+            OnPropertyChanged(nameof(IsRunning));
+            OnPropertyChanged(nameof(ProgressText));
         }
+    }
 
-        private int _total;
-        public int Total
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        await _scrapeService.Start();
+    }
+
+    private void Page_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _scrapeService.PropertyChanged -= ScrapeService_PropertyChanged;
+    }
+
+    private async void Button_Click(object sender, RoutedEventArgs e)
+    {
+        if (_scrapeService.IsRunning)
         {
-            get { return _total; }
-            set
-            {
-                if (_total != value)
-                {
-                    _total = value;
-                    OnPropertyChanged(nameof(Total));
-                }
-            }
-        }
-
-        public string ProgressText => $"{Current}/{Total}";
-
-        public ParsePage(ChromeDriver driver)
-        {
-            InitializeComponent();
-
-            _scrapeService = new(driver);
-
-            DataContext = this;
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private async void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            await _scrapeService.Start();
-
-            Current = _scrapeService.CurrentNote;
-            Total = _scrapeService.NotesAmount;
-        }
-
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (_scrapeService.IsRunning)
-            {
-                await _scrapeService.Stop();
-            }
+            await _scrapeService.Stop();
         }
     }
 }

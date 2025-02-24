@@ -1,34 +1,43 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 
-namespace xiaomiNoteExporter.Gui.Services
+namespace xiaomiNoteExporter.Gui.Services;
+
+public static class StatusbarService
 {
-    public class StatusbarService
+    private static StatusBar? statusBar;
+
+    private static readonly string WindowName = "GuiWindow";
+
+    public static void Initialize()
     {
-        private static StatusBar? statusBar;
-
-        private static string WindowName { get; } = "GuiWindow";
-
-        private static void FindStatusBar(string name)
+        Application.Current.Dispatcher.Invoke(() =>
         {
-            Window? window = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.Name == name);
+            Window? window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Name == WindowName && w.IsActive);
 
             if (window is not null)
             {
                 statusBar = window.FindName("Statusbar") as StatusBar;
             }
-        }
+        });
+    }
 
-        public static void SetStatus(string status)
+    public static void SetStatus(string status)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
         {
-            FindStatusBar(WindowName);
+            if (statusBar is null)
+            {
+                Initialize();
+            }
 
             if (statusBar is not null)
             {
                 statusBar.Items.Clear();
                 statusBar.Items.Add(new StatusBarItem() { Content = status });
             }
-        }
+        }, DispatcherPriority.Normal);
     }
 }
