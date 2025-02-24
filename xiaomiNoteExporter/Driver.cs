@@ -1,24 +1,23 @@
 ﻿using OpenQA.Selenium.Chrome;
 
-namespace xiaomiNoteExporter
+namespace xiaomiNoteExporter;
+
+public class Driver
 {
-    public class Driver
+    private static string[] _args = Array.Empty<string>();
+
+    public Driver(string[] args)
     {
-        private static string[] _args = Array.Empty<string>();
+        _args = args;
+    }
 
-        public Driver(string[] args)
-        {
-            _args = args;
-        }
+    public ChromeDriver Prepare() 
+    {
+        ChromeOptions options = new();
+        options.AddArguments(_args);
+        ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+        service.HideCommandPromptWindow = true;
 
-        public ChromeDriver Prepare() 
-        {
-            ChromeOptions options = new();
-            options.AddArguments(_args);
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-
-            return new ChromeDriver(service, options);
-        }
+        return new ChromeDriver(service, options);
     }
 }

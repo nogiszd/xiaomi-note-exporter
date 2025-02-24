@@ -1,65 +1,65 @@
 ﻿using System.Drawing;
+
 using Pastel;
 
-namespace xiaomiNoteExporter
+namespace xiaomiNoteExporter;
+
+class Prompt
 {
-    class Prompt
+    private readonly string _message;
+    private readonly string _defaultValue;
+
+    public Prompt(string message, string? defaultValue = "")
     {
-        private readonly string _message;
-        private readonly string _defaultValue;
+        _message = message;
+        _defaultValue = defaultValue!;
+    }
 
-        public Prompt(string message, string? defaultValue = "")
+   private static string InsertAfterSpace(string str, string insertion, Color? color = null)
+    {
+        var spaceIndex = str.IndexOf(' ');
+
+        if (spaceIndex > 0)
         {
-            _message = message;
-            _defaultValue = defaultValue!;
+            return str.Insert(spaceIndex, $" {insertion.Pastel(color ?? Color.Red)}");
         }
-
-       private static string InsertAfterSpace(string str, string insertion, Color? color = null)
+        else
         {
-            var spaceIndex = str.IndexOf(' ');
-
-            if (spaceIndex > 0)
-            {
-                return str.Insert(spaceIndex, $" {insertion.Pastel(color ?? Color.Red)}");
-            }
-            else
-            {
-                return str;
-            }
+            return str;
         }
+    }
 
-        public string Ask(bool isToggle = false)
+    public string Ask(bool isToggle = false)
+    {
+        Console.WriteLine(_message);
+
+        if (isToggle)
         {
-            Console.WriteLine(_message);
+            Console.ReadKey();
+            return _defaultValue;
+        } 
+        else
+        {
+            while (true)
+            {
+                var result = Console.ReadLine();
 
-            if (isToggle)
-            {
-                Console.ReadKey();
-                return _defaultValue;
-            } 
-            else
-            {
-                while (true)
+                if (string.IsNullOrEmpty(result))
                 {
-                    var result = Console.ReadLine();
-
-                    if (string.IsNullOrEmpty(result))
+                    if (!string.IsNullOrEmpty(_defaultValue))
                     {
-                        if (!string.IsNullOrEmpty(_defaultValue))
-                        {
-                            Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
-                            return _defaultValue;
-                        } 
-                        else
-                        {
-                            Console.Clear();
-                            Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
-                        }
+                        Console.WriteLine(_defaultValue.Pastel(Color.DimGray));
+                        return _defaultValue;
                     } 
                     else
                     {
-                        return result;
+                        Console.Clear();
+                        Console.WriteLine($"{InsertAfterSpace(_message, "valid")}");
                     }
+                } 
+                else
+                {
+                    return result;
                 }
             }
         }
