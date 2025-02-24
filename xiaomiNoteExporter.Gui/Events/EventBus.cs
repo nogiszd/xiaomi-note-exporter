@@ -7,6 +7,9 @@ using System.Windows.Threading;
 
 namespace xiaomiNoteExporter.Gui.Events;
 
+/// <summary>
+/// Global event bus compatible with WPF threading.
+/// </summary>
 public static class EventBus
 {
     private static readonly ConcurrentDictionary<Type, MulticastDelegate> _handlers = new();

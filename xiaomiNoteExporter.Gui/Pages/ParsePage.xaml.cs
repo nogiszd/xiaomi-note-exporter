@@ -65,5 +65,7 @@ public partial class ParsePage : Page, INotifyPropertyChanged
         {
             await _scrapeService.Stop();
         }
+
+        StopButton.IsEnabled = false;
     }
 }
