@@ -15,7 +15,7 @@ public static class StatusbarService
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            Window? window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Name == WindowName && w.IsActive);
+            Window? window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Name == WindowName || w.IsActive);
 
             if (window is not null)
             {
