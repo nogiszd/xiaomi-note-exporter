@@ -46,7 +46,10 @@ public partial class SignInPage : Page
     {
         StatusbarService.SetStatus("Ready and waiting");
         Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-        NavigateToDomain();
+
+        // open the driver asynchronously to prevent blocking the UI thread
+        await Task.Run(NavigateToDomain);
+
         await _worker.Start();
     }
 

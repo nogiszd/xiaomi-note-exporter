@@ -9,7 +9,10 @@
         Title="{Binding WindowTitle, Mode=OneWay}" Height="550" Width="900" Closing="Window_Closing" MinHeight="300" MinWidth="400" Loaded="Window_Loaded">
     <Grid x:Name="MainGrid">
         <TabControl FontSize="14">
-            <TabItem Header="Viewer">
+            <TabItem Header="Export">
+                <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </TabItem>
+            <TabItem Header="Viewer" IsEnabled="{Binding CanContinue, Mode=OneWay}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="180" />
@@ -18,7 +21,7 @@
                     <ComboBox IsEnabled="{Binding CanContinue, Mode=OneWay}" Name="ScrapeSelect" Grid.Column="0" MaxWidth="180" Height="30" VerticalAlignment="Top" Margin="-5, 0, 0, 0"/>
                     <ListView Grid.Column="0" MaxWidth="180" d:ItemsSource="{d:SampleData}" Margin="-5, 30, 0, 25" SelectionMode="Single" />
                     <Grid Grid.Column="1" Margin="0,0,0,25">
-                        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        
                     </Grid>
                 </Grid>
             </TabItem>
