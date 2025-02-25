@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using OpenQA.Selenium.Chrome;
@@ -42,7 +43,13 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        CheckIfExportsExist();
         MainFrame.Navigate(new SignInPage(Domain, driver, worker));
+    }
+
+    private void CheckIfExportsExist()
+    {
+        CanContinue = Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "notes_export*.xml").Any();
     }
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

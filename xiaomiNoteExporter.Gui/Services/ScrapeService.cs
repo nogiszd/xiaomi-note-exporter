@@ -86,7 +86,7 @@ public partial class ScrapeService : INotifyPropertyChanged
 
         IWebElement noteList = wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
 
-        string fileName = $"{DateTime.Now:dd-MM-yy_HH-mm-ss}";
+        string fileName = $"notes_export_{DateTime.Now:dd-MM-yy_HH-mm-ss}";
         XmlDocument doc = XmlExtensions.Initialize("notes");
 
         CurrentNote = 0;
