@@ -1,7 +1,8 @@
-﻿using HtmlAgilityPack;
-using SystemVersion = System.Version;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
+using SystemVersion = System.Version;
+using HtmlAgilityPack;
+
 using xiaomiNoteExporter.Gui.Common;
 
 namespace xiaomiNoteExporter.Gui;

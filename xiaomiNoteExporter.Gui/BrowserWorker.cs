@@ -1,7 +1,8 @@
-﻿using OpenQA.Selenium.Chrome;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using OpenQA.Selenium.Chrome;
+
 using xiaomiNoteExporter.Gui.Extensions;
 
 namespace xiaomiNoteExporter.Gui;

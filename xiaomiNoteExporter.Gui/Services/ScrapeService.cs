@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -8,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 using xiaomiNoteExporter.Gui.Entities;
 using xiaomiNoteExporter.Gui.Extensions;
@@ -129,8 +129,7 @@ public partial class ScrapeService : INotifyPropertyChanged
                 catch
                 {
                     Insert(doc, Note.Create(null, null, createdAt, NoteType.Unsupported));
-
-                    ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
+                    ExecuteScroll(noteList, el);
                     UpdateCurrentNote();
                     continue;
                 }
@@ -141,8 +140,7 @@ public partial class ScrapeService : INotifyPropertyChanged
                 string value = wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
 
                 Insert(doc, Note.Create(title, value, createdAt, NoteType.Normal));
-
-                ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", noteList, el.Size.Height);
+                ExecuteScroll(noteList, el);
                 UpdateCurrentNote();
             }
         }
@@ -175,6 +173,11 @@ public partial class ScrapeService : INotifyPropertyChanged
             note.CreatedAt, 
             note.Type
             );
+    }
+
+    private void ExecuteScroll(IWebElement list, IWebElement element)
+    {
+        ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollBy(0, arguments[1]);", list, element.Size.Height);
     }
 
     private void InitializeTimer()

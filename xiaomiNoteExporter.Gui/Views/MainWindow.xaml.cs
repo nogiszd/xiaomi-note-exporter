@@ -51,9 +51,9 @@ public partial class MainWindow : Window
         {
             worker.Stop();
         } 
-        catch (Exception)
+        catch
         {
-            // ignore this exception
+            // ignore this exception, because we need to revoke the worker CancellationToken anyways
         }
 
         try
@@ -61,7 +61,7 @@ public partial class MainWindow : Window
             driver.Close();
             driver.Quit();
         }
-        catch (Exception)
+        catch
         {
             // apparently driver is not longer running
             // try to kill chromedriver.exe manually if exist

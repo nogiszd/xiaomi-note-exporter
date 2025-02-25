@@ -17,8 +17,6 @@ public partial class SignInPage : Page
 {
     private readonly ChromeDriver Driver;
 
-    private readonly SignedInEvent signedInEvent = new();
-
     private readonly BrowserWorker _worker;
 
     private string Domain { get; set; }
@@ -58,7 +56,7 @@ public partial class SignInPage : Page
 
         try
         {
-            if (await Task.Run(() => wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0))
+            if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'ant-tabs')]"))).Count != 0)
             {
                 MessageBox.Show(
                     $"You didn't sign into Mi Cloud or account is invalid.\nPlease try again.", 
@@ -68,7 +66,7 @@ public partial class SignInPage : Page
                     );
                 NavigateToDomain();
             } 
-            else if (await Task.Run(() => wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'identity-verifyPhone-')]"))).Count != 0))
+            else if (wait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'identity-verifyPhone-')]"))).Count != 0)
             {
                 MessageBox.Show(
                     $"You need to complete 2FA verification.",

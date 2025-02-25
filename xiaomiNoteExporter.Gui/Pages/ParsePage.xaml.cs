@@ -1,7 +1,7 @@
-﻿using OpenQA.Selenium.Chrome;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using OpenQA.Selenium.Chrome;
 
 using xiaomiNoteExporter.Gui.Extensions;
 using xiaomiNoteExporter.Gui.Services;

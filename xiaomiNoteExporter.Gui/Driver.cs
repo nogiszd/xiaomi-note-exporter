@@ -1,5 +1,5 @@
-﻿using OpenQA.Selenium.Chrome;
-using System;
+﻿using System;
+using OpenQA.Selenium.Chrome;
 
 namespace xiaomiNoteExporter.Gui;
 

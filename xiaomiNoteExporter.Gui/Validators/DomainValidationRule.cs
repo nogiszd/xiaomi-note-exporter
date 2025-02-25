@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+
 using xiaomiNoteExporter.Gui.Common;
 
 namespace xiaomiNoteExporter.Gui.Validators;

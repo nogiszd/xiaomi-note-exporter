@@ -1,5 +1,5 @@
-﻿using ExecutableVersion = System.Version;
-using System.Reflection;
+﻿using System.Reflection;
+using ExecutableVersion = System.Version;
 
 namespace xiaomiNoteExporter.Gui.Common;
 
