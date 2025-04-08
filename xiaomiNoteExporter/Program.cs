@@ -45,7 +45,7 @@ class Program
             }
         }
 
-        driver = _driver.Prepare(); 
+        driver = _driver.Prepare(); // prepare driver after parsing arguments from command line
 
         Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()}";
 
@@ -87,8 +87,8 @@ class Program
 
                     if (!string.IsNullOrEmpty(domain))
                     {
-                        defaultDomain = domain;
-                        _shouldAskForDomain = false;
+                        defaultDomain = domain; // set global domain to the provided value
+                        _shouldAskForDomain = false; // shouldn't ask for domain, since it was provided as argument
                     } 
                     else
                     {
@@ -96,7 +96,7 @@ class Program
                         Environment.Exit(1);
                     }
 
-                    i++;
+                    i++; // skip next argument - this was a value
                 } 
                 else
                 {
@@ -125,10 +125,10 @@ class Program
                         _timestampFormat = timestampFormat;
                     }
 
-                    i++;
+                    i++; // skip next argument - this was a value
                 }
 
-                _shouldSplit = true;
+                _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
             }
         }
     }

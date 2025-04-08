@@ -24,6 +24,12 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
     private int currentNote = 0;
 
+    /// <summary>
+    /// Method that starts the scraping process.
+    /// </summary>
+    /// <param name="domain">Domain address to be visited by <c>ChromeDriver</c>.</param>
+    /// <param name="timeStampFormat">Format of the timestamp for file (or directory) name.</param>
+    /// <param name="split">If <c>true</c> then notes will be split as separate files.</param>
     public void Start(string domain, string timeStampFormat, bool split = false)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));

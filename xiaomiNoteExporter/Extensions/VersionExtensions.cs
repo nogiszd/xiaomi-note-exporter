@@ -5,6 +5,11 @@ namespace xiaomiNoteExporter.Extensions;
 
 public static class VersionExtensions
 {
+    /// <summary>
+    /// Get the version string in the format <c>Major.Minor.Build</c> or <c>Major.Minor.Build-Suffix</c>
+    /// </summary>
+    /// <param name="version">`Version` object to be parsed.</param>
+    /// <returns>Formatted version string.</returns>
     public static string GetVersionString(this Version? version)
     {
         if (version is null)

@@ -23,6 +23,11 @@ public class Prompt(string message, string? defaultValue = "")
         }
     }
 
+    /// <summary>
+    /// Prompt the user for input.
+    /// </summary>
+    /// <param name="isToggle">If <c>true</c> then do not return received value, only wait for key to be pressed.</param>
+    /// <returns>Received value from keyboard.</returns>
     public string Ask(bool isToggle = false)
     {
         Console.WriteLine(_message);
