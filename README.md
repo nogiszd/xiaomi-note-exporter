@@ -35,8 +35,11 @@ Options:
   -h, --help
         Show this help message.
 
+  -d, --domain <domain> (default: us.i.mi.com)
+        Mi Notes domain that you were redirected to.
+
   -s, --split <timestamp> (default: dd-MM-yyyy_HH-mm-ss)
-        Split notes into separate files with provided timestamp format. Format must be compatible with:
+        Split notes into separate files with provided timestamp format. Must be compatible with:
         https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
 ```
 
