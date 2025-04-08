@@ -45,7 +45,7 @@ class Program
 
         driver = _driver.Prepare(); 
 
-        Console.Title = $"Xiaomi Note Exporter {appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build}";
+        Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()}";
 
         Console.WriteLine(
             $"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n"
@@ -61,7 +61,7 @@ class Program
 
     private static void ShowHelp()
     {
-        Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} v{appVersion?.ToString(3)}\n");
+        Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} {appVersion?.GetVersionString()}\n");
         Console.WriteLine($"Usage: xiaomiNoteExporter.exe {"[options]".Pastel(Color.DimGray)}\n");
         Console.WriteLine("Options:");
         Console.WriteLine("  -h, --help\n\tShow this help message.\n");
