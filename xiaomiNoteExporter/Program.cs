@@ -65,7 +65,7 @@ class Program
         Console.WriteLine($"Usage: xiaomiNoteExporter.exe {"[options]".Pastel(Color.DimGray)}\n");
         Console.WriteLine("Options:");
         Console.WriteLine("  -h, --help\n\tShow this help message.\n");
-        Console.WriteLine($"  -s, --split <timestamp>\n\tSplit notes into separate files with provided timestamp format. {"(default: dd-MM-yyyy_HH-mm-ss)".Pastel(Color.DimGray)}");
+        Console.WriteLine($"  -s, --split <timestamp> {"(default: dd-MM-yyyy_HH-mm-ss)".Pastel(Color.DimGray)}\n\tSplit notes into separate files with provided timestamp format. Must be compatible with:\n\thttps://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings");
     }
 
     private static void ParseArgs(string[] args)
