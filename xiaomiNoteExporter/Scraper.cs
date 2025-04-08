@@ -165,7 +165,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
             if (split)
             {
-                Console.WriteLine($"Successfully exported notes to {exportName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
+                Console.WriteLine($"Successfully exported notes to {exportName.Pastel(Color.WhiteSmoke)} directory\n".Pastel(Color.LimeGreen));
             } 
             else
             {
