@@ -12,21 +12,21 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 **DISCLAIMER: This software will work only if you have your notes stored on [Mi Cloud](https://i.mi.com/)**
 
-**Prerequisites :**
+### Prerequisites :
 
 - **Windows machine with [_.NET 8 runtime_](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime) installed**
 - **Latest version of Google Chrome browser installed**
 
 Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), extract the contents **to the same folder** and run `xiaomiNoteExporter.exe` executable.
 
-**Steps how to use (normal)**:
+### Normal usage:
 
 1.  Launch the app - you will be prompted to input domain address (if it differs from the default one).
 2.  Sign into your account via browser window that popped up.
 3.  After succeeding, press any key as requested.
 4.  Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
-**CLI usage**:
+### CLI usage:
 
 `xiaomiNoteExporter.exe [options]`
 
@@ -48,11 +48,11 @@ With `-s` flag you can enable note splitting - which exports notes to separate d
 
 This enables user to input specific format for timestamp - \*\*but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings).
 
+---
+
 ## 🔧 How about maintenance?
 
 I will only add modifications and new features **when I have free time to do so**. Until then, there will only be major bug fixes and small updates (including library updates).
-
----
 
 ## 🔗 Importing into other apps (Advanced)
 
@@ -61,8 +61,6 @@ There is an **[fork](https://github.com/aviv926/xiaomi-note-exporter)** with add
 More details are described in this fork's `readme.md`.
 
 Credits are going to [aviv926](https://github.com/aviv926)
-
----
 
 ## 📜 License
 
