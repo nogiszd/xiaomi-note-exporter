@@ -14,7 +14,7 @@ class Program
     public static string defaultDomain = "us.i.mi.com";
 
     static bool _shouldSplit = false;
-    static string _timestampFormat = "dd-MM-yyyy_HH-mm";
+    static string _timestampFormat = "dd-MM-yyyy_HH-mm-ss";
 
     readonly static Driver _driver = new(Array.Empty<string>());
     static ChromeDriver? driver;
@@ -61,11 +61,11 @@ class Program
 
     private static void ShowHelp()
     {
-        Console.WriteLine($"Xiaomi Note Exporter {appVersion.GetString()}\n");
-        Console.WriteLine("Usage: xiaomiNoteExporter.exe [options]\n");
+        Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} v{appVersion?.ToString(3)}\n");
+        Console.WriteLine($"Usage: xiaomiNoteExporter.exe {"[options]".Pastel(Color.DimGray)}\n");
         Console.WriteLine("Options:");
         Console.WriteLine("  -h, --help\n\tShow this help message.\n");
-        Console.WriteLine("  -s, --split <timestamp>\n\tSplit notes into separate files with provided timestamp format. (default: dd-MM-yyyy_HH-mm)");
+        Console.WriteLine($"  -s, --split <timestamp>\n\tSplit notes into separate files with provided timestamp format. {"(default: dd-MM-yyyy_HH-mm-ss)".Pastel(Color.DimGray)}");
     }
 
     private static void ParseArgs(string[] args)
@@ -75,12 +75,8 @@ class Program
             if (args.Length > 1)
             {
                 string timestampFormat = args[1];
-                if (string.IsNullOrEmpty(timestampFormat))
-                {
-                    Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Invalid timestamp format.");
-                    Environment.Exit(1);
-                } 
-                else
+
+                if (!string.IsNullOrEmpty(timestampFormat))
                 {
                     try
                     {
@@ -91,16 +87,13 @@ class Program
                         Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Invalid timestamp format.");
                         Environment.Exit(1);
                     }
+
+                    _timestampFormat = timestampFormat;
                 }
 
-                _timestampFormat = timestampFormat;
-                _shouldSplit = true;
             }
-            else
-            {
-                Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Timestamp format is required with split flag.");
-                Environment.Exit(1);
-            }
+
+            _shouldSplit = true;
         }
     }
 }
