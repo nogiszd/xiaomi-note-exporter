@@ -23,7 +23,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
     private int currentNote = 0;
 
-    public void Start(string domain)
+    public void Start(string domain, string timestampFormat, bool? split = false)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 

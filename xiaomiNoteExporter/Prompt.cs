@@ -4,7 +4,7 @@ using Pastel;
 
 namespace xiaomiNoteExporter;
 
-class Prompt(string message, string? defaultValue = "")
+public class Prompt(string message, string? defaultValue = "")
 {
     private readonly string _message = message;
     private readonly string _defaultValue = defaultValue!;
