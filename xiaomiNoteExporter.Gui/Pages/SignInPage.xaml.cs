@@ -97,7 +97,7 @@ public partial class SignInPage : Page
 
     private void NavigateToDomain()
     {
-        Driver.Navigate().GoToUrl($"https://{Domain}/note/h5#");
+        Driver.Navigate().GoToUrl($"https://{Domain}/note/h5");
     }
 
     private void Page_Unloaded(object sender, RoutedEventArgs e)

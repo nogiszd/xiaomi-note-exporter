@@ -72,7 +72,7 @@ namespace xiaomiNoteExporter
 
             WebDriverWait wait = new(driver, TimeSpan.FromSeconds(10));
 
-            driver.Navigate().GoToUrl($"https://{domain}/note/h5#");
+            driver.Navigate().GoToUrl($"https://{domain}/note/h5");
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
@@ -98,7 +98,11 @@ namespace xiaomiNoteExporter
             }
 
 
-            wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
+            wait.Until(e =>
+            {
+                var style = e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style");
+                return style != null && style.Contains("display: none");
+            });
             wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
             Console.Clear();
 
