@@ -9,6 +9,7 @@ using OpenQA.Selenium.Support.UI;
 using Pastel;
 
 using xiaomiNoteExporter.Extensions;
+using System.Net;
 
 namespace xiaomiNoteExporter;
 
@@ -95,6 +96,14 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                 Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exportName));
             }
 
+            string imgDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                split ? $"{exportName}\\images" : $"images_{currentExportDate}"
+                );
+
+            // create directory for exported images
+            Directory.CreateDirectory(imgDir);
+
             bool isFirst = true; // this check is needed, because it usually opens first note automatically
 
             while (true)
@@ -152,14 +161,36 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
                     _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
+                    var noteContainer = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]")));
+
                     string title = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
-                    string value = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
+                    string value = noteContainer.Text;
 
                     SaveToFile(
                         !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
                         value, 
                         title
                         );
+
+                    var embeddedImages = noteContainer.FindElements(By.XPath(@"//div[contains(@class, 'image-view')]/img"));
+
+                    if (embeddedImages.Count != 0)
+                    {
+                        foreach (IWebElement img in embeddedImages)
+                        {
+                            var imgSrc = img.GetAttribute("src");
+                            string imgName = $"note_img_{createdDate.ToString(timeStampFormat)}";
+                            string imgPath = Path.Combine(imgDir, imgName);
+
+                            if (!File.Exists(imgPath))
+                            {
+                                // todo: download file via visiting the url
+                            }
+
+                            // todo: save the image in directory
+                        }
+                    }
+
                     ExecuteScroll(notesList, element);
                     currentNote++;
                 }
@@ -203,6 +234,8 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
         sw.WriteLine(content);
     }
+
+    private static void SaveImage() { }
 
     private void ExecuteScroll(IWebElement notesList, IWebElement currentElement)
     {
