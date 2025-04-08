@@ -46,7 +46,7 @@ Since `v1.6.0` you can launch this application via CLI with usage as shown above
 
 With `-s` flag you can enable note splitting - which exports notes to separate directory, one by one.
 
-This enables user to input specific format for timestamp - \*\*but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings).
+This enables user to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
 
 ---
 
