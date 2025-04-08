@@ -27,7 +27,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 
-        _driver.Navigate().GoToUrl($"https://{domain}/note/#h5");
+        _driver.Navigate().GoToUrl($"https://{domain}/note/h5");
         _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
         new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you succeed...").Ask(true);
@@ -59,7 +59,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             return;
         }
 
-        _wait.Until(e => e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style").Contains("display: none"));
+        _wait.Until(e =>
+        {
+            var style = e.FindElement(By.XPath(@"//body/div[contains(@class, 'spinner')]")).GetAttribute("style");
+            return style != null && style.Contains("display: none");
+        });
         _wait.Until(e => e.FindElement(By.XPath(@"//button[contains(@class, 'btn-create')]")).Displayed);
         Console.Clear();
 

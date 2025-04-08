@@ -4,18 +4,12 @@ using Pastel;
 
 namespace xiaomiNoteExporter;
 
-class Prompt
+class Prompt(string message, string? defaultValue = "")
 {
-    private readonly string _message;
-    private readonly string _defaultValue;
+    private readonly string _message = message;
+    private readonly string _defaultValue = defaultValue!;
 
-    public Prompt(string message, string? defaultValue = "")
-    {
-        _message = message;
-        _defaultValue = defaultValue!;
-    }
-
-   private static string InsertAfterSpace(string str, string insertion, Color? color = null)
+    private static string InsertAfterSpace(string str, string insertion, Color? color = null)
     {
         var spaceIndex = str.IndexOf(' ');
 
