@@ -21,7 +21,15 @@ public static class RelativeTimeParser
         { "year", v => TimeSpan.FromDays(v * 365) },
         { "years", v => TimeSpan.FromDays(v * 365) },
     };
-      
+
+    /// <summary>
+    /// Parses a relative time string (e.g., "5 minutes ago") into a DateTime object.
+    /// </summary>
+    /// <param name="input">Input string that contains relative time info.</param>
+    /// <returns><c>DateTime</c> object calculated from relative time description.</returns>
+    /// <exception cref="ArgumentException">Thrown when input is empty.</exception>
+    /// <exception cref="FormatException">Thrown when RegEx couldn't be matched to input string.</exception>
+    /// <exception cref="NotSupportedException">Thrown when found unit of time is not in supported range.</exception>
     public static DateTime Parse(string input)
     {
         if (string.IsNullOrWhiteSpace(input))

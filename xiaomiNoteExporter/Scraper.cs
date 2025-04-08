@@ -120,8 +120,10 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     element.Click(); // open the note
                     Thread.Sleep(200); // timeout for optimization
 
-                    // creation date text (calculated from UI)
+                    // creation date text (retrieved from UI)
                     string createdString = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
+
+                    // creation date (calculated from retrieved text)
                     DateTime createdDate = createdString.EndsWith("ago") 
                         ? RelativeTimeParser.Parse(createdString) 
                         : DateTime.Parse(createdString, new CultureInfo("en-US"));
