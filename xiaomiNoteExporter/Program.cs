@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Reflection;
-
 using OpenQA.Selenium.Chrome;
 using Pastel;
 
@@ -63,15 +62,7 @@ class Program
         new Scraper(driver, ShutdownHandler_Handler).Start(domain, _timestampFormat, _shouldSplit);
     }
 
-    private static void ShowHelp()
-    {
-        Console.WriteLine($"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} {appVersion?.GetVersionString()}\n");
-        Console.WriteLine($"Usage: xiaomiNoteExporter.exe {"[options]".Pastel(Color.DimGray)}\n");
-        Console.WriteLine("Options:");
-        Console.WriteLine("  -h, --help\n\tShow this help message.\n");
-        Console.WriteLine($"  -d, --domain <domain> {"(default: us.i.mi.com)".Pastel(Color.DimGray)}\n\tMi Notes domain that you were redirected to.\n");
-        Console.WriteLine($"  -s, --split <timestamp> {"(default: dd-MM-yyyy_HH-mm-ss)".Pastel(Color.DimGray)}\n\tSplit notes into separate files with provided timestamp format. Must be compatible with:\n\thttps://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings");
-    }
+    private static void ShowHelp() => new ConsoleHelp(appVersion).Print();
 
     private static void ParseArgs(string[] args)
     {

@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-
 using Pastel;
 
 namespace xiaomiNoteExporter;
@@ -17,10 +16,8 @@ public class Prompt(string message, string? defaultValue = "")
         {
             return str.Insert(spaceIndex, $" {insertion.Pastel(color ?? Color.Red)}");
         }
-        else
-        {
-            return str;
-        }
+        
+        return str;
     }
 
     /// <summary>
