@@ -12,19 +12,46 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 **DISCLAIMER: This software will work only if you have your notes stored on [Mi Cloud](https://i.mi.com/)**
 
-**Prerequisites :**
+### Prerequisites :
 
 - **Windows machine with [_.NET 8 runtime_](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime) installed**
 - **Latest version of Google Chrome browser installed**
 
 Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), extract the contents **to the same folder** and run `xiaomiNoteExporter.exe` executable.
 
-**Steps how to use**:
+### Normal usage:
 
 1.  Launch the app - you will be prompted to input domain address (if it differs from the default one).
 2.  Sign into your account via browser window that popped up.
 3.  After succeeding, press any key as requested.
 4.  Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
+
+### CLI usage:
+
+`xiaomiNoteExporter.exe [options]`
+
+```
+Options:
+  -h, --help
+        Show this help message.
+
+  -d, --domain <domain> (default: us.i.mi.com)
+        Mi Notes domain that you were redirected to.
+
+  -s, --split <timestamp> (default: dd-MM-yyyy_HH-mm-ss)
+        Split notes into separate files with provided timestamp format. Must be compatible with:
+        https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+```
+
+## 🗒️ Note splitting
+
+Since `v1.6.0` you can launch this application via CLI with usage as shown above.
+
+With `-s` flag you can enable note splitting - which exports notes to separate directory, one by one.
+
+This enables user to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
+
+---
 
 ## 🔧 How about maintenance?
 
