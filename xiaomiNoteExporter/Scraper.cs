@@ -161,7 +161,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     {
                         // found note that is not supported, log this fact and continue
                         SaveToFile(
-                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}",
+                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md",
                             $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**"
                             );
                         ExecuteScroll(notesList, element);
