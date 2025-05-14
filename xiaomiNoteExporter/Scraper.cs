@@ -177,7 +177,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string value = noteContainer.Text;
 
                     SaveToFile(
-                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}",
+                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md",
                         value,
                         title
                         );
