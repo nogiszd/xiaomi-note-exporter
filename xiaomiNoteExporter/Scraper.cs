@@ -130,9 +130,20 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string createdString = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
 
                     // creation date (calculated from retrieved text)
-                    DateTime createdDate = createdString.EndsWith("ago") 
-                        ? RelativeTimeParser.Parse(createdString) 
-                        : DateTime.Parse(createdString, new CultureInfo("en-US"));
+                    DateTime createdDate;
+
+                    if (createdString.EndsWith("ago"))
+                    {
+                        createdDate = RelativeTimeParser.Parse(createdString);
+                    } 
+                    else if (SimplifiedDateParser.TryParseMdHm(createdString, out DateTime parsedSimple))
+                    {
+                        createdDate = parsedSimple;
+                    } 
+                    else
+                    {
+                        createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
+                    }
 
                     try
                     {
@@ -210,5 +221,5 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
     }
 
     [GeneratedRegex("[^\\d]")]
-    private static partial Regex DigitRegex(); 
+    private static partial Regex DigitRegex();
 }
