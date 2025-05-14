@@ -9,7 +9,6 @@ using OpenQA.Selenium.Support.UI;
 using Pastel;
 
 using xiaomiNoteExporter.Extensions;
-using System.Threading.Tasks;
 
 namespace xiaomiNoteExporter;
 
