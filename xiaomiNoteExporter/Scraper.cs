@@ -138,9 +138,20 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string createdString = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
 
                     // creation date (calculated from retrieved text)
-                    DateTime createdDate = createdString.EndsWith("ago")
-                        ? RelativeTimeParser.Parse(createdString)
-                        : DateTime.Parse(createdString, new CultureInfo("en-US"));
+                    DateTime createdDate;
+
+                    if (createdString.EndsWith("ago"))
+                    {
+                        createdDate = RelativeTimeParser.Parse(createdString);
+                    }
+                    else if (SimplifiedDateParser.TryParseMdHm(createdString, out DateTime parsedSimple))
+                    {
+                        createdDate = parsedSimple;
+                    }
+                    else
+                    {
+                        createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
+                    }
 
                     try
                     {
@@ -171,17 +182,20 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         title
                         );
 
-                    var embeddedImages = noteContainer.FindElements(By.XPath(@"//div[contains(@class, 'image-view')]/img"));
+                    var embeddedImages = noteContainer.FindElements(By.XPath(@".//div[contains(@class, 'image-view')]/img"));
 
                     if (embeddedImages.Count != 0)
                     {
                         var cookies = _driver.Manage().Cookies.AllCookies;
 
                         // IWebElement because non nullish type is needed (force typing)
-                        foreach (IWebElement img in embeddedImages)
+                        foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
                         {
-                            var imgSrc = img.GetAttribute("src");
-                            string imgName = $"note_img_{createdDate.ToString(timeStampFormat)}";
+                            int idx = t.idx;
+                            IWebElement item = t.Item2;
+
+                            var imgSrc = item.GetAttribute("src");
+                            string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
                             string imgPath = Path.Combine(imgDir, imgName);
 
                             SaveImage(imgPath, imgSrc, domain, cookies);
