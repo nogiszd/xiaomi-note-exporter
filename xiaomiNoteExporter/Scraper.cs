@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -23,11 +24,17 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
     private int currentNote = 0;
 
-    public void Start(string domain)
+    /// <summary>
+    /// Method that starts the scraping process.
+    /// </summary>
+    /// <param name="domain">Domain address to be visited by <c>ChromeDriver</c>.</param>
+    /// <param name="timeStampFormat">Format of the timestamp for file (or directory) name.</param>
+    /// <param name="split">If <c>true</c> then notes will be split as separate files.</param>
+    public void Start(string domain, string timeStampFormat, bool split = false)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 
-        _driver.Navigate().GoToUrl($"https://{domain}/note/h5");
+        _driver.Navigate().GoToUrl($"https://{domain}/note/h5/?locale=en-US");
         _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
         new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you succeed...").Ask(true);
@@ -49,10 +56,10 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             Console.ReadKey();
         }
 
-        Scrape();
+        Scrape(timeStampFormat, split);
     }
 
-    private void Scrape()
+    private void Scrape(string timeStampFormat, bool split)
     {
         if (_wait is null)
         {
@@ -77,7 +84,16 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             totalNotes = int.Parse(DigitRegex().Replace(notesElements, ""));
 
             IWebElement notesList = _wait.Until(e => e.FindElement(By.XPath("//div[contains(@class, 'note-list-items')]")));
-            string fileName = $"exported_notes_{DateTime.Now:dd-MM-yy_HH-mm-ss}.md";
+
+            string currentExportDate = DateTime.Now.ToString(timeStampFormat);
+            string exportName = $"exported_notes_{currentExportDate}";
+            string fileName = $"{exportName}.md"; // file name for accumulated notes (without split)
+
+            if (split)
+            {
+                // if split is enabled, create directory in which notes will be saved
+                Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exportName));
+            }
 
             bool isFirst = true; // this check is needed, because it usually opens first note automatically
 
@@ -110,6 +126,14 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     element.Click(); // open the note
                     Thread.Sleep(200); // timeout for optimization
 
+                    // creation date text (retrieved from UI)
+                    string createdString = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
+
+                    // creation date (calculated from retrieved text)
+                    DateTime createdDate = createdString.EndsWith("ago") 
+                        ? RelativeTimeParser.Parse(createdString) 
+                        : DateTime.Parse(createdString, new CultureInfo("en-US"));
+
                     try
                     {
                         innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i)]")).Count == 1);
@@ -117,8 +141,10 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     catch
                     {
                         // found note that is not supported, log this fact and continue
-                        string createdAt = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
-                        SaveToFile(fileName, $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdAt})**");
+                        SaveToFile(
+                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                            $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**"
+                            );
                         ExecuteScroll(notesList, element);
                         currentNote++;
                         continue;
@@ -129,7 +155,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string title = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
                     string value = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
 
-                    SaveToFile(fileName, value, title);
+                    SaveToFile(
+                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                        value, 
+                        title
+                        );
                     ExecuteScroll(notesList, element);
                     currentNote++;
                 }
@@ -138,7 +168,16 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             Console.Clear();
             Console.Title = string.Format("Completed! (took {0:00}:{1:00}:{2:00})",
                 watch.Elapsed.Hours, watch.Elapsed.Minutes, watch.Elapsed.Seconds);
-            Console.WriteLine($"Successfully exported notes to {fileName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
+
+            if (split)
+            {
+                Console.WriteLine($"Successfully exported notes to {exportName.Pastel(Color.WhiteSmoke)} directory\n".Pastel(Color.LimeGreen));
+            } 
+            else
+            {
+                Console.WriteLine($"Successfully exported notes to {fileName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
+            }
+
             Console.WriteLine("Press any key to close application...".Pastel(Color.Gray));
             Console.ReadKey();
         }
