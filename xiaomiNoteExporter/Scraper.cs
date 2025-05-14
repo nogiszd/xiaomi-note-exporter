@@ -153,7 +153,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     {
                         // found note that is not supported, log this fact and continue
                         SaveToFile(
-                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md", 
                             $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**"
                             );
                         ExecuteScroll(notesList, element);
@@ -167,7 +167,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string value = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
 
                     SaveToFile(
-                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md", 
                         value, 
                         title
                         );
