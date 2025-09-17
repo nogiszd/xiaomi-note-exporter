@@ -140,7 +140,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     // creation date (calculated from retrieved text)
                     DateTime createdDate;
 
-                    if (createdString.ToLower().Contains("yesterday"))
+                    if (createdString.ToLower().Contains("now"))
+                    {
+                       createdDate = DateTime.Now; // get current date
+                    }
+                    else if (createdString.ToLower().Contains("yesterday"))
                     {
                         createdDate = DateTime.Now.AddDays(-1).Date; // get yesterday's date
                     }
