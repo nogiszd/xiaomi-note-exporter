@@ -8,8 +8,8 @@
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyVersion>1.6.2</AssemblyVersion>
-    <FileVersion>1.6.2</FileVersion>
+    <AssemblyVersion>1.7.0</AssemblyVersion>
+    <FileVersion>1.7.0</FileVersion>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
 
@@ -27,8 +27,8 @@
 
   <ItemGroup>
     <PackageReference Include="Pastel" Version="6.0.1" />
-    <PackageReference Include="Selenium.Support" Version="4.33.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.33.0" />
+    <PackageReference Include="Selenium.Support" Version="4.31.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.31.0" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Globalization;
-
+using System.Net;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
@@ -56,10 +56,10 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             Console.ReadKey();
         }
 
-        Scrape(timeStampFormat, split);
+        Scrape(timeStampFormat, domain, split);
     }
 
-    private void Scrape(string timeStampFormat, bool split)
+    private void Scrape(string timeStampFormat, string domain, bool split)
     {
         if (_wait is null)
         {
@@ -95,6 +95,14 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                 Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exportName));
             }
 
+            string imgDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                split ? $"{exportName}\\images" : $"images_{currentExportDate}"
+                );
+
+            // create directory for exported images
+            Directory.CreateDirectory(imgDir);
+
             bool isFirst = true; // this check is needed, because it usually opens first note automatically
 
             while (true)
@@ -116,7 +124,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     {
                         // if element is not the first one, use following element
                         element = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'open')]/following::div")));
-                    } 
+                    }
                     else
                     {
                         element = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'open')]")));
@@ -135,15 +143,15 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     if (createdString.ToLower().Contains("yesterday"))
                     {
                         createdDate = DateTime.Now.AddDays(-1).Date; // get yesterday's date
-                    } 
+                    }
                     else if (createdString.EndsWith("ago"))
                     {
                         createdDate = RelativeTimeParser.Parse(createdString);
-                    } 
+                    }
                     else if (SimplifiedDateParser.TryParseMdHm(createdString, out DateTime parsedSimple))
                     {
                         createdDate = parsedSimple;
-                    } 
+                    }
                     else
                     {
                         createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
@@ -152,12 +160,12 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     try
                     {
                         innerWait.Until(e => e.FindElements(By.XPath(@"//div[contains(@class, 'open')]/div[2][not(./i)]")).Count == 1);
-                    } 
+                    }
                     catch
                     {
                         // found note that is not supported, log this fact and continue
                         SaveToFile(
-                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md", 
+                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
                             $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**"
                             );
                         ExecuteScroll(notesList, element);
@@ -167,14 +175,37 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
                     _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div")).Displayed);
 
+                    var noteContainer = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]")));
+
                     string title = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'origin-title')]/div"))).Text;
-                    string value = _wait.Until(e => e.FindElement(By.XPath(@"//div[contains(@class, 'pm-container')]"))).Text;
+                    string value = noteContainer.Text;
 
                     SaveToFile(
-                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}.md", 
+                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
                         value, 
                         title
                         );
+
+                    var embeddedImages = noteContainer.FindElements(By.XPath(@".//div[contains(@class, 'image-view')]/img"));
+
+                    if (embeddedImages.Count != 0)
+                    {
+                        var cookies = _driver.Manage().Cookies.AllCookies;
+
+                        // IWebElement because non nullish type is needed (force typing)
+                        foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
+                        {
+                            int idx = t.idx;
+                            IWebElement item = t.Item2;
+
+                            var imgSrc = item.GetAttribute("src");
+                            string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
+                            string imgPath = Path.Combine(imgDir, imgName);
+
+                            SaveImage(imgPath, imgSrc, domain, cookies);
+                        }
+                    }
+
                     ExecuteScroll(notesList, element);
                     currentNote++;
                 }
@@ -187,7 +218,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             if (split)
             {
                 Console.WriteLine($"Successfully exported notes to {exportName.Pastel(Color.WhiteSmoke)} directory\n".Pastel(Color.LimeGreen));
-            } 
+            }
             else
             {
                 Console.WriteLine($"Successfully exported notes to {fileName.Pastel(Color.WhiteSmoke)}\n".Pastel(Color.LimeGreen));
@@ -217,6 +248,40 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         }
 
         sw.WriteLine(content);
+    }
+
+    private static void SaveImage(string path, string? src, string domain, IEnumerable<OpenQA.Selenium.Cookie> cookies)
+    {
+        if (File.Exists(path))
+        {
+            return;
+        }
+
+        var handler = new HttpClientHandler
+        {
+            CookieContainer = new CookieContainer()
+        };
+
+        var uri = new Uri($"https://{domain}{src}");
+
+        foreach (var cookie in cookies)
+        {
+            handler.CookieContainer.Add(
+                new System.Net.Cookie(cookie.Name, cookie.Value, cookie.Path, cookie.Domain)
+                );
+        }
+
+        using var client = new HttpClient(handler);
+
+        try
+        {
+            byte[] imageBytes = client.GetByteArrayAsync(src).Result;
+            File.WriteAllBytes(path, imageBytes);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Couldn't fetch image.");
+        }
     }
 
     private void ExecuteScroll(IWebElement notesList, IWebElement currentElement)

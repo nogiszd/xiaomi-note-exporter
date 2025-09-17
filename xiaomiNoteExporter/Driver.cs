@@ -15,6 +15,7 @@ public class Driver
     {
         ChromeOptions options = new();
         options.AddArguments(_args);
+
         ChromeDriverService service = ChromeDriverService.CreateDefaultService();
         service.HideCommandPromptWindow = true;
 
