@@ -30,7 +30,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
     /// <param name="domain">Domain address to be visited by <c>ChromeDriver</c>.</param>
     /// <param name="timeStampFormat">Format of the timestamp for file (or directory) name.</param>
     /// <param name="split">If <c>true</c> then notes will be split as separate files.</param>
-    public void Start(string domain, string timeStampFormat, bool split = false)
+    public void Start(string domain, string timeStampFormat, bool split = false, bool exportImages = true)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 
@@ -56,10 +56,10 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             Console.ReadKey();
         }
 
-        Scrape(timeStampFormat, domain, split);
+        Scrape(timeStampFormat, domain, split, exportImages);
     }
 
-    private void Scrape(string timeStampFormat, string domain, bool split)
+    private void Scrape(string timeStampFormat, string domain, bool split, bool exportImages)
     {
         if (_wait is null)
         {
@@ -168,6 +168,14 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         value, 
                         title
                         );
+
+                    if (!exportImages)
+                    {
+                        // skip image export if user chose so
+                        ExecuteScroll(notesList, element);
+                        currentNote++;
+                        continue;
+                    }
 
                     var initialImgs = DriverHelpers.TryFindImages(noteContainer, TimeSpan.FromMilliseconds(500));
 

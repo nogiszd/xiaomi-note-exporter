@@ -7,7 +7,7 @@ public static class DriverHelpers
 {
     public static IReadOnlyCollection<IWebElement> TryFindImages(IWebElement scope, TimeSpan timeout)
     {
-
+        // Temporarily set implicit wait to zero to avoid long waits on each FindElements call
         var driver = ((IWrapsDriver)scope).WrappedDriver;
         var timeouts = driver.Manage().Timeouts();
         var originalImplicitWait = timeouts.ImplicitWait;
@@ -33,6 +33,7 @@ public static class DriverHelpers
         }
         finally
         {
+            // Restore original implicit wait
             timeouts.ImplicitWait = originalImplicitWait;
         }        
     }
@@ -43,7 +44,6 @@ public static class DriverHelpers
         {
             var w = new WebDriverWait(driver, periodPerItem);
             w.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
-
             w.Until(d => IsRealImageLoaded(d, img));
         }
     }

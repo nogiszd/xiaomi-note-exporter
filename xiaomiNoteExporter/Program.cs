@@ -17,6 +17,8 @@ class Program
     static bool _shouldSplit = false;
     static string _timestampFormat = "dd-MM-yyyy_HH-mm-ss";
 
+    static bool _disableImages = false;
+
     readonly static Driver _driver = new(Array.Empty<string>());
     static ChromeDriver? driver;
 
@@ -38,6 +40,10 @@ class Program
                 ShowHelp();
                 return;
             }
+            if (args[0].Includes("-di", "--disable-images"))
+            {
+                _disableImages = true;
+            }
             else
             {
                 ParseArgs(args);
@@ -52,14 +58,14 @@ class Program
             $"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n"
             );
 
-        string? domain = _shouldAskForDomain 
+        string? domain = _shouldAskForDomain
             ? new Prompt(
                 $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input Mi Notes domain that you were redirected to (default \"{defaultDomain}\"):",
                 defaultDomain
-                ).Ask() 
+                ).Ask()
             : defaultDomain;
 
-        new Scraper(driver, ShutdownHandler_Handler).Start(domain, _timestampFormat, _shouldSplit);
+        new Scraper(driver, ShutdownHandler_Handler).Start(domain, _timestampFormat, _shouldSplit, !_disableImages);
     }
 
     private static void ShowHelp() => new ConsoleHelp(appVersion).Print();
@@ -72,55 +78,52 @@ class Program
 
             if (arg.Includes("-d", "--domain"))
             {
-                if (i + 1 < args.Length)
+                if (TryGetArgValue(args, i, out var domain) && !string.IsNullOrEmpty(domain))
                 {
-                    string domain = args[i + 1];
-
-                    if (!string.IsNullOrEmpty(domain))
-                    {
-                        defaultDomain = domain; // set global domain to the provided value
-                        _shouldAskForDomain = false; // shouldn't ask for domain, since it was provided as argument
-                    } 
-                    else
-                    {
-                        Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Provided domain is invalid.");
-                        Environment.Exit(1);
-                    }
+                    defaultDomain = domain; // set global domain to the provided value
+                    _shouldAskForDomain = false; // shouldn't ask for domain, since it was provided as argument
 
                     i++; // skip next argument - this was a value
-                } 
+                }
                 else
                 {
                     Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Domain address is required with domain flag.");
                     Environment.Exit(1);
                 }
-            } 
+            }
             else if (arg.Includes("-s", "--split"))
             {
-                if (i + 1 < args.Length)
+                if (TryGetArgValue(args, i, out var timestampFormat) && !string.IsNullOrEmpty(timestampFormat))
                 {
-                    string timestampFormat = args[i + 1];
-
-                    if (!string.IsNullOrEmpty(timestampFormat))
+                    try
                     {
-                        try
-                        {
-                            DateTime.Now.ToString(timestampFormat);
-                        }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Invalid timestamp format.");
-                            Environment.Exit(1);
-                        }
-
-                        _timestampFormat = timestampFormat;
+                        DateTime.Now.ToString(timestampFormat);
+                    }
+                    catch (FormatException)
+                    {
+                        Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Invalid timestamp format.");
+                        Environment.Exit(1);
                     }
 
-                    i++; // skip next argument - this was a value
+                    _timestampFormat = timestampFormat;
                 }
 
-                _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
+                i++; // skip next argument - this was a value
             }
+
+            _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
         }
+    }
+
+    private static bool TryGetArgValue(string[] args, int index, out string value)
+    {
+        if (index + 1 < args.Length)
+        {
+            value = args[index + 1];
+            return true;
+        }
+
+        value = string.Empty;
+        return false;
     }
 }
