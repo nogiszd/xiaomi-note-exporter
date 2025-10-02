@@ -33,7 +33,7 @@ Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releas
 ```
 Options:
   -h, --help
-        Show this help message.
+        Show this help message and exit
 
   -d, --domain <domain> (default: us.i.mi.com)
         Mi Notes domain that you were redirected to.
@@ -41,6 +41,9 @@ Options:
   -s, --split <timestamp> (default: dd-MM-yyyy_HH-mm-ss)
         Split notes into separate files with provided timestamp format. Must be compatible with:
         https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+
+  -di, --disable-images
+        Disable default image export behavior, images will not be downloaded from the notes.
 ```
 
 ## 🗒️ Note splitting
@@ -50,6 +53,12 @@ Since `v1.6.0` you can launch this application via CLI with usage as shown above
 With `-s` flag you can enable note splitting - which exports notes to separate directory, one by one.
 
 This enables user to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
+
+## 🖼️ Image export
+
+Since `v1.7.0` this app exports images present in notes by default.
+
+You can disable this feature by `-di` flag in CLI args.
 
 ---
 
