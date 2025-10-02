@@ -138,28 +138,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string createdString = element.FindElement(By.XPath(@".//div[2]/div[1]")).Text;
 
                     // creation date (calculated from retrieved text)
-                    DateTime createdDate;
-
-                    if (createdString.ToLower().Contains("now"))
-                    {
-                       createdDate = DateTime.Now; // get current date
-                    }
-                    else if (createdString.ToLower().Contains("yesterday"))
-                    {
-                        createdDate = DateTime.Now.AddDays(-1).Date; // get yesterday's date
-                    }
-                    else if (createdString.EndsWith("ago"))
-                    {
-                        createdDate = RelativeTimeParser.Parse(createdString);
-                    }
-                    else if (SimplifiedDateParser.TryParseMdHm(createdString, out DateTime parsedSimple))
-                    {
-                        createdDate = parsedSimple;
-                    }
-                    else
-                    {
-                        createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
-                    }
+                    GetCreatedDate(createdString, out DateTime createdDate);
 
                     try
                     {
@@ -190,23 +169,37 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         title
                         );
 
-                    var embeddedImages = noteContainer.FindElements(By.XPath(@".//div[contains(@class, 'image-view')]/img"));
+                    var initialImgs = DriverHelpers.TryFindImages(noteContainer, TimeSpan.FromMilliseconds(500));
 
-                    if (embeddedImages.Count != 0)
+                    if (initialImgs.Count > 0)
                     {
-                        var cookies = _driver.Manage().Cookies.AllCookies;
+                        DriverHelpers.WaitUntilImagesAreRealAndLoaded(_driver, initialImgs, TimeSpan.FromSeconds(5));
 
-                        // IWebElement because non nullish type is needed (force typing)
-                        foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
+                        var embeddedImages = noteContainer.FindElements(By.CssSelector(".image-view img"));
+
+                        if (embeddedImages.Count != 0)
                         {
-                            int idx = t.idx;
-                            IWebElement item = t.Item2;
+                            var cookies = _driver.Manage().Cookies.AllCookies;
 
-                            var imgSrc = item.GetAttribute("src");
-                            string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
-                            string imgPath = Path.Combine(imgDir, imgName);
+                            // IWebElement because non nullish type is needed (force typing)
+                            foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
+                            {
+                                int idx = t.idx;
+                                IWebElement item = t.Item2;
 
-                            SaveImage(imgPath, imgSrc, domain, cookies);
+                                var imgSrc = DriverHelpers.GetCurrentSrc(_driver, item);
+
+                                if (string.IsNullOrWhiteSpace(imgSrc) || imgSrc.Contains("data:"))
+                                {
+                                    // skip base64 images and empty sources
+                                    continue;
+                                }
+
+                                string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
+                                string imgPath = Path.Combine(imgDir, imgName);
+
+                                SaveImage(imgPath, imgSrc, cookies);
+                            }
                         }
                     }
 
@@ -254,7 +247,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         sw.WriteLine(content);
     }
 
-    private static void SaveImage(string path, string? src, string domain, IEnumerable<OpenQA.Selenium.Cookie> cookies)
+    private static void SaveImage(string path, string? src, IEnumerable<OpenQA.Selenium.Cookie> cookies)
     {
         if (File.Exists(path))
         {
@@ -265,8 +258,6 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         {
             CookieContainer = new CookieContainer()
         };
-
-        var uri = new Uri($"https://{domain}{src}");
 
         foreach (var cookie in cookies)
         {
@@ -282,9 +273,33 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
             byte[] imageBytes = client.GetByteArrayAsync(src).Result;
             File.WriteAllBytes(path, imageBytes);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Couldn't fetch image.");
+            Console.WriteLine($"\n{"[ERROR]".Pastel(Color.Red)} Couldn't fetch image.\nError: {e.Message}");
+        }
+    }
+
+    private static void GetCreatedDate(string createdString, out DateTime createdDate)
+    {
+        if (createdString.ToLower().Contains("now"))
+        {
+            createdDate = DateTime.Now; // get current date
+        }
+        else if (createdString.ToLower().Contains("yesterday"))
+        {
+            createdDate = DateTime.Now.AddDays(-1).Date; // get yesterday's date
+        }
+        else if (createdString.EndsWith("ago"))
+        {
+            createdDate = RelativeTimeParser.Parse(createdString);
+        }
+        else if (SimplifiedDateParser.TryParseMdHm(createdString, out DateTime parsedSimple))
+        {
+            createdDate = parsedSimple;
+        }
+        else
+        {
+            createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
         }
     }
 
