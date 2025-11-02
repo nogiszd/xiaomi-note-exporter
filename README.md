@@ -67,9 +67,9 @@ Credits are going to [aviv926](https://github.com/aviv926)
 
 ## 📜 License
 
-This repository is distributed mainly under the [MIT license](https://github.com/nogiszd/xiaomi-note-exporter/blob/master/LICENSE.txt).
+This project is licensed under the [GNU General Public License v3.0](https://github.com/nogiszd/xiaomi-note-exporter/blob/master/LICENSE.txt).
 
 Used libraries:
 
-- [Selenium](https://www.selenium.dev/) - `Apache License 2.0`
-- [Pastel](https://github.com/silkfire/Pastel) - `MIT License`
+- [Selenium](https://www.selenium.dev/) - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- [Pastel](https://github.com/silkfire/Pastel) - [MIT License](https://opensource.org/licenses/MIT)
