@@ -40,10 +40,6 @@ class Program
                 ShowHelp();
                 return;
             }
-            if (args[0].Includes("-di", "--disable-images"))
-            {
-                _disableImages = true;
-            }
             else
             {
                 ParseArgs(args);
@@ -106,12 +102,16 @@ class Program
                     }
 
                     _timestampFormat = timestampFormat;
+
+                    i++; // skip next argument - this was a value
                 }
 
-                i++; // skip next argument - this was a value
+                _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
             }
-
-            _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
+            else if (arg.Includes("-di", "--disable-images"))
+            {
+                _disableImages = true;
+            }
         }
     }
 

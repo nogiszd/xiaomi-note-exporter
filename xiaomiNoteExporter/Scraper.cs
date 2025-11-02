@@ -177,11 +177,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         continue;
                     }
 
-                    var initialImgs = DriverHelpers.TryFindImages(noteContainer, TimeSpan.FromMilliseconds(500));
+                    var initialImgs = DriverHelpers.TryFindImages(noteContainer);
 
                     if (initialImgs.Count > 0)
                     {
-                        DriverHelpers.WaitUntilImagesAreRealAndLoaded(_driver, initialImgs, TimeSpan.FromSeconds(5));
+                        DriverHelpers.WaitUntilImagesAreRealAndLoaded(_driver, initialImgs, TimeSpan.FromSeconds(3));
 
                         var embeddedImages = noteContainer.FindElements(By.CssSelector(".image-view img"));
 

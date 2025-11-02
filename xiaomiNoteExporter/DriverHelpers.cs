@@ -5,9 +5,9 @@ namespace xiaomiNoteExporter;
 
 public static class DriverHelpers
 {
-    public static IReadOnlyCollection<IWebElement> TryFindImages(IWebElement scope, TimeSpan timeout)
+    public static IReadOnlyCollection<IWebElement> TryFindImages(IWebElement scope)
     {
-        // Temporarily set implicit wait to zero to avoid long waits on each FindElements call
+        // temporarily set implicit wait to zero
         var driver = ((IWrapsDriver)scope).WrappedDriver;
         var timeouts = driver.Manage().Timeouts();
         var originalImplicitWait = timeouts.ImplicitWait;
@@ -15,25 +15,12 @@ public static class DriverHelpers
 
         try
         {
-            var end = DateTime.Now + timeout;
-            while (DateTime.UtcNow < end)
-            {
-                try
-                {
-                    var found = scope.FindElements(By.CssSelector(".image-view img"));
-                    if (found.Count > 0) return found;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    // ignore and retry
-                }
-                Thread.Sleep(80);
-            }
-            return Array.Empty<IWebElement>();
+            var found = scope.FindElements(By.CssSelector(".image-view img"));
+            return found.Count > 0 ? found : Array.Empty<IWebElement>();
         }
         finally
         {
-            // Restore original implicit wait
+            // restore original implicit wait timeout
             timeouts.ImplicitWait = originalImplicitWait;
         }        
     }
