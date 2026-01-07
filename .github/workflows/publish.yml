@@ -43,7 +43,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish -c Release -p:PublishProfile=FolderProfile
+        run: dotnet publish -c Release -p:PublishProfile=FolderProfile -p:PublishDir=./publish
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v6
