@@ -1,4 +1,4 @@
-name: Build, Test, Publish & Release
+name: Build, Publish & Draft New Release
 
 on:
   workflow_dispatch:
