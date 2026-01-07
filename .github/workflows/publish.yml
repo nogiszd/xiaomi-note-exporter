@@ -1,4 +1,4 @@
-name: Build, Publish & Draft New Release
+name: Publish
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish -c Release -p:PublishProfile=FolderProfile
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v6
