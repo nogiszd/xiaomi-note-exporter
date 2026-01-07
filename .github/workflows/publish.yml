@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  build-test-publish:
+  build-and-test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,8 +28,38 @@ jobs:
       - name: Test
         run: dotnet test --no-build --verbosity normal
 
+  publish:
+    runs-on: windows-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Publish
         run: dotnet publish -c Release -o ./publish
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish-folder
+          path: ./publish
+
+  create-release:
+    runs-on: windows-latest
+    needs: publish
+    steps:
+      - name: Download publish artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: publish-folder
+          path: ./publish
 
       - name: Create ZIP file
         run: |

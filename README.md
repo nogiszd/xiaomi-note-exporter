@@ -1,5 +1,5 @@
 Xiaomi Note Exporter
-![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/build.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-active-success.svg)
+![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/publish.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-active-success.svg)
 =================================
 
 > Export your notes from Mi Cloud directly to Markdown file! 📝➡️🧾
