@@ -43,13 +43,13 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish -c Release -p:PublishProfile=FolderProfile -p:PublishDir=./publish
+        run: dotnet publish -c Release -p:PublishProfile=FolderProfile -p:PublishDir=${{ github.workspace }}/publish
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v6
         with:
           name: publish-folder
-          path: ./publish
+          path: ${{ github.workspace }}/publish
 
   create-release:
     runs-on: windows-latest
@@ -59,7 +59,7 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           name: publish-folder
-          path: ./publish
+          path: ${{ github.workspace }}/publish
 
       - name: Create ZIP file
         run: |
