@@ -100,10 +100,13 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                 split ? $"{exportName}\\images" : $"images_{currentExportDate}"
                 );
 
-            // create directory for exported images
-            Directory.CreateDirectory(imgDir);
+            // create directory for exported images (if enabled)
+            if (!exportImages)
+            {
+                Directory.CreateDirectory(imgDir);
+            }
 
-            bool isFirst = true; // this check is needed, because it usually opens first note automatically
+            bool isFirst = true; // this check is needed, because webapp usually opens first note automatically
 
             while (true)
             {
@@ -289,11 +292,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
     private static void GetCreatedDate(string createdString, out DateTime createdDate)
     {
-        if (createdString.ToLower().Contains("now"))
+        if (createdString.ToLower().Contains("now", StringComparison.InvariantCultureIgnoreCase))
         {
             createdDate = DateTime.Now; // get current date
         }
-        else if (createdString.ToLower().Contains("yesterday"))
+        else if (createdString.ToLower().Contains("yesterday", StringComparison.InvariantCultureIgnoreCase))
         {
             createdDate = DateTime.Now.AddDays(-1).Date; // get yesterday's date
         }

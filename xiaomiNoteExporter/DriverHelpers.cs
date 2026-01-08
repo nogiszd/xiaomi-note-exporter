@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
 namespace xiaomiNoteExporter;
@@ -22,7 +22,7 @@ public static class DriverHelpers
         {
             // restore original implicit wait timeout
             timeouts.ImplicitWait = originalImplicitWait;
-        }        
+        }
     }
 
     public static void WaitUntilImagesAreRealAndLoaded(IWebDriver driver, IReadOnlyCollection<IWebElement> imgs, TimeSpan periodPerItem)

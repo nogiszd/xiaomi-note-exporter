@@ -1,4 +1,4 @@
-﻿namespace xiaomiNoteExporter.Extensions;
+namespace xiaomiNoteExporter.Extensions;
 
 public static class NumberExtensions
 {
