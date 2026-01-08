@@ -26,6 +26,11 @@ Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releas
 3.  After succeeding, press any key as requested.
 4.  Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
 
+## _Warning!_
+
+App **can trigger** Windows SmartScreen because the code is unsigned.  
+In that case you can click **More info** and **Run anyway**.
+
 ### CLI usage:
 
 `xiaomiNoteExporter.exe [options]`
