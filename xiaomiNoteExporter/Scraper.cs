@@ -101,7 +101,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                 );
 
             // create directory for exported images (if enabled)
-            if (!exportImages)
+            if (exportImages)
             {
                 Directory.CreateDirectory(imgDir);
             }
@@ -152,7 +152,8 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         // found note that is not supported, log this fact and continue
                         SaveToFile(
                             !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
-                            $"** Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**"
+                            $"**Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**",
+                            createdDate
                             );
                         ExecuteScroll(notesList, element);
                         currentNote++;
@@ -168,7 +169,8 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
                     SaveToFile(
                         !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
-                        value, 
+                        value,
+                        createdDate,
                         title
                         );
 
@@ -244,7 +246,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         }
     }
 
-    private static void SaveToFile(string fileName, string content, string? title = null)
+    private static void SaveToFile(string fileName, string content, DateTime createdDate, string? title = null)
     {
         using StreamWriter sw = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + fileName);
 
@@ -252,10 +254,14 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
         if (!string.IsNullOrEmpty(title))
         {
-            sw.WriteLine($"**{title}**");
+            sw.WriteLine($"## {title}");
         }
 
-        sw.WriteLine(content);
+        // add newline preserve to format the note properly
+        sw.WriteLine(content.EscapeNewLine());
+        sw.WriteLine();
+
+        sw.WriteLine($"*Created at: {createdDate:dd/MM/yyyy HH:mm}*");
     }
 
     private static void SaveImage(string path, string? src, IEnumerable<OpenQA.Selenium.Cookie> cookies)

@@ -11,4 +11,14 @@ public static class StringExtensions
     {
         return values.Any(v => str.Contains(v, StringComparison.InvariantCultureIgnoreCase));
     }
+
+    public static string EscapeNewLine(this string str)
+    {
+        if (string.IsNullOrEmpty(str))
+            return str;
+
+        str = str.Replace("\r\n", "\n");
+
+        return str.Replace("\n", "  \n");
+    }
 }
