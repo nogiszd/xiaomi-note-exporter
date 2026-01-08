@@ -19,6 +19,9 @@ class Program
 
     static bool _disableImages = false;
 
+    static bool isConvertingJson = false;
+    static string convertPath = string.Empty;
+
     readonly static Driver _driver = new(Array.Empty<string>());
     static ChromeDriver? driver;
 
@@ -46,22 +49,38 @@ class Program
             }
         }
 
-        driver = _driver.Prepare(); // prepare driver after parsing arguments from command line
+        if (isConvertingJson)
+        {
+            Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()} - Converting to JSON";
 
-        Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()}";
+            try
+            {
+                new JsonConverter(convertPath).Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} An error occurred during JSON conversion: {ex.Message}");
+            }
+        }
+        else
+        {
+            driver = _driver.Prepare(); // prepare driver after parsing arguments from command line
 
-        Console.WriteLine(
-            $"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n"
-            );
+            Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()}";
 
-        string? domain = _shouldAskForDomain
-            ? new Prompt(
-                $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input Mi Notes domain that you were redirected to (default \"{defaultDomain}\"):",
-                defaultDomain
-                ).Ask()
-            : defaultDomain;
+            Console.WriteLine(
+                $"{"Xiaomi Note Exporter".Pastel(Color.FromArgb(252, 106, 0))} - Export your notes to {"Markdown".Pastel(Color.SkyBlue)}!\n"
+                );
 
-        new Scraper(driver, ShutdownHandler_Handler).Start(domain, _timestampFormat, _shouldSplit, !_disableImages);
+            string? domain = _shouldAskForDomain
+                ? new Prompt(
+                    $"{"[OPTIONAL]".Pastel(Color.DimGray)} Input Mi Notes domain that you were redirected to (default \"{defaultDomain}\"):",
+                    defaultDomain
+                    ).Ask()
+                : defaultDomain;
+
+            new Scraper(driver, ShutdownHandler_Handler).Start(domain, _timestampFormat, _shouldSplit, !_disableImages);
+        }
     }
 
     private static void ShowHelp() => new ConsoleHelp(appVersion).Print();
@@ -72,7 +91,21 @@ class Program
         {
             string arg = args[i];
 
-            if (arg.Includes("-d", "--domain"))
+            if (arg.Includes("-j", "--json"))
+            {
+                if (TryGetArgValue(args, i, out var path) && !string.IsNullOrEmpty(path))
+                {
+                    isConvertingJson = true;
+                    convertPath = path;
+                    break;
+                } 
+                else
+                {
+                    Console.WriteLine($"{"[ERROR]".Pastel(Color.Red)} Path is required for json convert flag.");
+                    Environment.Exit(1);
+                }
+            }
+            else if (arg.Includes("-d", "--domain"))
             {
                 if (TryGetArgValue(args, i, out var domain) && !string.IsNullOrEmpty(domain))
                 {
