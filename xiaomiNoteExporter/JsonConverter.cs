@@ -51,7 +51,7 @@ public class JsonConverter(string path)
         Console.ReadKey();
     }
 
-    private static IReadOnlyList<NoteDto> ConvertFromDirectory(string dir)
+    private static List<NoteDto> ConvertFromDirectory(string dir)
     {
         var notes = new List<NoteDto>();
 
