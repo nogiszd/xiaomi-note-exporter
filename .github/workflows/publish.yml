@@ -1,5 +1,10 @@
 name: Publish
 
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -65,6 +70,11 @@ jobs:
         run: |
           Compress-Archive -Path ./publish/* -DestinationPath ./release-win-x86.zip -Force
         shell: pwsh
+
+      - name: Attest release artifact
+        uses: actions/attest-build-provenance@v3.1.0
+        with:
+          subject-path: ./release-win-x86.zip
 
       - name: Create Draft Release
         uses: ncipollo/release-action@v1
