@@ -54,7 +54,8 @@ Options:
         Convert your markdown file(s) to JSON. You can pass path to a folder containing split notes, or path to a single .md file.
 
   -md, --manual-driver
-        Use manual chromedriver.exe instead of selenium-manager.exe. You need to put chromedriver.exe in the same directory as executable.
+        Use standalone chromedriver.exe instead of selenium-manager.exe.
+        You need to put chromedriver.exe in the same directory as executable.
 ```
 
 ## 🗒️ Note splitting
