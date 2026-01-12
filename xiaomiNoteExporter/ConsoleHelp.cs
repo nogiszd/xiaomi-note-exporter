@@ -16,7 +16,8 @@ internal class ConsoleHelp(Version? version)
         $"  -d, --domain <domain> {"(default: us.i.mi.com)".Pastel(Color.DimGray)}\n\tMi Notes domain that you were redirected to.\n",
         $"  -s, --split <timestamp> {"(default: dd-MM-yyyy_HH-mm-ss)".Pastel(Color.DimGray)}\n\tSplit notes into separate files with provided timestamp format. Must be compatible with:\n\thttps://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings\n",
         $"  -di, --disable-images\n\tDisable default image export behavior, images will not be downloaded from the notes.\n",
-        $"  -j, --json <path>\n\tConvert your markdown file(s) to JSON. You can pass path to a folder containing split notes, or path to a single .md file.\n"
+        $"  -j, --json <path>\n\tConvert your markdown file(s) to JSON. You can pass path to a folder containing split notes, or path to a single .md file.\n",
+        $"  -md, --manual-driver\n\tUse manual chromedriver.exe instead of selenium-manager.exe. You need to put chromedriver.exe in the same directory as executable.\n"
     };
 
     public void Print()
