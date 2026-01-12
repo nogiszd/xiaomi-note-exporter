@@ -34,7 +34,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
     {
         _wait = _driver.GetWait(TimeSpan.FromSeconds(10));
 
-        _driver.Navigate().GoToUrl($"https://{domain}/note/h5/?locale=en-US");
+        _driver.Navigate().GoToUrl($"https://{domain}/note/h5/?_locale=en-US");
         _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
         new Prompt($"\n{"[IMPORTANT]".Pastel(Color.Red)} Please sign-in to your account. Press any key after you succeed...").Ask(true);
@@ -316,7 +316,11 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         }
         else
         {
-            createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
+            if (!DateTime.TryParse(createdString, new CultureInfo("en-US"), out createdDate) &&
+                !DateTime.TryParse(createdString, new CultureInfo("en-GB"), out createdDate))
+            {
+                createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
+            }
         }
     }
 
