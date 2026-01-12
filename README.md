@@ -74,19 +74,13 @@ With new flag `-j` you can point to your folder (when notes were split) or to an
 
 This feature is available since `v1.7.4` and it's a mode of running the app via CLI.
 
+Credits for this idea are going to [aviv926](https://github.com/aviv926) who made Python script that does the same.
+
 ---
 
 ## 🔧 How about maintenance?
 
 I will only add modifications and new features **when I have free time to do so**. Until then, there will only be major bug fixes and small updates (including library updates).
-
-## 🔗 Importing into other apps (Advanced)
-
-There is an **[fork](https://github.com/aviv926/xiaomi-note-exporter)** with additional scripts written in Python which are made to split complete markdown file into one per note, and convert them into JSON format file.
-
-More details are described in this fork's `readme.md`.
-
-Credits are going to [aviv926](https://github.com/aviv926)
 
 ## 📜 License
 
