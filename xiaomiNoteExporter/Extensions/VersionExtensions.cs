@@ -27,6 +27,13 @@ public static class VersionExtensions
         return $"{version.Major}.{version.Minor}.{version.Build}-{suffix}";
     }
 
+    /// <summary>
+    /// Extracts the version suffix tag from the assembly's informational version string, if present.
+    /// </summary>
+    /// <remarks>The version suffix is typically used to indicate pre-release versions (for example, 'beta' or
+    /// 'rc') in the assembly's informational version. If the informational version does not contain a suffix, this
+    /// method returns an empty string.</remarks>
+    /// <returns>A string containing the version suffix tag (such as a pre-release label) if found; otherwise, an empty string.</returns>
     private static string GetVersionSuffix()
     {
         var infoVersion = Assembly.GetExecutingAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
