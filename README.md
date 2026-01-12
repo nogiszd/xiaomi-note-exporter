@@ -49,6 +49,9 @@ Options:
 
   -di, --disable-images
         Disable default image export behavior, images will not be downloaded from the notes.
+
+  -j, --json <path>
+        Convert your markdown file(s) to JSON. You can pass path to a folder containing split notes, or path to a single .md file.
 ```
 
 ## 🗒️ Note splitting
@@ -64,6 +67,12 @@ This enables user to input specific format for timestamp - **but it must be comp
 Since `v1.7.0` this app exports images present in notes by default.
 
 You can disable this feature by `-di` flag in CLI args.
+
+## 🔗 Convert to JSON
+
+With new flag `-j` you can point to your folder (when notes were split) or to an file, to convert notes into JSON file.
+
+This feature is available since `v1.7.4` and it's a mode of running the app via CLI.
 
 ---
 
