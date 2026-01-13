@@ -19,6 +19,8 @@ class Program
 
     static bool _disableImages = false;
 
+    static bool _useStaticDriver = false;
+
     static bool isConvertingJson = false;
     static string convertPath = string.Empty;
 
@@ -64,7 +66,7 @@ class Program
         }
         else
         {
-            driver = _driver.Prepare(); // prepare driver after parsing arguments from command line
+            driver = _driver.Prepare(_useStaticDriver); // prepare driver after parsing arguments from command line
 
             Console.Title = $"Xiaomi Note Exporter {appVersion?.GetVersionString()}";
 
@@ -140,6 +142,10 @@ class Program
                 }
 
                 _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
+            }
+            else if (arg.Includes("-md", "--manual-driver"))
+            {
+                _useStaticDriver = true;
             }
             else if (arg.Includes("-di", "--disable-images"))
             {

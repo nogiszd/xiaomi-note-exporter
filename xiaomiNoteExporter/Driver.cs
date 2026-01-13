@@ -11,12 +11,18 @@ public class Driver
         _args = args;
     }
 
-    public ChromeDriver Prepare() 
+    public ChromeDriver Prepare(bool useStaticDriver = false) 
     {
+        ChromeDriverService service;
+
         ChromeOptions options = new();
         options.AddArguments(_args);
 
-        ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+        if (useStaticDriver)
+            service = ChromeDriverService.CreateDefaultService(AppContext.BaseDirectory);
+        else
+            service = ChromeDriverService.CreateDefaultService();
+
         service.HideCommandPromptWindow = true;
 
         return new ChromeDriver(service, options);

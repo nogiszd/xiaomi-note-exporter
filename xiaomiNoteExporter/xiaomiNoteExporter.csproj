@@ -8,8 +8,8 @@
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyVersion>1.7.4</AssemblyVersion>
-    <FileVersion>1.7.4</FileVersion>
+    <AssemblyVersion>1.7.5</AssemblyVersion>
+    <FileVersion>1.7.5</FileVersion>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
 
