@@ -316,10 +316,20 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
         }
         else
         {
-            if (!DateTime.TryParse(createdString, new CultureInfo("en-US"), out createdDate) &&
-                !DateTime.TryParse(createdString, new CultureInfo("en-GB"), out createdDate))
+            var formats = new[]
             {
-                createdDate = DateTime.Parse(createdString, new CultureInfo("en-US"));
+                "dd/MM/yyyy HH:mm",
+                "MM/dd/yyyy HH:mm",
+                "yyyy/MM/dd HH:mm",
+                "dd/MM/yyyy H:mm",
+                "MM/dd/yyyy H:mm",
+                "M/d/yyyy h:mm tt",
+                "MM/dd/yyyy hh:mm tt"
+            };
+
+            if (!DateTime.TryParseExact(createdString, formats, new CultureInfo("en-US"), DateTimeStyles.None, out createdDate))
+            {
+                createdDate = DateTime.Now; // fallback to current date
             }
         }
     }
