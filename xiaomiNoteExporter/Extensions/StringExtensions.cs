@@ -14,6 +14,17 @@ public static class StringExtensions
     }
 
     /// <summary>
+    /// Determines whether the specified string exactly matches any of the provided values.
+    /// </summary>
+    /// <param name="str">The string to search within. Cannot be null.</param>
+    /// <param name="values">An array of strings to search for within the source string. Cannot be null or contain null elements.</param>
+    /// <returns><c>true</c> if the source string contains at least one of the specified values; otherwise, <c>false</c>.</returns>
+    public static bool IncludesExact(this string str, params string[] values)
+    {
+        return values.Any(v => str.Equals(v, StringComparison.InvariantCulture));
+    }
+
+    /// <summary>
     /// Determines whether the specified string contains any of the provided values, using a case-insensitive comparison
     /// based on the invariant culture.
     /// </summary>

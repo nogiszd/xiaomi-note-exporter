@@ -151,7 +151,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     {
                         // found note that is not supported, log this fact and continue
                         SaveToFile(
-                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                            !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}",
                             $"**Unsupported note type (Mind-map or Sound note) (Created at: {createdDate:dd/MM/yyyy HH:mm})**",
                             createdDate
                             );
@@ -168,7 +168,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                     string value = noteContainer.Text;
 
                     SaveToFile(
-                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}", 
+                        !split ? fileName : $"{exportName}\\{$"note_{createdDate.ToString(timeStampFormat)}"}",
                         value,
                         createdDate,
                         title
@@ -194,7 +194,7 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
                         {
                             var cookies = _driver.Manage().Cookies.AllCookies;
 
-                            // IWebElement because non nullish type is needed (force typing)
+                            // IWebElement because non nullish type is needed
                             foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
                             {
                                 int idx = t.idx;

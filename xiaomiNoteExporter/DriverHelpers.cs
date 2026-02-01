@@ -27,6 +27,10 @@ public static class DriverHelpers
             var found = scope.FindElements(By.CssSelector(".image-view img"));
             return found.Count > 0 ? found : Array.Empty<IWebElement>();
         }
+        catch
+        {
+            return Array.Empty<IWebElement>();
+        }
         finally
         {
             // restore original implicit wait timeout

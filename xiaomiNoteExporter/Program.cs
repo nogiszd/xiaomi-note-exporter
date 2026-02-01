@@ -93,7 +93,7 @@ class Program
         {
             string arg = args[i];
 
-            if (arg.Includes("-j", "--json"))
+            if (arg.IncludesExact("-j", "--json"))
             {
                 if (TryGetArgValue(args, i, out var path) && !string.IsNullOrEmpty(path))
                 {
@@ -107,7 +107,7 @@ class Program
                     Environment.Exit(1);
                 }
             }
-            else if (arg.Includes("-d", "--domain"))
+            else if (arg.IncludesExact("-d", "--domain"))
             {
                 if (TryGetArgValue(args, i, out var domain) && !string.IsNullOrEmpty(domain))
                 {
@@ -122,7 +122,7 @@ class Program
                     Environment.Exit(1);
                 }
             }
-            else if (arg.Includes("-s", "--split"))
+            else if (arg.IncludesExact("-s", "--split"))
             {
                 if (TryGetArgValue(args, i, out var timestampFormat) && !string.IsNullOrEmpty(timestampFormat))
                 {
@@ -143,11 +143,11 @@ class Program
 
                 _shouldSplit = true; // if flag is present, split is enabled (even if no value is provided)
             }
-            else if (arg.Includes("-md", "--manual-driver"))
+            else if (arg.IncludesExact("-md", "--manual-driver"))
             {
                 _useStaticDriver = true;
             }
-            else if (arg.Includes("-di", "--disable-images"))
+            else if (arg.IncludesExact("-di", "--disable-images"))
             {
                 _disableImages = true;
             }
