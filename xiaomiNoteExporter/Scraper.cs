@@ -186,32 +186,33 @@ public partial class Scraper(ChromeDriver driver, Action shutdownHandler)
 
                     if (initialImgs.Count > 0)
                     {
-                        DriverHelpers.WaitUntilImagesAreRealAndLoaded(_driver, initialImgs, TimeSpan.FromSeconds(3));
-
-                        var embeddedImages = noteContainer.FindElements(By.CssSelector(".image-view img"));
-
-                        if (embeddedImages.Count != 0)
+                        if (DriverHelpers.WaitUntilImagesAreRealAndLoaded(_driver, initialImgs, TimeSpan.FromSeconds(3)))
                         {
-                            var cookies = _driver.Manage().Cookies.AllCookies;
+                            var embeddedImages = noteContainer.FindElements(By.CssSelector(".image-view img"));
 
-                            // IWebElement because non nullish type is needed
-                            foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
+                            if (embeddedImages.Count != 0)
                             {
-                                int idx = t.idx;
-                                IWebElement item = t.Item2;
+                                var cookies = _driver.Manage().Cookies.AllCookies;
 
-                                var imgSrc = DriverHelpers.GetCurrentSrc(_driver, item);
-
-                                if (string.IsNullOrWhiteSpace(imgSrc) || imgSrc.Contains("data:"))
+                                // IWebElement because non nullish type is needed
+                                foreach (var t in embeddedImages.Select((item, idx) => (idx, (IWebElement)item)))
                                 {
-                                    // skip base64 images and empty sources
-                                    continue;
+                                    int idx = t.idx;
+                                    IWebElement item = t.Item2;
+
+                                    var imgSrc = DriverHelpers.GetCurrentSrc(_driver, item);
+
+                                    if (string.IsNullOrWhiteSpace(imgSrc) || imgSrc.Contains("data:"))
+                                    {
+                                        // skip base64 images and empty sources
+                                        continue;
+                                    }
+
+                                    string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
+                                    string imgPath = Path.Combine(imgDir, imgName);
+
+                                    SaveImage(imgPath, imgSrc, cookies);
                                 }
-
-                                string imgName = $"note_img_{idx}_{createdDate.ToString(timeStampFormat)}.png";
-                                string imgPath = Path.Combine(imgDir, imgName);
-
-                                SaveImage(imgPath, imgSrc, cookies);
                             }
                         }
                     }

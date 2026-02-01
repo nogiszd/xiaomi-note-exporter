@@ -43,19 +43,29 @@ public static class DriverHelpers
     /// browser.
     /// </summary>
     /// <remarks>This method waits for each image in the collection individually, using the specified timeout
-    /// for each item. If an image does not load within the given period, a WebDriverTimeoutException is thrown for that
-    /// image. The method ignores stale or missing elements during the wait, retrying as necessary until the timeout
+    /// for each item. If an image does not load within the given period, the method returns false.
+    /// The method ignores stale or missing elements during the wait, retrying as necessary until the timeout
     /// expires.</remarks>
     /// <param name="driver">The WebDriver instance used to interact with the browser.</param>
     /// <param name="imgs">A collection of image elements to check for being real and fully loaded.</param>
     /// <param name="periodPerItem">The maximum amount of time to wait for each image to load before timing out.</param>
-    public static void WaitUntilImagesAreRealAndLoaded(IWebDriver driver, IReadOnlyCollection<IWebElement> imgs, TimeSpan periodPerItem)
+    /// <returns>True if all images are loaded successfully; otherwise, false.</returns>
+    public static bool WaitUntilImagesAreRealAndLoaded(IWebDriver driver, IReadOnlyCollection<IWebElement> imgs, TimeSpan periodPerItem)
     {
-        foreach (var img in imgs)
+        try
         {
-            var w = new WebDriverWait(driver, periodPerItem);
-            w.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
-            w.Until(d => IsRealImageLoaded(d, img));
+            foreach (var img in imgs)
+            {
+                var w = new WebDriverWait(driver, periodPerItem);
+                w.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
+                w.Until(d => IsRealImageLoaded(d, img));
+            }
+
+            return true;
+        }
+        catch (WebDriverTimeoutException)
+        {
+            return false;
         }
     }
 
