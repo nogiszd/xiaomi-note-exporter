@@ -25,6 +25,7 @@ fn map_session_row(row: &Row<'_>) -> Result<Session, rusqlite::Error> {
         timestamp_format: row.get("timestamp_fmt")?,
         images_enabled: row.get::<_, i64>("images_enabled")? != 0,
         output_path: row.get("output_path")?,
+        images_dir_name: row.get("images_dir_name")?,
         error_message: row.get("error_message")?,
     })
 }
@@ -44,9 +45,11 @@ pub fn init_db(db_path: &Path) -> AppResult<()> {
             timestamp_fmt TEXT NOT NULL,
             images_enabled INTEGER NOT NULL,
             output_path TEXT NOT NULL,
+            images_dir_name TEXT,
             error_message TEXT
         );",
     )?;
+
     Ok(())
 }
 
@@ -55,8 +58,8 @@ pub fn insert_session(db_path: &Path, session: &Session) -> AppResult<()> {
     conn.execute(
         "INSERT INTO sessions (
             id, domain, started_at, completed_at, status, notes_count, images_count,
-            split_mode, timestamp_fmt, images_enabled, output_path, error_message
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            split_mode, timestamp_fmt, images_enabled, output_path, images_dir_name, error_message
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
         params![
             session.id,
             session.domain,
@@ -69,6 +72,7 @@ pub fn insert_session(db_path: &Path, session: &Session) -> AppResult<()> {
             session.timestamp_format,
             bool_to_i64(session.images_enabled),
             session.output_path,
+            session.images_dir_name,
             session.error_message,
         ],
     )?;
@@ -127,7 +131,7 @@ pub fn fetch_sessions(db_path: &Path, page: u32, per_page: u32) -> AppResult<Vec
     let mut stmt = conn.prepare(
         "SELECT
             id, domain, started_at, completed_at, status, notes_count, images_count,
-            split_mode, timestamp_fmt, images_enabled, output_path, error_message
+            split_mode, timestamp_fmt, images_enabled, output_path, images_dir_name, error_message
          FROM sessions
          ORDER BY started_at DESC
          LIMIT ?1 OFFSET ?2",
@@ -150,7 +154,7 @@ pub fn fetch_session_by_id(db_path: &Path, session_id: &str) -> AppResult<Option
     let mut stmt = conn.prepare(
         "SELECT
             id, domain, started_at, completed_at, status, notes_count, images_count,
-            split_mode, timestamp_fmt, images_enabled, output_path, error_message
+            split_mode, timestamp_fmt, images_enabled, output_path, images_dir_name, error_message
          FROM sessions
          WHERE id = ?1
          LIMIT 1",

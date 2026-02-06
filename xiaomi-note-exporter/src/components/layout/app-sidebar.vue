@@ -3,9 +3,13 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Activity,
+  Ban,
+  CheckCircle2,
+  CircleX,
   Download,
   FileJson2,
   History,
+  LoaderCircle,
   Play,
   Settings,
 } from "lucide-vue-next";
@@ -39,6 +43,31 @@ const navItems = [
 
 const isCollapsed = computed(() => state.value === "collapsed");
 const statusLabel = computed(() => exportStore.statusText || "Idle");
+const statusMeta = computed(() => {
+  const normalized = statusLabel.value.toLowerCase();
+
+  if (
+    exportStore.isRunning ||
+    normalized.startsWith("starting") ||
+    normalized.startsWith("exporting")
+  ) {
+    return { icon: LoaderCircle, iconClass: "size-3 animate-spin text-sky-500" };
+  }
+
+  if (normalized.startsWith("completed")) {
+    return { icon: CheckCircle2, iconClass: "size-3 text-emerald-500" };
+  }
+
+  if (normalized.startsWith("cancel")) {
+    return { icon: Ban, iconClass: "size-3 text-amber-500" };
+  }
+
+  if (normalized.startsWith("error")) {
+    return { icon: CircleX, iconClass: "size-3 text-destructive" };
+  }
+
+  return { icon: Play, iconClass: "size-3 text-muted-foreground" };
+});
 
 function isActive(path: string) {
   return route.path.startsWith(path);
@@ -130,7 +159,7 @@ function goToExport() {
         variant="outline"
         class="w-full gap-1 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:px-1"
       >
-        <Play class="size-3" />
+        <component :is="statusMeta.icon" :class="statusMeta.iconClass" />
         <span class="group-data-[collapsible=icon]:hidden">{{
           statusLabel
         }}</span>

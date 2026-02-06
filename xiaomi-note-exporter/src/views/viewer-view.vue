@@ -1,27 +1,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import MarkdownEditor from "@/components/viewer/markdown-editor.vue";
-import MarkdownPreview from "@/components/viewer/markdown-preview.vue";
+import { MdEditor } from "md-editor-v3";
+import "md-editor-v3/lib/style.css";
 import { listExportFiles, readExportFile, writeExportFile } from "@/lib/api";
 import { useSessionsStore } from "@/stores/sessions";
+import { useSettingsStore } from "@/stores/settings";
 import type { FileEntry } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const route = useRoute();
 const router = useRouter();
 const sessionsStore = useSessionsStore();
+const settingsStore = useSettingsStore();
 
 const files = ref<FileEntry[]>([]);
 const activeFilePath = ref("");
 const content = ref("");
-const activeTab = ref<"preview" | "edit">("preview");
 const loading = ref(false);
 const errorMessage = ref("");
 const saveStatus = ref("");
+const editorTheme = computed(() =>
+  settingsStore.settings.darkMode ? "dark" : "light",
+);
 
 const sessionId = computed(() => {
   const param = route.params.sessionId;
@@ -162,19 +165,16 @@ onMounted(() => {
           >No file selected.</CardContent
         >
       </Card>
-      <Tabs v-else v-model="activeTab" class="w-full">
-        <TabsList class="grid w-full max-w-55 grid-cols-2">
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="edit">Edit</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="preview">
-          <MarkdownPreview :content="content" />
-        </TabsContent>
-        <TabsContent value="edit">
-          <MarkdownEditor v-model="content" @save="saveFile" />
-        </TabsContent>
-      </Tabs>
+      <MdEditor
+        v-else
+        v-model="content"
+        :theme="editorTheme"
+        preview-theme="github"
+        code-theme="atom"
+        language="en-US"
+        :style="{ height: '70vh' }"
+        @on-save="saveFile"
+      />
     </div>
   </section>
 </template>

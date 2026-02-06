@@ -8,6 +8,9 @@ import type { StartExportPayload } from "@/types";
 const exportStore = useExportStore();
 
 const canStart = computed(() => !exportStore.isRunning);
+const showProgress = computed(
+  () => exportStore.logs.length > 0 && exportStore.statusText !== "Cancelled",
+);
 
 async function handleStart(payload: StartExportPayload) {
   if (!canStart.value) {
@@ -20,6 +23,6 @@ async function handleStart(payload: StartExportPayload) {
 <template>
   <section class="grid gap-6">
     <ExportForm v-if="canStart" @start="handleStart" />
-    <ExportProgress v-if="exportStore.logs.length > 0" />
+    <ExportProgress v-if="showProgress" />
   </section>
 </template>

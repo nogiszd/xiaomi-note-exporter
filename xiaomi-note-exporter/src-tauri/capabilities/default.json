@@ -2,6 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
+  "windows": ["main", "auth-export-*"],
   "remote": {
     "urls": [
       "https://*.i.mi.com/*",
@@ -10,6 +11,7 @@
     ]
   },
   "permissions": [
+    "allow-all-app-commands",
     "core:default",
     "dialog:default",
     "opener:default"

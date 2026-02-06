@@ -86,6 +86,10 @@ pub fn start_export(
     } else {
         output_dir.join(format!("images_{stamp}"))
     };
+    let images_dir_name = images_dir
+        .file_name()
+        .and_then(|name| name.to_str())
+        .map(ToString::to_string);
 
     if split {
         std::fs::create_dir_all(&output_root).map_err(|e| e.to_string())?;
@@ -109,6 +113,7 @@ pub fn start_export(
         timestamp_format: timestamp_format.clone(),
         images_enabled: export_images,
         output_path: output_root.to_string_lossy().to_string(),
+        images_dir_name,
         error_message: None,
     };
 
@@ -136,36 +141,62 @@ pub fn start_export(
         *guard = Some(active_export);
     }
 
-    if let Err(error) = scraper::create_auth_window(&app, &session_id, &domain, export_images) {
-        let _ = sessions_db::set_session_outcome(
-            &state.db_path,
-            &session_id,
-            "error",
-            &now_utc(),
-            0,
-            0,
-            Some(&error.to_string()),
-        );
-        if let Ok(mut guard) = state.active_export.lock() {
-            *guard = None;
+    let app_handle = app.clone();
+    let state_handle = state.inner().clone();
+    let session_id_for_window = session_id.clone();
+    let domain_for_window = domain.clone();
+    tauri::async_runtime::spawn(async move {
+        match scraper::create_auth_window(
+            &app_handle,
+            &session_id_for_window,
+            &domain_for_window,
+            export_images,
+        ) {
+            Ok(_) => {
+                let _ = app_handle.emit(
+                    "export:progress",
+                    ExportProgressEvent {
+                        session_id: session_id_for_window.clone(),
+                        current: 0,
+                        total: 1,
+                        last_title: String::new(),
+                        notes_count: 0,
+                        images_count: 0,
+                        log_line: format!(
+                            "Opened sign-in window for domain {domain_for_window}. Complete login to start export."
+                        ),
+                    },
+                );
+            }
+            Err(error) => {
+                let _ = sessions_db::set_session_outcome(
+                    &state_handle.db_path,
+                    &session_id_for_window,
+                    "error",
+                    &now_utc(),
+                    0,
+                    0,
+                    Some(&error.to_string()),
+                );
+                if let Ok(mut guard) = state_handle.active_export.lock() {
+                    let should_clear = guard
+                        .as_ref()
+                        .map(|active| active.session_id == session_id_for_window)
+                        .unwrap_or(false);
+                    if should_clear {
+                        *guard = None;
+                    }
+                }
+                let _ = app_handle.emit(
+                    "export:error",
+                    ExportErrorEvent {
+                        session_id: session_id_for_window,
+                        message: format!("Failed to open sign-in window: {error}"),
+                    },
+                );
+            }
         }
-        return Err(error.to_string());
-    }
-
-    let _ = app.emit(
-        "export:progress",
-        ExportProgressEvent {
-            session_id: session_id.clone(),
-            current: 0,
-            total: 1,
-            last_title: String::new(),
-            notes_count: 0,
-            images_count: 0,
-            log_line: format!(
-                "Opened Xiaomi sign-in window for domain {domain}. Complete login to start export."
-            ),
-        },
-    );
+    });
 
     Ok(session_id)
 }

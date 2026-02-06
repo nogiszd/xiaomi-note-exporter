@@ -33,7 +33,12 @@ pub fn delete_session(
     if delete_files {
         if let Some(session) = removed {
             let path = PathBuf::from(session.output_path);
-            files::remove_path(&path).map_err(|e| e.to_string())?;
+            files::remove_export_artifacts(
+                &path,
+                session.split_mode,
+                session.images_dir_name.as_deref(),
+            )
+            .map_err(|e| e.to_string())?;
         }
     }
 

@@ -1,7 +1,7 @@
 {
   "name": "xiaomi-note-exporter",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.563.0",
+    "md-editor-v3": "^4.21.3",
     "pinia": "^3.0.4",
     "reka-ui": "^2.8.0",
     "tailwind-merge": "^3.4.0",

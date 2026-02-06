@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { useField } from "vee-validate";
 import { FolderOpen, FileSearch, X } from "lucide-vue-next";
-import { open, type DialogFilter } from "@tauri-apps/plugin-dialog";
+import { open, save, type DialogFilter } from "@tauri-apps/plugin-dialog";
 import {
   Field,
   FieldContent,
@@ -18,6 +18,7 @@ const props = withDefaults(
     name: string;
     label: string;
     mode?: "directory" | "file";
+    operation?: "open" | "save";
     placeholder?: string;
     description?: string;
     dialogTitle?: string;
@@ -26,6 +27,7 @@ const props = withDefaults(
   }>(),
   {
     mode: "directory",
+    operation: "open",
     placeholder: "",
     description: "",
     dialogTitle: "",
@@ -38,13 +40,21 @@ const { value, errorMessage, handleBlur, setValue } = useField<string>(() => pro
 const fieldId = computed(() => `field-${props.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`);
 const isPicking = ref(false);
 
-const browseLabel = computed(() => (props.mode === "directory" ? "Browse Folder" : "Browse File"));
+const browseLabel = computed(() => {
+  if (props.mode === "directory") {
+    return "Browse Folder";
+  }
+  return props.operation === "save" ? "Save As" : "Browse File";
+});
 const browseIcon = computed(() => (props.mode === "directory" ? FolderOpen : FileSearch));
 const resolvedDialogTitle = computed(() => {
   if (props.dialogTitle.trim()) {
     return props.dialogTitle;
   }
-  return props.mode === "directory" ? "Select folder" : "Select file";
+  if (props.mode === "directory") {
+    return "Select folder";
+  }
+  return props.operation === "save" ? "Save file as" : "Select file";
 });
 
 async function browsePath() {
@@ -54,13 +64,20 @@ async function browsePath() {
 
   isPicking.value = true;
   try {
-    const selection = await open({
-      title: resolvedDialogTitle.value,
-      defaultPath: value.value || undefined,
-      directory: props.mode === "directory",
-      multiple: false,
-      filters: props.mode === "file" ? props.filters : undefined,
-    });
+    const selection =
+      props.mode === "file" && props.operation === "save"
+        ? await save({
+            title: resolvedDialogTitle.value,
+            defaultPath: value.value || undefined,
+            filters: props.filters,
+          })
+        : await open({
+            title: resolvedDialogTitle.value,
+            defaultPath: value.value || undefined,
+            directory: props.mode === "directory",
+            multiple: false,
+            filters: props.mode === "file" ? props.filters : undefined,
+          });
 
     if (typeof selection === "string") {
       setValue(selection);

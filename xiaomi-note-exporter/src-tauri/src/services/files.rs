@@ -102,6 +102,31 @@ pub fn remove_path(path: &Path) -> AppResult<()> {
     Ok(())
 }
 
+pub fn remove_export_artifacts(
+    output_path: &Path,
+    split_mode: bool,
+    images_dir_name: Option<&str>,
+) -> AppResult<()> {
+    remove_path(output_path)?;
+
+    if let Some(images_dir_name) = images_dir_name {
+        let trimmed = images_dir_name.trim();
+        if !trimmed.is_empty() {
+            let images_path = if split_mode {
+                output_path.join(trimmed)
+            } else if let Some(parent) = output_path.parent() {
+                parent.join(trimmed)
+            } else {
+                PathBuf::from(trimmed)
+            };
+
+            remove_path(&images_path)?;
+        }
+    }
+
+    Ok(())
+}
+
 pub fn open_in_system_explorer(path: &Path) -> AppResult<()> {
     #[cfg(target_os = "windows")]
     {

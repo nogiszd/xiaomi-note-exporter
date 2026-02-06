@@ -14,6 +14,7 @@ pub struct Session {
     pub timestamp_format: String,
     pub images_enabled: bool,
     pub output_path: String,
+    pub images_dir_name: Option<String>,
     pub error_message: Option<String>,
 }
 

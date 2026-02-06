@@ -1,5 +1,8 @@
 use chrono::Utc;
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{
+    webview::PageLoadEvent, AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder,
+    WindowEvent,
+};
 use url::Url;
 
 use crate::{
@@ -17,23 +20,56 @@ pub fn auth_window_label(session_id: &str) -> String {
 fn build_scrape_script(session_id: &str, export_images: bool) -> String {
     let script = r#"
 (() => {
-  if (window.__xiaomiExporterRunning) {
+  const state = window.__xiaomiNoteExporterState || {
+    running: false,
+    completed: false,
+    lastError: "",
+  };
+  window.__xiaomiNoteExporterState = state;
+
+  if (state.completed || state.running) {
+    console.debug("[xiaomi-note-exporter] injection skipped because runner is already active or completed", {
+      running: state.running,
+      completed: state.completed,
+      lastError: state.lastError,
+      href: window.location.href,
+    });
     return;
   }
-  window.__xiaomiExporterRunning = true;
+  state.running = true;
+  state.lastError = "";
 
   const sessionId = "__SESSION_ID__";
   const exportImages = __EXPORT_IMAGES__;
+  const logPrefix = `[xiaomi-note-exporter][${sessionId}]`;
+  const log = (...args) => console.log(logPrefix, ...args);
+  const warn = (...args) => console.warn(logPrefix, ...args);
+  const errorLog = (...args) => console.error(logPrefix, ...args);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const invoke = async (cmd, payload) => {
-    if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === "function") {
-      return window.__TAURI__.core.invoke(cmd, payload);
+  const resolveInvoke = async (timeoutMs = 30000) => {
+    log("Waiting for Tauri invoke bridge", { timeoutMs });
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      if (
+        window.__TAURI__ &&
+        window.__TAURI__.core &&
+        typeof window.__TAURI__.core.invoke === "function"
+      ) {
+        log("Tauri invoke bridge ready via __TAURI__.core.invoke");
+        return (cmd, payload) => window.__TAURI__.core.invoke(cmd, payload);
+      }
+      if (
+        window.__TAURI_INTERNALS__ &&
+        typeof window.__TAURI_INTERNALS__.invoke === "function"
+      ) {
+        log("Tauri invoke bridge ready via __TAURI_INTERNALS__.invoke");
+        return (cmd, payload) => window.__TAURI_INTERNALS__.invoke(cmd, payload);
+      }
+      await sleep(100);
     }
-    if (window.__TAURI_INTERNALS__ && typeof window.__TAURI_INTERNALS__.invoke === "function") {
-      return window.__TAURI_INTERNALS__.invoke(cmd, payload);
-    }
+    errorLog("Tauri invoke bridge unavailable after timeout", { timeoutMs });
     throw new Error("Tauri invoke bridge unavailable");
   };
 
@@ -67,9 +103,62 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
+  const classNameIncludes = (element, fragment) => {
+    if (!element || !fragment) return false;
+    const cls = typeof element.className === "string" ? element.className : String(element.className || "");
+    return cls.includes(fragment);
+  };
+
   const getCards = (container) => {
     if (!container) return [];
-    return Array.from(container.children).filter((node) => node instanceof HTMLElement);
+    return Array.from(container.querySelectorAll("div"))
+      .filter((node) => node instanceof HTMLElement)
+      .filter((node) => {
+        const cls = typeof node.className === "string" ? node.className : String(node.className || "");
+        return cls
+          .split(/\s+/)
+          .some((token) => token.startsWith("note-item"));
+      });
+  };
+
+  const findOpenCard = (container, cards) => {
+    const openMarker = container.querySelector("div[class*='open']");
+    if (openMarker instanceof HTMLElement) {
+      const owner = cards.find((card) => card === openMarker || card.contains(openMarker));
+      if (owner) {
+        return owner;
+      }
+    }
+    return cards.find((card) => classNameIncludes(card, "open")) || null;
+  };
+
+  const resolveTargetCard = (openCard, cards, isFirstIteration) => {
+    if (!cards.length) return null;
+
+    if (isFirstIteration) {
+      return openCard || cards[0];
+    }
+
+    if (!openCard) {
+      return cards[0];
+    }
+
+    const openIndex = cards.indexOf(openCard);
+    if (openIndex < 0) {
+      return cards[0];
+    }
+
+    if (openIndex + 1 < cards.length) {
+      return cards[openIndex + 1];
+    }
+
+    return null;
+  };
+
+  const isCardOpen = (card) => {
+    if (!(card instanceof HTMLElement)) return false;
+    if (classNameIncludes(card, "open")) return true;
+    return !!card.querySelector("div[class*='open']");
   };
 
   const extractCreatedString = (card) => {
@@ -78,17 +167,69 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
     return (candidate?.textContent || "").trim();
   };
 
+  const getImageSrc = (img) => {
+    if (!(img instanceof HTMLImageElement)) return "";
+    return img.currentSrc || img.src || "";
+  };
+
+  const isRealImageLoaded = (img) => {
+    if (!(img instanceof HTMLImageElement)) return false;
+    const src = getImageSrc(img);
+    if (!src || src.startsWith("data:image/svg+xml")) return false;
+    return img.complete === true && (img.naturalWidth || 0) > 0;
+  };
+
+  const waitForImageReady = async (img, timeoutMs = 3000) => {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      if (isRealImageLoaded(img)) {
+        return true;
+      }
+      await sleep(120);
+    }
+    return isRealImageLoaded(img);
+  };
+
+  const waitUntilImagesAreReady = async (images, perItemTimeoutMs = 3000) => {
+    for (const img of images) {
+      const ok = await waitForImageReady(img, perItemTimeoutMs);
+      if (!ok) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const collectImages = async (container, createdString) => {
     if (!exportImages || !container) {
       return [];
     }
 
     const images = [];
+    const initialImageNodes = Array.from(container.querySelectorAll(".image-view img"));
+    if (initialImageNodes.length > 0) {
+      const allLoaded = await waitUntilImagesAreReady(initialImageNodes, 3000);
+      if (!allLoaded) {
+        warn("Some images were not fully loaded before export attempt", {
+          initialCount: initialImageNodes.length,
+        });
+      }
+    }
+
     const imageNodes = Array.from(container.querySelectorAll(".image-view img"));
     let index = 0;
 
     for (const img of imageNodes) {
-      const src = img.currentSrc || img.src || "";
+      if (!isRealImageLoaded(img)) {
+        const ready = await waitForImageReady(img, 1500);
+        if (!ready) {
+          warn("Skipping image that did not finish loading", { index });
+          index += 1;
+          continue;
+        }
+      }
+
+      const src = getImageSrc(img);
       if (!src || src.startsWith("data:")) {
         continue;
       }
@@ -96,6 +237,7 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
       try {
         const response = await fetch(src, { credentials: "include" });
         if (!response.ok) {
+          warn("Skipping image due to non-OK response", { src, status: response.status });
           continue;
         }
 
@@ -108,29 +250,51 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
           dataBase64: base64,
         });
       } catch (_) {
+        warn("Failed to fetch image", { src });
       }
 
       index += 1;
     }
 
+    log("Collected images for note", { count: images.length, createdString });
     return images;
   };
 
   const run = async () => {
+    let invoke = null;
+    const invokeCommand = async (cmd, payload) => {
+      log("invoke ->", cmd, { payloadKeys: payload ? Object.keys(payload) : [] });
+      try {
+        const result = await invoke(cmd, payload);
+        log("invoke <-", cmd, { ok: true });
+        return result;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        errorLog("invoke failed", { cmd, message, payload });
+        throw error;
+      }
+    };
+
     try {
+      log("Scraper runner started", { href: window.location.href, exportImages });
+      invoke = await resolveInvoke();
+
       const ready = await waitFor(() => {
-        const spinner = document.querySelector("div[class*='spinner']");
+        const spinner = document.querySelector("div[id*='spinner']");
         const spinnerHidden = !spinner || window.getComputedStyle(spinner).display === "none";
         const createButton = document.querySelector("button[class*='btn-create']");
         return spinnerHidden && !!createButton;
       }, 300000);
 
       if (!ready) {
+        errorLog("Timed out while waiting for notes page readiness");
         throw new Error("Timeout waiting for Xiaomi Notes page. Sign in might be incomplete.");
       }
+      log("Notes page ready");
 
       const listContainer = document.querySelector("div[class*='note-list-items']");
       if (!listContainer) {
+        errorLog("Note list container not found");
         throw new Error("Could not find note list container.");
       }
 
@@ -139,48 +303,104 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         total = getCards(listContainer).length;
       }
       if (total <= 0) {
+        warn("No notes found in container after readiness check");
         throw new Error("No notes found for export.");
       }
+      log("Discovered notes", { total });
 
-      await invoke("report_export_total", { sessionId, total });
+      await invokeCommand("report_export_total", { sessionId, total });
 
-      const seen = new Set();
       let processed = 0;
       let guard = 0;
+      let isFirstIteration = true;
+      let noTargetRetries = 0;
 
-      while (processed < total && guard < total * 8) {
+      while (processed < total && guard < total * 16) {
         const cards = getCards(listContainer);
-        let target = null;
-
-        for (const card of cards) {
-          const marker = card.dataset.xiaomiExporterSeen || "";
-          if (marker === "1") {
-            continue;
-          }
-          target = card;
-          break;
-        }
+        const openCard = findOpenCard(listContainer, cards);
+        const target = resolveTargetCard(openCard, cards, isFirstIteration);
 
         if (!target) {
-          listContainer.scrollBy(0, Math.max(240, listContainer.clientHeight / 2));
-          await sleep(250);
+          noTargetRetries += 1;
+          const waitMs = Math.min(1200, 200 + noTargetRetries * 150);
+          await sleep(waitMs);
+
+          // Give the UI several retries before forcing scroll; this prevents racing past notes.
+          if (noTargetRetries < 4) {
+            continue;
+          }
+
+          const fallbackHeight =
+            cards.length > 0
+              ? Math.max(Math.floor(cards[cards.length - 1].getBoundingClientRect().height * 0.8), 96)
+              : Math.max(Math.floor(listContainer.clientHeight * 0.25), 96);
+
+          listContainer.scrollBy(0, fallbackHeight);
+          noTargetRetries = 0;
+          await sleep(300);
           guard += 1;
+          if (guard % 10 === 0) {
+            log("Scanning for next note", {
+              processed,
+              total,
+              guard,
+              visibleCards: cards.length,
+              hasOpenCard: !!openCard,
+              scrollTop: listContainer.scrollTop,
+            });
+          }
           continue;
         }
+        noTargetRetries = 0;
 
-        target.dataset.xiaomiExporterSeen = "1";
+        if (isFirstIteration) {
+          isFirstIteration = false;
+        }
+
         target.click();
-        await sleep(400);
+        const opened = await waitFor(() => isCardOpen(target), 5000, 120);
+        if (!opened) {
+          warn("Clicked note did not become active in time", {
+            processed,
+            total,
+          });
+          await sleep(250);
+          continue;
+        }
+        await sleep(240);
 
         const createdString = extractCreatedString(target);
-        const titleNode = document.querySelector("div[class*='origin-title'] > div");
-        const noteContainer = document.querySelector("div[class*='pm-container']");
+        const contentReady = await waitFor(
+          () => !!document.querySelector("div[class*='pm-container']"),
+          5000,
+          120
+        );
+        const titleReady = await waitFor(
+          () => !!document.querySelector("div[class*='origin-title'] > div"),
+          3000,
+          120
+        );
+
+        const titleNode = titleReady
+          ? document.querySelector("div[class*='origin-title'] > div")
+          : null;
+        const noteContainer = contentReady
+          ? document.querySelector("div[class*='pm-container']")
+          : null;
+
         const unsupported = !noteContainer;
         const title = (titleNode?.textContent || "").trim();
         const content = unsupported ? "" : ((noteContainer.innerText || "").trim());
         const images = await collectImages(noteContainer, createdString);
+        log("Appending scraped note", {
+          processed: processed + 1,
+          total,
+          title,
+          unsupported,
+          images: images.length,
+        });
 
-        await invoke("append_scraped_note", {
+        await invokeCommand("append_scraped_note", {
           sessionId,
           note: {
             title,
@@ -192,17 +412,33 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         });
 
         processed += 1;
-        listContainer.scrollBy(0, Math.max(target.getBoundingClientRect().height, 120));
-        await sleep(200);
+        listContainer.scrollBy(0, target.getBoundingClientRect().height);
+        await sleep(420);
       }
 
-      await invoke("finish_scrape", { sessionId });
+      await invokeCommand("finish_scrape", { sessionId });
+      state.completed = true;
+      state.lastError = "";
+      log("Scrape completed successfully", { totalProcessed: processed });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      state.lastError = message;
+      errorLog("Scrape failed", { message });
       try {
-        await invoke("fail_scrape", { sessionId, message });
+        if (invoke) {
+          await invokeCommand("fail_scrape", { sessionId, message });
+        } else {
+          const lateInvoke = await resolveInvoke(2000);
+          await lateInvoke("fail_scrape", { sessionId, message });
+        }
       } catch (_) {
       }
+    } finally {
+      state.running = false;
+      log("Scraper runner stopped", {
+        completed: state.completed,
+        lastError: state.lastError,
+      });
     }
   };
 
@@ -222,26 +458,23 @@ pub fn create_auth_window(
     domain: &str,
     export_images: bool,
 ) -> AppResult<String> {
-    let notes_url = format!("https://{domain}/note/h5/?_locale=en-US");
-    let mut login_url = Url::parse("https://account.xiaomi.com/pass/serviceLogin")?;
-    login_url
-        .query_pairs_mut()
-        .append_pair("sid", "i.mi.com")
-        .append_pair("_locale", "en_US")
-        .append_pair("continue", &notes_url);
+    let notes_url = Url::parse(&format!("https://{domain}/note/h5/?_locale=en-US"))?;
 
     let window_label = auth_window_label(session_id);
     let session_id_for_close = session_id.to_string();
     let script = build_scrape_script(session_id, export_images);
 
-    let window = WebviewWindowBuilder::new(app, &window_label, WebviewUrl::External(login_url))
-        .title("Mi Cloud Sign-In")
+    let window = WebviewWindowBuilder::new(app, &window_label, WebviewUrl::External(notes_url))
+        .title("Mi Cloud Shell")
         .inner_size(1200.0, 860.0)
         .closable(true)
         .user_agent(CHROME_USER_AGENT)
         .on_page_load(move |window, payload| {
-            let current_url = payload.url().to_string();
-            if current_url.contains("/note/h5/") {
+            if payload.event() != PageLoadEvent::Finished {
+                return;
+            }
+
+            if payload.url().path().starts_with("/note/h5") {
                 let _ = window.eval(script.clone());
             }
         })
@@ -279,13 +512,13 @@ pub fn create_auth_window(
                 &Utc::now().to_rfc3339(),
                 active.notes_count,
                 active.images_count,
-                Some("Authentication window closed by user."),
+                Some("Mi Cloud access window closed by user."),
             );
             let _ = app_handle.emit(
                 "export:error",
                 ExportErrorEvent {
                     session_id: active.session_id,
-                    message: "Authentication window closed by user.".to_string(),
+                    message: "Mi Cloud access window closed by user.".to_string(),
                 },
             );
         }

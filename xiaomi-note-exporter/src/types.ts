@@ -12,6 +12,7 @@ export interface Session {
   timestampFormat: string;
   imagesEnabled: boolean;
   outputPath: string;
+  imagesDirName: string | null;
   errorMessage: string | null;
 }
 
