@@ -28,12 +28,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
   window.__xiaomiNoteExporterState = state;
 
   if (state.completed || state.running) {
-    console.debug("[xiaomi-note-exporter] injection skipped because runner is already active or completed", {
-      running: state.running,
-      completed: state.completed,
-      lastError: state.lastError,
-      href: window.location.href,
-    });
     return;
   }
   state.running = true;
@@ -41,15 +35,10 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
 
   const sessionId = "__SESSION_ID__";
   const exportImages = __EXPORT_IMAGES__;
-  const logPrefix = `[xiaomi-note-exporter][${sessionId}]`;
-  const log = (...args) => console.log(logPrefix, ...args);
-  const warn = (...args) => console.warn(logPrefix, ...args);
-  const errorLog = (...args) => console.error(logPrefix, ...args);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const resolveInvoke = async (timeoutMs = 30000) => {
-    log("Waiting for Tauri invoke bridge", { timeoutMs });
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
       if (
@@ -57,19 +46,16 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         window.__TAURI__.core &&
         typeof window.__TAURI__.core.invoke === "function"
       ) {
-        log("Tauri invoke bridge ready via __TAURI__.core.invoke");
         return (cmd, payload) => window.__TAURI__.core.invoke(cmd, payload);
       }
       if (
         window.__TAURI_INTERNALS__ &&
         typeof window.__TAURI_INTERNALS__.invoke === "function"
       ) {
-        log("Tauri invoke bridge ready via __TAURI_INTERNALS__.invoke");
         return (cmd, payload) => window.__TAURI_INTERNALS__.invoke(cmd, payload);
       }
       await sleep(100);
     }
-    errorLog("Tauri invoke bridge unavailable after timeout", { timeoutMs });
     throw new Error("Tauri invoke bridge unavailable");
   };
 
@@ -210,8 +196,9 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
     if (initialImageNodes.length > 0) {
       const allLoaded = await waitUntilImagesAreReady(initialImageNodes, 3000);
       if (!allLoaded) {
-        warn("Some images were not fully loaded before export attempt", {
+        console.warn("Some images did not finish loading in time, proceeding with what is available", {
           initialCount: initialImageNodes.length,
+          loadedCount: initialImageNodes.filter(isRealImageLoaded).length,
         });
       }
     }
@@ -223,7 +210,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
       if (!isRealImageLoaded(img)) {
         const ready = await waitForImageReady(img, 1500);
         if (!ready) {
-          warn("Skipping image that did not finish loading", { index });
           index += 1;
           continue;
         }
@@ -237,7 +223,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
       try {
         const response = await fetch(src, { credentials: "include" });
         if (!response.ok) {
-          warn("Skipping image due to non-OK response", { src, status: response.status });
           continue;
         }
 
@@ -249,34 +234,20 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
           sourceUrl: src,
           dataBase64: base64,
         });
-      } catch (_) {
-        warn("Failed to fetch image", { src });
+      } catch (e) {
+        console.error("Failed to fetch image", { src }, e);
       }
 
       index += 1;
     }
 
-    log("Collected images for note", { count: images.length, createdString });
     return images;
   };
 
   const run = async () => {
     let invoke = null;
-    const invokeCommand = async (cmd, payload) => {
-      log("invoke ->", cmd, { payloadKeys: payload ? Object.keys(payload) : [] });
-      try {
-        const result = await invoke(cmd, payload);
-        log("invoke <-", cmd, { ok: true });
-        return result;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        errorLog("invoke failed", { cmd, message, payload });
-        throw error;
-      }
-    };
 
     try {
-      log("Scraper runner started", { href: window.location.href, exportImages });
       invoke = await resolveInvoke();
 
       const ready = await waitFor(() => {
@@ -287,14 +258,11 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
       }, 300000);
 
       if (!ready) {
-        errorLog("Timed out while waiting for notes page readiness");
         throw new Error("Timeout waiting for Xiaomi Notes page. Sign in might be incomplete.");
       }
-      log("Notes page ready");
 
       const listContainer = document.querySelector("div[class*='note-list-items']");
       if (!listContainer) {
-        errorLog("Note list container not found");
         throw new Error("Could not find note list container.");
       }
 
@@ -303,12 +271,10 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         total = getCards(listContainer).length;
       }
       if (total <= 0) {
-        warn("No notes found in container after readiness check");
         throw new Error("No notes found for export.");
       }
-      log("Discovered notes", { total });
 
-      await invokeCommand("report_export_total", { sessionId, total });
+      await invoke("report_export_total", { sessionId, total });
 
       let processed = 0;
       let guard = 0;
@@ -325,7 +291,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
           const waitMs = Math.min(1200, 200 + noTargetRetries * 150);
           await sleep(waitMs);
 
-          // Give the UI several retries before forcing scroll; this prevents racing past notes.
           if (noTargetRetries < 4) {
             continue;
           }
@@ -339,16 +304,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
           noTargetRetries = 0;
           await sleep(300);
           guard += 1;
-          if (guard % 10 === 0) {
-            log("Scanning for next note", {
-              processed,
-              total,
-              guard,
-              visibleCards: cards.length,
-              hasOpenCard: !!openCard,
-              scrollTop: listContainer.scrollTop,
-            });
-          }
           continue;
         }
         noTargetRetries = 0;
@@ -360,10 +315,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         target.click();
         const opened = await waitFor(() => isCardOpen(target), 5000, 120);
         if (!opened) {
-          warn("Clicked note did not become active in time", {
-            processed,
-            total,
-          });
           await sleep(250);
           continue;
         }
@@ -392,15 +343,8 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         const title = (titleNode?.textContent || "").trim();
         const content = unsupported ? "" : ((noteContainer.innerText || "").trim());
         const images = await collectImages(noteContainer, createdString);
-        log("Appending scraped note", {
-          processed: processed + 1,
-          total,
-          title,
-          unsupported,
-          images: images.length,
-        });
 
-        await invokeCommand("append_scraped_note", {
+        await invoke("append_scraped_note", {
           sessionId,
           note: {
             title,
@@ -416,17 +360,16 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         await sleep(420);
       }
 
-      await invokeCommand("finish_scrape", { sessionId });
+      await invoke("finish_scrape", { sessionId });
       state.completed = true;
       state.lastError = "";
-      log("Scrape completed successfully", { totalProcessed: processed });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       state.lastError = message;
-      errorLog("Scrape failed", { message });
+      console.error("Scrape failed", { message });
       try {
         if (invoke) {
-          await invokeCommand("fail_scrape", { sessionId, message });
+          await invoke("fail_scrape", { sessionId, message });
         } else {
           const lateInvoke = await resolveInvoke(2000);
           await lateInvoke("fail_scrape", { sessionId, message });
@@ -435,10 +378,6 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
       }
     } finally {
       state.running = false;
-      log("Scraper runner stopped", {
-        completed: state.completed,
-        lastError: state.lastError,
-      });
     }
   };
 
