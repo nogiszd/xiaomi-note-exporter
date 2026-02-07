@@ -1,6 +1,6 @@
 [package]
 name = "xiaomi-note-exporter"
-version = "0.1.0"
+version = "2.0.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -25,10 +25,11 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 base64 = "0.22"
 chrono = { version = "0.4", features = ["clock"] }
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 sha2 = "0.10"
 thiserror = "2"
 tokio = { version = "1", features = ["time"] }
 uuid = { version = "1", features = ["v4"] }
 walkdir = "2.5"
 url = "2.5"
+reqwest = { version = "0.12", features = ["blocking", "json"] }

@@ -17,7 +17,7 @@ pub fn run() {
     {
         std::env::set_var(
             "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-            "--disable-features=CalculateNativeWinOcclusion --disable-gpu --disable-gpu-compositing",
+            "--disable-features=CalculateNativeWinOcclusion",
         );
     }
 
@@ -59,7 +59,8 @@ pub fn run() {
             commands::files::open_in_explorer,
             commands::converter::convert_to_json,
             commands::settings::get_app_settings,
-            commands::settings::update_app_settings
+            commands::settings::update_app_settings,
+            commands::settings::check_latest_release_version
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -2,7 +2,7 @@ use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension, Row};
 
-use crate::{error::AppResult, models::Session};
+use crate::{db::migrations::run_migrations, error::AppResult, models::Session};
 
 fn bool_to_i64(value: bool) -> i64 {
     if value {
@@ -31,26 +31,7 @@ fn map_session_row(row: &Row<'_>) -> Result<Session, rusqlite::Error> {
 }
 
 pub fn init_db(db_path: &Path) -> AppResult<()> {
-    let conn = Connection::open(db_path)?;
-    conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS sessions (
-            id TEXT PRIMARY KEY,
-            domain TEXT NOT NULL,
-            started_at TEXT NOT NULL,
-            completed_at TEXT,
-            status TEXT NOT NULL,
-            notes_count INTEGER DEFAULT 0,
-            images_count INTEGER DEFAULT 0,
-            split_mode INTEGER NOT NULL,
-            timestamp_fmt TEXT NOT NULL,
-            images_enabled INTEGER NOT NULL,
-            output_path TEXT NOT NULL,
-            images_dir_name TEXT,
-            error_message TEXT
-        );",
-    )?;
-
-    Ok(())
+    run_migrations(db_path)
 }
 
 pub fn insert_session(db_path: &Path, session: &Session) -> AppResult<()> {

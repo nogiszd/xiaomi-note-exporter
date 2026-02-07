@@ -77,3 +77,7 @@ export async function updateAppSettings(
     settingsPayload: settings,
   });
 }
+
+export async function checkLatestReleaseVersion(): Promise<string> {
+  return invoke<string>("check_latest_release_version");
+}

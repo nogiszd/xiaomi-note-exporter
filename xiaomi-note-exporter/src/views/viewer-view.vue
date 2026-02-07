@@ -22,9 +22,7 @@ const content = ref("");
 const loading = ref(false);
 const errorMessage = ref("");
 const saveStatus = ref("");
-const editorTheme = computed(() =>
-  settingsStore.settings.darkMode ? "dark" : "light",
-);
+const editorTheme = computed(() => (settingsStore.isDarkTheme ? "dark" : "light"));
 
 const sessionId = computed(() => {
   const param = route.params.sessionId;
@@ -113,20 +111,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+  <section class="grid h-full gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
     <Card>
       <CardHeader>
         <CardTitle class="text-base">Files</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea class="h-135 pr-2">
+        <ScrollArea class="h-full">
           <div class="grid gap-2">
             <Button
               v-for="entry in files"
               :key="entry.path"
               type="button"
               :variant="entry.path === activeFilePath ? 'secondary' : 'ghost'"
-              class="justify-start truncate"
+              class="justify-start truncate text-right text-rtl"
               @click="
                 activeFilePath = entry.path;
                 loadActiveFile();
@@ -172,7 +170,7 @@ onMounted(() => {
         preview-theme="github"
         code-theme="atom"
         language="en-US"
-        :style="{ height: '70vh' }"
+        :style="{ height: '80vh', borderRadius: '0.475rem' }"
         @on-save="saveFile"
       />
     </div>

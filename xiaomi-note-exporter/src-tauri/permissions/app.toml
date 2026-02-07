@@ -18,4 +18,5 @@ commands.allow = [
   "convert_to_json",
   "get_app_settings",
   "update_app_settings",
+  "check_latest_release_version",
 ]

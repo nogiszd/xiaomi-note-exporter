@@ -35,7 +35,7 @@ const headerMeta = computed(() => {
 
 <template>
   <header
-    class="sticky rounded-t-2xl top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-6 select-none"
+    class="sticky top-0 z-10 border-b bg-background/95 px-2 py-3 backdrop-blur md:px-4 select-none"
   >
     <div class="flex items-center h-full space-x-3">
       <SidebarTrigger />

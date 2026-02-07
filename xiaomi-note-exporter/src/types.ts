@@ -60,5 +60,5 @@ export interface NoteDto {
 
 export interface AppSettings {
   defaultExportDir: string;
-  darkMode: boolean;
+  theme: "system" | "light" | "dark";
 }

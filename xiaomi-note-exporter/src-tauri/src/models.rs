@@ -84,5 +84,5 @@ pub struct NoteDto {
 #[serde(rename_all = "camelCase")]
 pub struct AppSettings {
     pub default_export_dir: String,
-    pub dark_mode: bool,
+    pub theme: String,
 }

@@ -7,7 +7,8 @@
     "urls": [
       "https://*.i.mi.com/*",
       "https://i.mi.com/*",
-      "https://account.xiaomi.com/*"
+      "https://account.xiaomi.com/*",
+      "https://github.com/*"
     ]
   },
   "permissions": [

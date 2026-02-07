@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Activity,
@@ -33,7 +33,8 @@ import logo from "@/assets/logo.png";
 const router = useRouter();
 const route = useRoute();
 const exportStore = useExportStore();
-const { state } = useSidebar();
+const { state, open, setOpen, isMobile } = useSidebar();
+const SIDEBAR_STORAGE_KEY = "xne.sidebar.open";
 
 const navItems = [
   { to: "/export", label: "Export", icon: Download },
@@ -51,22 +52,25 @@ const statusMeta = computed(() => {
     normalized.startsWith("starting") ||
     normalized.startsWith("exporting")
   ) {
-    return { icon: LoaderCircle, iconClass: "size-3 animate-spin text-sky-500" };
+    return {
+      icon: LoaderCircle,
+      iconClass: "size-4! animate-spin text-sky-500",
+    };
   }
 
   if (normalized.startsWith("completed")) {
-    return { icon: CheckCircle2, iconClass: "size-3 text-emerald-500" };
+    return { icon: CheckCircle2, iconClass: "size-4! text-emerald-500" };
   }
 
   if (normalized.startsWith("cancel")) {
-    return { icon: Ban, iconClass: "size-3 text-amber-500" };
+    return { icon: Ban, iconClass: "size-4! text-amber-500" };
   }
 
   if (normalized.startsWith("error")) {
-    return { icon: CircleX, iconClass: "size-3 text-destructive" };
+    return { icon: CircleX, iconClass: "size-4! text-destructive" };
   }
 
-  return { icon: Play, iconClass: "size-3 text-muted-foreground" };
+  return { icon: Play, iconClass: "size-4! text-muted-foreground" };
 });
 
 function isActive(path: string) {
@@ -76,6 +80,49 @@ function isActive(path: string) {
 function goToExport() {
   void router.push("/export");
 }
+
+function readStoredSidebarOpen(): boolean | null {
+  try {
+    const raw = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (raw === "true") {
+      return true;
+    }
+    if (raw === "false") {
+      return false;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function persistSidebarOpen(value: boolean) {
+  try {
+    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(value));
+  } catch {
+  }
+}
+
+onMounted(() => {
+  if (isMobile.value) {
+    return;
+  }
+
+  const stored = readStoredSidebarOpen();
+  if (stored === null) {
+    persistSidebarOpen(open.value);
+    return;
+  }
+
+  setOpen(stored);
+});
+
+watch(open, (value) => {
+  if (isMobile.value) {
+    return;
+  }
+  persistSidebarOpen(value);
+});
 </script>
 
 <template>
@@ -157,7 +204,7 @@ function goToExport() {
       </SidebarMenu>
       <Badge
         variant="outline"
-        class="w-full gap-1 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:px-1"
+        class="w-full gap-1 text-sm group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:px-1"
       >
         <component :is="statusMeta.icon" :class="statusMeta.iconClass" />
         <span class="group-data-[collapsible=icon]:hidden">{{
