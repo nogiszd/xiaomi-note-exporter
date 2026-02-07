@@ -19,4 +19,5 @@ commands.allow = [
   "get_app_settings",
   "update_app_settings",
   "check_latest_release_version",
+  "download_scrape_image"
 ]

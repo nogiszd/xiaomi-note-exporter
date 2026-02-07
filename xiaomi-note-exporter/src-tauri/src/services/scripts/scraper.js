@@ -50,17 +50,6 @@
     return false;
   };
 
-  const toBase64 = (arrayBuffer) => {
-    const bytes = new Uint8Array(arrayBuffer);
-    const chunkSize = 0x8000;
-    let binary = "";
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.subarray(i, i + chunkSize);
-      binary += String.fromCharCode.apply(null, chunk);
-    }
-    return btoa(binary);
-  };
-
   const parseTotal = () => {
     const totalNode = document.querySelector("div[class*='note-count-select']");
     if (!totalNode) return 0;
@@ -172,7 +161,7 @@
     return true;
   };
 
-  const collectImages = async (container, createdString) => {
+  const collectImages = async (invoke, container, createdString) => {
     if (!exportImages || !container) {
       return [];
     }
@@ -197,6 +186,7 @@
     const imageNodes = Array.from(
       container.querySelectorAll(".image-view img"),
     );
+    const cookieHeader = document.cookie || "";
     let index = 0;
 
     for (const img of imageNodes) {
@@ -214,18 +204,15 @@
       }
 
       try {
-        const response = await fetch(src, { credentials: "true" });
-        if (!response.ok) {
-          continue;
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const base64 = toBase64(arrayBuffer);
+        const base64 = await invoke("download_scrape_image", {
+          sourceUrl: src,
+          cookieHeader: cookieHeader || null,
+        });
+        if (!base64) continue;
         const sanitizedCreated =
           (createdString || "").replace(/[^0-9a-zA-Z_-]+/g, "_") || "unknown";
         images.push({
           name: `note_img_${index}_${sanitizedCreated}.png`,
-          sourceUrl: src,
           dataBase64: base64,
         });
       } catch (e) {
@@ -351,7 +338,7 @@
         const content = unsupported
           ? ""
           : (noteContainer.innerText || "").trim();
-        const images = await collectImages(noteContainer, createdString);
+        const images = await collectImages(invoke, noteContainer, createdString);
 
         await invoke("append_scraped_note", {
           sessionId,

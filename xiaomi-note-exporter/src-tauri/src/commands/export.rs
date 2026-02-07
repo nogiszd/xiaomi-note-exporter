@@ -1,7 +1,10 @@
 use std::path::PathBuf;
 
+use base64::Engine as _;
 use chrono::{Local, Utc};
+use reqwest::{blocking::Client, header};
 use tauri::{AppHandle, Emitter, Manager, State};
+use url::Url;
 use uuid::Uuid;
 
 use crate::{
@@ -41,6 +44,13 @@ fn emit_progress(app: &AppHandle, export: &ActiveExportState, last_title: &str, 
             log_line: log_line.to_string(),
         },
     );
+}
+
+fn is_allowed_image_host(host: &str) -> bool {
+    host == "i.mi.com"
+        || host.ends_with(".i.mi.com")
+        || host.ends_with(".micloud.xiaomi.net")
+        || host.ends_with(".xmssdn.micloud.xiaomi.net")
 }
 
 #[tauri::command]
@@ -163,7 +173,7 @@ pub fn start_export(
                         notes_count: 0,
                         images_count: 0,
                         log_line: format!(
-                            "Opened sign-in window for domain {domain_for_window}. Complete login to start export."
+                            "Opened shell window for domain {domain_for_window}. Complete login (or wait till session is loaded) to start export."
                         ),
                     },
                 );
@@ -191,7 +201,7 @@ pub fn start_export(
                     "export:error",
                     ExportErrorEvent {
                         session_id: session_id_for_window,
-                        message: format!("Failed to open sign-in window: {error}"),
+                        message: format!("Failed to open shell window: {error}"),
                     },
                 );
             }
@@ -199,6 +209,63 @@ pub fn start_export(
     });
 
     Ok(session_id)
+}
+
+#[tauri::command]
+pub fn download_scrape_image(
+    source_url: String,
+    cookie_header: Option<String>,
+) -> CommandResult<String> {
+    let parsed = Url::parse(&source_url).map_err(|e| format!("Invalid image URL: {e}"))?;
+    if parsed.scheme() != "https" {
+        return Err("Only HTTPS image URLs are allowed.".to_string());
+    }
+
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| "Image URL does not include a host.".to_string())?;
+    if !is_allowed_image_host(host) {
+        return Err(format!("Unsupported image host: {host}"));
+    }
+
+    let client = Client::builder()
+        .timeout(std::time::Duration::from_secs(20))
+        .user_agent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
+             (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        )
+        .build()
+        .map_err(|e| format!("Failed to initialize HTTP client: {e}"))?;
+
+    let mut request = client.get(parsed.as_str());
+    if let Some(cookie) = cookie_header
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        request = request.header(header::COOKIE, cookie);
+    }
+
+    let response = request
+        .send()
+        .map_err(|e| format!("Failed to download image: {e}"))?;
+    if !response.status().is_success() {
+        return Err(format!(
+            "Failed to download image: HTTP {}",
+            response.status()
+        ));
+    }
+
+    if let Some(final_host) = response.url().host_str() {
+        if !is_allowed_image_host(final_host) {
+            return Err(format!("Image redirect host is not allowed: {final_host}"));
+        }
+    }
+
+    let bytes = response
+        .bytes()
+        .map_err(|e| format!("Failed to read image bytes: {e}"))?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(bytes))
 }
 
 #[tauri::command]

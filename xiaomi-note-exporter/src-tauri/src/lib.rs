@@ -45,6 +45,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::export::start_export,
+            commands::export::download_scrape_image,
             commands::export::cancel_export,
             commands::export::report_export_total,
             commands::export::append_scraped_note,
