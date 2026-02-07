@@ -148,7 +148,7 @@ onMounted(() => {
       <div class="flex items-center gap-12 pb-2">
         <div class="grid gap-1 text-sm">
           <p class="text-muted-foreground">Current version</p>
-          <p class="font-medium">{{ normalizedCurrentVersion || "unknown" }}</p>
+          <p class="font-medium">{{ normalizedCurrentVersion || "" }}</p>
         </div>
 
         <div class="grid gap-1 text-sm">

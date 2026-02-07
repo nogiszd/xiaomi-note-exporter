@@ -105,13 +105,13 @@ async function removeSession(sessionId: string) {
             <TableCell>{{ session.imagesCount }}</TableCell>
             <TableCell>{{ session.splitMode ? "Yes" : "No" }}</TableCell>
             <TableCell>
-              <Badge variant="default" :class="statusStyle(session.status)">{{
-                firstLetterToUpperCase(session.status)
-              }}</Badge>
+              <Badge variant="default" :class="statusStyle(session.status)">
+                {{ firstLetterToUpperCase(session.status) }}
+              </Badge>
             </TableCell>
-            <TableCell class="truncate" :title="session.outputPath">{{
-              session.outputPath
-            }}</TableCell>
+            <TableCell class="truncate" :title="session.outputPath">
+              {{ session.outputPath }}
+            </TableCell>
             <TooltipProvider :disable-hoverable-content="true">
               <TableCell>
                 <div class="flex flex-wrap gap-2 justify-end">
@@ -148,18 +148,18 @@ async function removeSession(sessionId: string) {
                   </Tooltip>
 
                   <AlertDialog>
-                    <AlertDialogTrigger as-child>
-                      <Tooltip>
-                        <TooltipTrigger as-child>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <AlertDialogTrigger as-child>
                           <Button size="sm" variant="destructive" type="button">
                             <Trash2 />
                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete session</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </AlertDialogTrigger>
+                        </AlertDialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete export session</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle

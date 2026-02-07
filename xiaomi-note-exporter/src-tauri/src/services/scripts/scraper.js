@@ -31,7 +31,8 @@
         window.__TAURI_INTERNALS__ &&
         typeof window.__TAURI_INTERNALS__.invoke === "function"
       ) {
-        return (cmd, payload) => window.__TAURI_INTERNALS__.invoke(cmd, payload);
+        return (cmd, payload) =>
+          window.__TAURI_INTERNALS__.invoke(cmd, payload);
       }
       await sleep(100);
     }
@@ -93,7 +94,9 @@
   const findOpenCard = (container, cards) => {
     const openMarker = container.querySelector("div[class*='open']");
     if (openMarker instanceof HTMLElement) {
-      const owner = cards.find((card) => card === openMarker || card.contains(openMarker));
+      const owner = cards.find(
+        (card) => card === openMarker || card.contains(openMarker),
+      );
       if (owner) {
         return owner;
       }
@@ -175,7 +178,9 @@
     }
 
     const images = [];
-    const initialImageNodes = Array.from(container.querySelectorAll(".image-view img"));
+    const initialImageNodes = Array.from(
+      container.querySelectorAll(".image-view img"),
+    );
     if (initialImageNodes.length > 0) {
       const allLoaded = await waitUntilImagesAreReady(initialImageNodes, 3000);
       if (!allLoaded) {
@@ -184,12 +189,14 @@
           {
             initialCount: initialImageNodes.length,
             loadedCount: initialImageNodes.filter(isRealImageLoaded).length,
-          }
+          },
         );
       }
     }
 
-    const imageNodes = Array.from(container.querySelectorAll(".image-view img"));
+    const imageNodes = Array.from(
+      container.querySelectorAll(".image-view img"),
+    );
     let index = 0;
 
     for (const img of imageNodes) {
@@ -207,7 +214,7 @@
       }
 
       try {
-        const response = await fetch(src, { credentials: "include" });
+        const response = await fetch(src, { credentials: "true" });
         if (!response.ok) {
           continue;
         }
@@ -239,16 +246,23 @@
 
       const ready = await waitFor(() => {
         const spinner = document.querySelector("div[id*='spinner']");
-        const spinnerHidden = !spinner || window.getComputedStyle(spinner).display === "none";
-        const createButton = document.querySelector("button[class*='btn-create']");
+        const spinnerHidden =
+          !spinner || window.getComputedStyle(spinner).display === "none";
+        const createButton = document.querySelector(
+          "button[class*='btn-create']",
+        );
         return spinnerHidden && !!createButton;
       }, 300000);
 
       if (!ready) {
-        throw new Error("Timeout waiting for Xiaomi Notes page. Sign in might be incomplete.");
+        throw new Error(
+          "Timeout waiting for Xiaomi Notes page. Sign in might be incomplete.",
+        );
       }
 
-      const listContainer = document.querySelector("div[class*='note-list-items']");
+      const listContainer = document.querySelector(
+        "div[class*='note-list-items']",
+      );
       if (!listContainer) {
         throw new Error("Could not find note list container.");
       }
@@ -285,8 +299,11 @@
           const fallbackHeight =
             cards.length > 0
               ? Math.max(
-                  Math.floor(cards[cards.length - 1].getBoundingClientRect().height * 0.8),
-                  96
+                  Math.floor(
+                    cards[cards.length - 1].getBoundingClientRect().height *
+                      0.8,
+                  ),
+                  96,
                 )
               : Math.max(Math.floor(listContainer.clientHeight * 0.25), 96);
 
@@ -314,20 +331,26 @@
         const contentReady = await waitFor(
           () => !!document.querySelector("div[class*='pm-container']"),
           5000,
-          120
+          120,
         );
         const titleReady = await waitFor(
           () => !!document.querySelector("div[class*='origin-title'] > div"),
           3000,
-          120
+          120,
         );
 
-        const titleNode = titleReady ? document.querySelector("div[class*='origin-title'] > div") : null;
-        const noteContainer = contentReady ? document.querySelector("div[class*='pm-container']") : null;
+        const titleNode = titleReady
+          ? document.querySelector("div[class*='origin-title'] > div")
+          : null;
+        const noteContainer = contentReady
+          ? document.querySelector("div[class*='pm-container']")
+          : null;
 
         const unsupported = !noteContainer;
         const title = (titleNode?.textContent || "").trim();
-        const content = unsupported ? "" : (noteContainer.innerText || "").trim();
+        const content = unsupported
+          ? ""
+          : (noteContainer.innerText || "").trim();
         const images = await collectImages(noteContainer, createdString);
 
         await invoke("append_scraped_note", {
@@ -360,8 +383,7 @@
           const lateInvoke = await resolveInvoke(2000);
           await lateInvoke("fail_scrape", { sessionId, message });
         }
-      } catch (_) {
-      }
+      } catch (_) {}
     } finally {
       state.running = false;
     }
