@@ -35,8 +35,8 @@ const sourceDescription = computed(() =>
 );
 const sourcePlaceholder = computed(() =>
   sourceMode.value === "file"
-    ? "C:\\Exports\\XiaomiNotes\\exported_notes_01-01-2026_12-00-00.md"
-    : "C:\\Exports\\XiaomiNotes\\",
+    ? `C:\\User\\Documents\\Xiaomi Note Exporter\\exported_notes_01-01-2026_12-00-00.md`
+    : `C:\\User\\Documents\\Xiaomi Note Exporter\\exported_notes_01-01-2026_12-00-00`,
 );
 
 function handleSubmit(values: Record<string, unknown>) {
@@ -93,7 +93,7 @@ function handleSubmit(values: Record<string, unknown>) {
         mode="file"
         operation="save"
         dialog-title="Save output JSON file"
-        placeholder="C:\\Exports\\XiaomiNotes\\exported_notes.json"
+        :placeholder="`C:\\User\\Documents\\Xiaomi Note Exporter\\exported_notes.json`"
         description="Choose where the converted JSON file will be saved."
         :filters="[{ name: 'JSON', extensions: ['json'] }]"
       />

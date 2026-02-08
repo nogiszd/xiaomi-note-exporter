@@ -4,7 +4,14 @@ import ConverterForm from "@/components/converter/converter-form.vue";
 import { convertToJson, openInExplorer } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import CardAction from "@/components/ui/card/CardAction.vue";
 
 const busy = ref(false);
 const resultPath = ref("");
@@ -17,7 +24,8 @@ async function handleConvert(sourcePath: string, outputPath: string) {
   try {
     resultPath.value = await convertToJson(sourcePath, outputPath);
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Conversion failed.";
+    errorMessage.value =
+      error instanceof Error ? error.message : "Conversion failed.";
   } finally {
     busy.value = false;
   }
@@ -36,21 +44,31 @@ async function openResult() {
     <ConverterForm @convert="handleConvert" />
 
     <Card v-if="busy">
-      <CardContent class="pt-6 text-sm text-muted-foreground">Converting...</CardContent>
+      <CardContent class="pt-6 text-sm text-muted-foreground"
+        >Converting...</CardContent
+      >
     </Card>
 
     <Card v-if="errorMessage" class="border-destructive/50">
-      <CardContent class="pt-6 text-sm text-destructive">{{ errorMessage }}</CardContent>
+      <CardContent class="pt-6 text-sm text-destructive">{{
+        errorMessage
+      }}</CardContent>
     </Card>
 
     <Card v-if="resultPath">
       <CardHeader class="flex-row items-center justify-between">
         <CardTitle class="text-base">JSON created</CardTitle>
-        <Badge variant="secondary">Success</Badge>
+        <CardAction>
+          <Badge variant="secondary">Success</Badge>
+        </CardAction>
       </CardHeader>
-      <CardContent class="text-sm text-muted-foreground">{{ resultPath }}</CardContent>
+      <CardContent class="text-sm text-muted-foreground">{{
+        resultPath
+      }}</CardContent>
       <CardFooter>
-        <Button type="button" variant="outline" @click="openResult">Open File</Button>
+        <Button type="button" variant="outline" @click="openResult"
+          >Open File</Button
+        >
       </CardFooter>
     </Card>
   </section>

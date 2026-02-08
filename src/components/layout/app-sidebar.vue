@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Activity,
   Ban,
   CheckCircle2,
+  CircleHelp,
   CircleX,
   Download,
   FileJson2,
@@ -28,6 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useExportStore } from "@/stores/export";
+import AppAbout from "@/components/layout/app-about.vue";
 import logo from "@/assets/logo.png";
 
 const router = useRouter();
@@ -35,11 +37,38 @@ const route = useRoute();
 const exportStore = useExportStore();
 const { state, open, setOpen, isMobile } = useSidebar();
 const SIDEBAR_STORAGE_KEY = "xne.sidebar.open";
+const isAboutOpen = ref(false);
 
-const navItems = [
+type SecondaryNavItem =
+  | {
+      type: "route";
+      to: string;
+      label: string;
+      icon: unknown;
+    }
+  | {
+      type: "action";
+      label: string;
+      icon: unknown;
+      onClick: () => void;
+    };
+
+const primaryNavItems = [
   { to: "/export", label: "Export", icon: Download },
   { to: "/history", label: "History", icon: History },
   { to: "/converter", label: "Converter", icon: FileJson2 },
+];
+
+const secondaryNavItems: SecondaryNavItem[] = [
+  { type: "route", to: "/settings", label: "Settings", icon: Settings },
+  {
+    type: "action",
+    label: "About",
+    icon: CircleHelp,
+    onClick: () => {
+      isAboutOpen.value = true;
+    },
+  },
 ];
 
 const isCollapsed = computed(() => state.value === "collapsed");
@@ -99,8 +128,7 @@ function readStoredSidebarOpen(): boolean | null {
 function persistSidebarOpen(value: boolean) {
   try {
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(value));
-  } catch {
-  }
+  } catch {}
 }
 
 onMounted(() => {
@@ -153,7 +181,7 @@ watch(open, (value) => {
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem v-for="item in navItems" :key="item.to">
+            <SidebarMenuItem v-for="item in primaryNavItems" :key="item.to">
               <SidebarMenuButton
                 as-child
                 :is-active="isActive(item.to)"
@@ -174,16 +202,28 @@ watch(open, (value) => {
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem>
+            <SidebarMenuItem
+              v-for="item in secondaryNavItems"
+              :key="item.type === 'route' ? item.to : item.label"
+            >
               <SidebarMenuButton
+                v-if="item.type === 'route'"
                 as-child
-                :is-active="isActive('/settings')"
-                tooltip="Settings"
+                :is-active="isActive(item.to)"
+                :tooltip="item.label"
               >
-                <RouterLink to="/settings" class="flex items-center gap-2">
-                  <component :is="Settings" />
-                  <span>Settings</span>
+                <RouterLink :to="item.to" class="flex items-center gap-2">
+                  <component :is="item.icon" />
+                  <span>{{ item.label }}</span>
                 </RouterLink>
+              </SidebarMenuButton>
+              <SidebarMenuButton
+                v-else
+                :tooltip="item.label"
+                @click="item.onClick"
+              >
+                <component :is="item.icon" />
+                <span>{{ item.label }}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -213,4 +253,6 @@ watch(open, (value) => {
       </Badge>
     </SidebarFooter>
   </Sidebar>
+
+  <AppAbout v-model:open="isAboutOpen" />
 </template>

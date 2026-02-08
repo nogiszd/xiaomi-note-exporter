@@ -110,3 +110,4 @@
 - Export workflow depends on the embedded scraper script: [src-tauri/src/services/scripts/scraper.js](src-tauri/src/services/scripts/scraper.js)
 - Theme is applied from settings on boot in [src/stores/settings.ts](src/stores/settings.ts).
 - Viewer uses `md-editor-v3` and writes edits back via `write_export_file`.
+- MCP server: use the shadcn-vue MCP server to lookup component docs/props since these components are used across the app.
