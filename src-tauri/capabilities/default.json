@@ -1,0 +1,20 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main", "splashscreen", "auth-export-*"],
+  "remote": {
+    "urls": [
+      "https://*.i.mi.com/*",
+      "https://i.mi.com/*",
+      "https://account.xiaomi.com/*",
+      "https://github.com/*"
+    ]
+  },
+  "permissions": [
+    "allow-all-app-commands",
+    "core:default",
+    "dialog:default",
+    "opener:default"
+  ]
+}

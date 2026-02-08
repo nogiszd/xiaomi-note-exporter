@@ -1,0 +1,24 @@
+[[permission]]
+identifier = "allow-all-app-commands"
+description = "Allows all app commands used by the local UI and Xiaomi scraper webview."
+commands.allow = [
+  "start_export",
+  "cancel_export",
+  "report_export_total",
+  "append_scraped_note",
+  "finish_scrape",
+  "fail_scrape",
+  "get_sessions",
+  "get_session",
+  "delete_session",
+  "read_export_file",
+  "write_export_file",
+  "list_export_files",
+  "open_in_explorer",
+  "convert_to_json",
+  "get_app_settings",
+  "update_app_settings",
+  "check_latest_release_version",
+  "download_scrape_image",
+  "close_splashscreen"
+]

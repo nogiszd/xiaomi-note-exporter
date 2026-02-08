@@ -1,5 +1,5 @@
 Xiaomi Note Exporter
-![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/publish.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-active-success.svg)
+![workflow](https://github.com/nogiszd/xiaomi-note-exporter/actions/workflows/publish.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://opensource.org/licenses/MIT) ![maintenance-status](https://img.shields.io/badge/maintenance-active-success.svg)
 =================================
 
 > Export your notes from Mi Cloud directly to Markdown file! 📝➡️🧾
@@ -14,71 +14,87 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 ### Prerequisites :
 
-- **Windows machine with [_.NET 8 runtime_](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime) installed**
-- **Latest version of Google Chrome browser installed**
+- **Windows machine (MacOS/Linux support coming soon)**
 
-Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), extract the contents **to the same folder** and run `xiaomiNoteExporter.exe` executable.
+Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), install the app as prompted, and launch.
+
+![Export tab](https://i.imgur.com/R3P98i7.png)
 
 ### Normal usage:
 
-1.  Launch the app - you will be prompted to input domain address (if it differs from the default one).
-2.  Sign into your account via browser window that popped up.
-3.  After succeeding, press any key as requested.
-4.  Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
+1.  Launch the app - you will be greeted with main screen.
+2.  Main tab allows you to input a Mi Cloud domain (if it differs than default one), choose if you want to split notes, and whether you want to export the images.
+3.  Pressing `Start Export` will open another window. You should sign-in to your Mi Cloud account.
+4.  After succeeding, app will automatically start to export your notes. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
+5.  The session is persistent, so if you decide to export again, you shouldn't be asked to sign-in again.
 
 ### _Warning!_
 
 App **can trigger** Windows SmartScreen because the code is unsigned.  
 In that case you can click **More info** and **Run anyway**.
 
-### CLI usage:
+## 🦀 Rust rewrite
 
-`xiaomiNoteExporter.exe [options]`
+Version `v2.0.0` is a complete rewrite of the application in Rust. The project has evolved from a CLI tool into a fully-featured graphical application.
+
+This release marks a major development milestone, significantly streamlining the export process by eliminating redundant dependencies:
+
+- Selenium has been removed and replaced with a pure JavaScript implementation that replicates the previous behavior.
+- The entire application is now built with Tauri, providing a modern GUI and fully asynchronous export execution.
+- The application is distributed as a standalone, installable executable, requiring no external runtime or dependencies.
+
+Old code (C#) will be available on [legacy](https://github.com/nogiszd/xiaomi-note-exporter/tree/legacy) branch, and old executables are still available to download via **Releases**, but they're **out of support**.
+
+## 🗓️ History:
+
+App allows you to see history of your exports.  
+Files and export results are stored in OS's default Documents directory.
+
+Below are defaults that are used by the app:
 
 ```
-Options:
-  -h, --help
-        Show this help message and exit
-
-  -d, --domain <domain> (default: us.i.mi.com)
-        Mi Notes domain that you were redirected to.
-
-  -s, --split <timestamp> (default: dd-MM-yyyy_HH-mm-ss)
-        Split notes into separate files with provided timestamp format. Must be compatible with:
-        https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-
-  -di, --disable-images
-        Disable default image export behavior, images will not be downloaded from the notes.
-
-  -j, --json <path>
-        Convert your markdown file(s) to JSON. You can pass path to a folder containing split notes, or path to a single .md file.
-
-  -md, --manual-driver
-        Use standalone chromedriver.exe instead of selenium-manager.exe.
-        You need to put chromedriver.exe in the same directory as executable.
+Windows: C:\Users\<username>\Documents
+Linux: XDG_DOCUMENTS_DIR
+MacOS: $HOME/Documents
 ```
+
+![History tab](https://i.imgur.com/HKBbi7B.png)
+
+App creates a folder named `Xiaomi Note Exporter` in your default Documents directory.
+
+Each export has few actions, that are described below:
+
+1. View - you can preview the markdown file (or multiple if export was selected as "split"), and here you can make manual edits, or convert them to JSON.
+2. Open directory - it will open directory where the file/folder is stored.
+3. Delete - you can delete the entry from the history, pop-up will ask you if you want to delete produced files too.
 
 ## 🗒️ Note splitting
 
-Since `v1.6.0` you can launch this application via CLI with usage as shown above.
+On `Export` tab there is an option to select if your notes should be splitted into separate files.
 
-With `-s` flag you can enable note splitting - which exports notes to separate directory, one by one.
+If so, an directory will be created and each note will be stored in separate file.
 
-This enables user to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
+This option shows another field to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
 
 ## 🖼️ Image export
 
-Since `v1.7.0` this app exports images present in notes by default.
+As it is with note splitting, there is also an option to decide whether images stored in the notes should be exported along the notes.
 
-You can disable this feature by `-di` flag in CLI args.
+It is selected by default, but user can choose not to export them.
 
 ## 🔗 Convert to JSON
 
-With new flag `-j` you can point to your folder (when notes were split) or to an file, to convert notes into JSON file.
+Third `Converter` tab is a tool that allows user to select a file (or folder if notes were split) and convert them to JSON format.
 
-This feature is available since `v1.7.4` and it's a mode of running the app via CLI.
+![Converter tab](https://i.imgur.com/aFFjwCr.png)
 
-Credits for this idea are going to [aviv926](https://github.com/aviv926) who made Python script that does the same.
+## ⚙️ Settings
+
+App has built in settings tab, that allows user to choose default export directory (instead of default created in Documents folder), and to choose theme (default is system deferred).
+
+This tab also has an update checker, for user convenience, without leaving app, you can check if your app is up to date.
+
+![Settings tab](https://i.imgur.com/Lyaoldl.png)
 
 ---
 
@@ -92,5 +108,14 @@ This project is licensed under the [GNU General Public License v3.0](https://git
 
 Used libraries:
 
-- [Selenium](https://www.selenium.dev/) - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- [Pastel](https://github.com/silkfire/Pastel) - [MIT License](https://opensource.org/licenses/MIT)
+- [Tauri](https://tauri.app/) - [MIT License](https://opensource.org/licenses/MIT)
+- [Vue 3](https://vuejs.org/) - [MIT License](https://opensource.org/licenses/MIT)
+- [Vite](https://vite.dev/) - [MIT License](https://opensource.org/licenses/MIT)
+- [Tailwind CSS](https://tailwindcss.com/) - [MIT License](https://opensource.org/licenses/MIT)
+- [shadcn-vue](https://www.shadcn-vue.com/) - [MIT License](https://opensource.org/licenses/MIT)
+- [Pinia](https://pinia.vuejs.org/) - [MIT License](https://opensource.org/licenses/MIT)
+- [Vue Router](https://router.vuejs.org/) - [MIT License](https://opensource.org/licenses/MIT)
+- [md-editor-v3](https://imzbf.github.io/md-editor-v3/) - [MIT License](https://opensource.org/licenses/MIT)
+- [rusqlite](https://github.com/rusqlite/rusqlite) - [MIT License](https://opensource.org/licenses/MIT)
+- [reqwest](https://github.com/seanmonstar/reqwest) - [MIT License](https://opensource.org/licenses/MIT)
+- [chrono](https://github.com/chronotope/chrono) - [MIT License](https://opensource.org/licenses/MIT)
