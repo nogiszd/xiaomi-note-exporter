@@ -12,24 +12,68 @@ on:
         description: "Version number (e.g., 2.0.0)"
         required: true
         type: string
-      platform:
-        description: "Platform to ship"
+      build_windows:
+        description: "Build Windows installer"
         required: true
-        type: choice
-        options:
-          - windows
-          - linux
-          - macos
+        type: boolean
+        default: true
+      build_linux:
+        description: "Build Linux installer"
+        required: true
+        type: boolean
+        default: false
+      build_macos:
+        description: "Build macOS installer"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
-  build-installers:
-    name: Build installer (${{ inputs.platform }})
-    runs-on: ${{ inputs.platform == 'windows' && 'windows-latest' || inputs.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
+  prepare-platforms:
+    name: Resolve selected platforms
+    runs-on: ubuntu-latest
+    outputs:
+      platforms_json: ${{ steps.set-platforms.outputs.platforms_json }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Build platform matrix
+        id: set-platforms
+        shell: bash
+        run: |
+          platforms=()
+
+          if [[ "${{ inputs.build_windows }}" == "true" ]]; then
+            platforms+=('"windows"')
+          fi
+
+          if [[ "${{ inputs.build_linux }}" == "true" ]]; then
+            platforms+=('"linux"')
+          fi
+
+          if [[ "${{ inputs.build_macos }}" == "true" ]]; then
+            platforms+=('"macos"')
+          fi
+
+          if [[ ${#platforms[@]} -eq 0 ]]; then
+            echo "At least one platform must be selected."
+            exit 1
+          fi
+
+          platforms_json="[$(IFS=,; echo "${platforms[*]}")]"
+          echo "platforms_json=$platforms_json" >> "$GITHUB_OUTPUT"
+
+  build-installers:
+    name: Build installer (${{ matrix.platform }})
+    needs: prepare-platforms
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.prepare-platforms.outputs.platforms_json) }}
+    runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || matrix.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
+    steps:
+      - uses: actions/checkout@v6.0.2
 
       - name: Install Linux dependencies
-        if: inputs.platform == 'linux'
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -39,17 +83,17 @@ jobs:
             patchelf
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: lts/*
           cache: npm
 
       - name: Install Rust stable
-        if: inputs.platform != 'macos'
+        if: matrix.platform != 'macos'
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rust stable (macOS Apple Silicon target)
-        if: inputs.platform == 'macos'
+        if: matrix.platform == 'macos'
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin
@@ -63,37 +107,29 @@ jobs:
         run: npm ci
 
       - name: Build Tauri installer (Windows NSIS only)
-        if: inputs.platform == 'windows'
+        if: matrix.platform == 'windows'
         uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          uploadWorkflowArtifacts: true
           args: --bundles nsis
 
       - name: Build Tauri installer
-        if: inputs.platform != 'windows'
+        if: matrix.platform != 'windows'
         uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          uploadWorkflowArtifacts: true
 
-  create-release:
-    runs-on: windows-latest
-    needs: build-installers
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v7
-        with:
-          path: ${{ github.workspace }}/release-assets
-
-      - name: Collect installer artifacts
-        id: collect-installers
+      - name: Stage installer artifacts
+        id: stage-installers
         shell: pwsh
         run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE "release-assets"
-          $platform = "${{ inputs.platform }}"
+          $bundleRoot = Join-Path $env:GITHUB_WORKSPACE "src-tauri/target/release/bundle"
+          $stagingRoot = Join-Path $env:GITHUB_WORKSPACE "release-assets"
+          $platform = "${{ matrix.platform }}"
+
+          New-Item -ItemType Directory -Force -Path $stagingRoot | Out-Null
+
           $patterns = switch ($platform) {
             "windows" { @("*.exe") }
             "linux" { @("*.deb", "*.rpm", "*.AppImage") }
@@ -106,13 +142,74 @@ jobs:
           }
 
           $files = foreach ($pattern in $patterns) {
-            Get-ChildItem -Path $root -Recurse -File -Filter $pattern -ErrorAction SilentlyContinue
+            Get-ChildItem -Path $bundleRoot -Recurse -File -Filter $pattern -ErrorAction SilentlyContinue
           }
 
           $files = $files | Sort-Object -Property FullName -Unique
 
           if (-not $files -or $files.Count -eq 0) {
-            throw "No installer artifacts found under $root for platform $platform."
+            throw "No installer artifacts found under $bundleRoot for platform $platform."
+          }
+
+          foreach ($file in $files) {
+            Copy-Item -Path $file.FullName -Destination $stagingRoot -Force
+          }
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: installer-${{ matrix.platform }}
+          path: ${{ github.workspace }}/release-assets
+          if-no-files-found: error
+
+  create-release:
+    runs-on: windows-latest
+    needs:
+      - prepare-platforms
+      - build-installers
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7.0.0
+        with:
+          path: ${{ github.workspace }}/release-assets
+
+      - name: Collect installer artifacts
+        id: collect-installers
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE "release-assets"
+          $platforms = '${{ needs.prepare-platforms.outputs.platforms_json }}' | ConvertFrom-Json
+          $files = @()
+
+          foreach ($platform in $platforms) {
+            $patterns = switch ($platform) {
+              "windows" { @("*.exe") }
+              "linux" { @("*.deb", "*.rpm", "*.AppImage") }
+              "macos" { @("*.dmg", "*.pkg", "*.app.tar.gz") }
+              default { @() }
+            }
+
+            if ($patterns.Count -eq 0) {
+              throw "Unsupported platform selection: $platform"
+            }
+
+            $platformFiles = foreach ($pattern in $patterns) {
+              Get-ChildItem -Path $root -Recurse -File -Filter $pattern -ErrorAction SilentlyContinue
+            }
+
+            $platformFiles = $platformFiles | Sort-Object -Property FullName -Unique
+
+            if (-not $platformFiles -or $platformFiles.Count -eq 0) {
+              throw "No installer artifacts found under $root for platform $platform."
+            }
+
+            $files += $platformFiles
+          }
+
+          $files = $files | Sort-Object -Property FullName -Unique
+
+          if (-not $files -or $files.Count -eq 0) {
+            throw "No installer artifacts found under $root."
           }
 
           $artifactList = ($files | ForEach-Object { $_.FullName }) -join ","
