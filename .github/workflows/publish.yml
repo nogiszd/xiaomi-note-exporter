@@ -23,27 +23,13 @@ on:
 
 jobs:
   build-installers:
-    name: Build installer (${{ matrix.platform }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows
-            runner: windows-latest
-            args: ""
-          - platform: linux
-            runner: ubuntu-22.04
-            args: ""
-          - platform: macos
-            runner: macos-latest
-            args: ""
-    if: ${{ matrix.platform == inputs.platform }}
+    name: Build installer (${{ inputs.platform }})
+    runs-on: ${{ inputs.platform == 'windows' && 'windows-latest' || inputs.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'linux'
+        if: inputs.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -59,17 +45,17 @@ jobs:
           cache: npm
 
       - name: Install Rust stable
-        if: matrix.platform != 'macos'
+        if: inputs.platform != 'macos'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Rust stable (macOS targets)
-        if: matrix.platform == 'macos'
+      - name: Install Rust stable (macOS Apple Silicon target)
+        if: inputs.platform == 'macos'
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2
+        uses: swatinem/rust-cache@v2.8.2
         with:
           workspaces: ./src-tauri -> target
 
@@ -77,11 +63,10 @@ jobs:
         run: npm ci
 
       - name: Build Tauri installer
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: ${{ matrix.args }}
           uploadWorkflowArtifacts: true
 
   create-release:
@@ -89,7 +74,7 @@ jobs:
     needs: build-installers
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ${{ github.workspace }}/release-assets
 
@@ -129,12 +114,12 @@ jobs:
           "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Attest release artifact
-        uses: actions/attest-build-provenance@v3.1.0
+        uses: actions/attest-build-provenance@v3.2.0
         with:
           subject-path: ${{ steps.collect-installers.outputs.subject_path }}
 
       - name: Create Draft Release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.20.0
         with:
           commit: ${{ github.sha }}
           tag: v${{ inputs.version }}
