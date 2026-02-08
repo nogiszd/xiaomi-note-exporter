@@ -12,9 +12,24 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Xiaomi Note Exporter",
+        "visible": false,
         "width": 1400,
         "height": 800
+      },
+      {
+        "label": "splashscreen",
+        "title": "Xiaomi Note Exporter",
+        "url": "splashscreen.html",
+        "width": 460,
+        "height": 280,
+        "center": true,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
     ],
     "security": {

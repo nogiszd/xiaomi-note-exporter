@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xiaomi Note Exporter</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+
+        --radius: 0.75rem;
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.145 0 0);
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
+        --border: oklch(0.922 0 0);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background: oklch(0.145 0 0);
+          --foreground: oklch(0.985 0 0);
+          --card: oklch(0.205 0 0);
+          --card-foreground: oklch(0.985 0 0);
+          --muted: oklch(0.269 0 0);
+          --muted-foreground: oklch(0.708 0 0);
+          --border: oklch(1 0 0 / 10%);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--background);
+        color: var(--foreground);
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .card {
+        width: min(420px, 92vw);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--card-foreground);
+        box-shadow: 0 1px 2px hsl(0 0% 0% / 0.08);
+        padding: 1.5rem;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+      }
+
+      .logo-shell {
+        width: 3.25rem;
+        height: 3.25rem;
+        border-radius: calc(var(--radius) - 2px);
+        border: 1px solid var(--border);
+        background: var(--muted);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+
+      .title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .subtitle {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: var(--muted-foreground);
+      }
+
+      .spinner-wrap {
+        margin-top: 1.25rem;
+      }
+
+      .spinner {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        border: 3px solid var(--muted);
+        border-top-color: var(--foreground);
+        animation: spin 0.9s linear infinite;
+      }
+
+      .hint {
+        margin: 0.55rem 0 0;
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <header>
+        <div class="logo-shell">
+          <img class="logo" src="/logo.svg" alt="Application logo" />
+        </div>
+        <div class="row">
+          <h1 class="title">Xiaomi Note Exporter</h1>
+        </div>
+      </header>
+      <section class="loading">
+        <div class="spinner-wrap" aria-hidden="true">
+          <div class="spinner"></div>
+        </div>
+        <p class="hint">Loading data and preferences...</p>
+      </section>
+    </main>
+  </body>
+</html>

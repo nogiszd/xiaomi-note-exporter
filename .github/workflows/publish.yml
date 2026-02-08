@@ -9,78 +9,139 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version number (e.g., 1.0.0)"
+        description: "Version number (e.g., 2.0.0)"
         required: true
         type: string
+      platform:
+        description: "Platform to ship"
+        required: true
+        type: choice
+        options:
+          - windows
+          - linux
+          - macos
 
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  build-installers:
+    name: Build installer (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-latest
+            args: ""
+          - platform: linux
+            runner: ubuntu-22.04
+            args: ""
+          - platform: macos
+            runner: macos-latest
+            args: ""
+    if: ${{ matrix.platform == inputs.platform }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: 8.0.x
+          node-version: lts/*
+          cache: npm
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Install Rust stable
+        if: matrix.platform != 'macos'
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Build
-        run: dotnet build --no-restore
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
-
-  publish:
-    runs-on: windows-latest
-    needs: build-and-test
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - name: Install Rust stable (macOS targets)
+        if: matrix.platform == 'macos'
+        uses: dtolnay/rust-toolchain@stable
         with:
-          dotnet-version: 8.0.x
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Publish
-        run: dotnet publish -c Release -p:PublishProfile=FolderProfile -p:PublishDir=${{ github.workspace }}/publish
-
-      - name: Upload publish artifact
-        uses: actions/upload-artifact@v6
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
         with:
-          name: publish-folder
-          path: ${{ github.workspace }}/publish
+          workspaces: ./src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build Tauri installer
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }}
+          uploadWorkflowArtifacts: true
 
   create-release:
     runs-on: windows-latest
-    needs: publish
+    needs: build-installers
     steps:
-      - name: Download publish artifact
-        uses: actions/download-artifact@v6
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: publish-folder
-          path: ${{ github.workspace }}/publish
+          path: ${{ github.workspace }}/release-assets
 
-      - name: Create ZIP file
-        run: |
-          Compress-Archive -Path ./publish/* -DestinationPath ./release-win-x86.zip -Force
+      - name: Collect installer artifacts
+        id: collect-installers
         shell: pwsh
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE "release-assets"
+          $platform = "${{ inputs.platform }}"
+          $patterns = switch ($platform) {
+            "windows" { @("*.msi", "*.exe") }
+            "linux" { @("*.deb", "*.rpm", "*.AppImage") }
+            "macos" { @("*.dmg", "*.pkg", "*.app.tar.gz") }
+            default { @() }
+          }
+
+          if ($patterns.Count -eq 0) {
+            throw "Unsupported platform selection: $platform"
+          }
+
+          $files = foreach ($pattern in $patterns) {
+            Get-ChildItem -Path $root -Recurse -File -Filter $pattern -ErrorAction SilentlyContinue
+          }
+
+          $files = $files | Sort-Object -Property FullName -Unique
+
+          if (-not $files -or $files.Count -eq 0) {
+            throw "No installer artifacts found under $root for platform $platform."
+          }
+
+          $artifactList = ($files | ForEach-Object { $_.FullName }) -join ","
+          $attestationSubjects = ($files | ForEach-Object { $_.FullName }) -join "`n"
+
+          "artifacts=$artifactList" >> $env:GITHUB_OUTPUT
+          "subject_path<<EOF" >> $env:GITHUB_OUTPUT
+          $attestationSubjects >> $env:GITHUB_OUTPUT
+          "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Attest release artifact
         uses: actions/attest-build-provenance@v3.1.0
         with:
-          subject-path: ./release-win-x86.zip
+          subject-path: ${{ steps.collect-installers.outputs.subject_path }}
 
       - name: Create Draft Release
         uses: ncipollo/release-action@v1
         with:
+          commit: ${{ github.sha }}
           tag: v${{ inputs.version }}
           name: Release v${{ inputs.version }}
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          replacesArtifacts: true
           draft: true
-          artifacts: ./release-win-x86.zip
+          artifacts: ${{ steps.collect-installers.outputs.artifacts }}
           token: ${{ secrets.GITHUB_TOKEN }}

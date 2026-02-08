@@ -11,6 +11,24 @@ use tauri::Manager;
 
 use crate::{db::sessions::init_db, services::settings, state::AppState};
 
+#[tauri::command]
+fn close_splashscreen(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(splashscreen_window) = app.get_webview_window("splashscreen") {
+        splashscreen_window
+            .close()
+            .map_err(|error| error.to_string())?;
+    }
+
+    let main_window = app
+        .get_webview_window("main")
+        .ok_or_else(|| String::from("Main window not found"))?;
+
+    main_window.show().map_err(|error| error.to_string())?;
+    main_window.set_focus().map_err(|error| error.to_string())?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(target_os = "windows")]
@@ -61,7 +79,8 @@ pub fn run() {
             commands::converter::convert_to_json,
             commands::settings::get_app_settings,
             commands::settings::update_app_settings,
-            commands::settings::check_latest_release_version
+            commands::settings::check_latest_release_version,
+            close_splashscreen
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

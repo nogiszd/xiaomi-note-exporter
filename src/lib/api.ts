@@ -81,3 +81,7 @@ export async function updateAppSettings(
 export async function checkLatestReleaseVersion(): Promise<string> {
   return invoke<string>("check_latest_release_version");
 }
+
+export async function closeSplashscreen(): Promise<void> {
+  return invoke<void>("close_splashscreen");
+}
