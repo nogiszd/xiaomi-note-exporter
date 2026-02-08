@@ -62,7 +62,17 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Build Tauri installer (Windows NSIS only)
+        if: inputs.platform == 'windows'
+        uses: tauri-apps/tauri-action@v0.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          uploadWorkflowArtifacts: true
+          args: --bundles nsis
+
       - name: Build Tauri installer
+        if: inputs.platform != 'windows'
         uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,7 +95,7 @@ jobs:
           $root = Join-Path $env:GITHUB_WORKSPACE "release-assets"
           $platform = "${{ inputs.platform }}"
           $patterns = switch ($platform) {
-            "windows" { @("*.msi", "*.exe") }
+            "windows" { @("*.exe") }
             "linux" { @("*.deb", "*.rpm", "*.AppImage") }
             "macos" { @("*.dmg", "*.pkg", "*.app.tar.gz") }
             default { @() }

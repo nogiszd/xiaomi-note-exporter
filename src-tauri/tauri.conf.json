@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "xiaomi-note-exporter",
+  "productName": "Xiaomi Note Exporter",
   "version": "2.0.0",
   "identifier": "com.nogiszd.xiaomi-note-exporter",
   "build": {
