@@ -4,6 +4,8 @@ Xiaomi Note Exporter
 
 > Export your notes from Mi Cloud directly to Markdown file! 📝➡️🧾
 
+### If you like the app, consider supporting the project ⭐
+
 ## 🤔 Why?
 
 I wanted to export my own notes from Mi Cloud but there is no option for that. The only option was to rewrite the notes one by one. So I decided to make an app that would do it for me.
@@ -16,7 +18,7 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 - **Windows machine (MacOS/Linux support coming soon)**
 
-Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest), install the app as prompted, and launch.
+**Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest)**, install the app as prompted, and launch.
 
 ![Export tab](https://i.imgur.com/R3P98i7.png)
 
@@ -30,7 +32,7 @@ Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releas
 
 ### _Warning!_
 
-App **can trigger** Windows SmartScreen because the code is unsigned.  
+Installer **can trigger** Windows SmartScreen because the code is unsigned.  
 In that case you can click **More info** and **Run anyway**.
 
 ## 🦀 Rust rewrite
@@ -98,9 +100,35 @@ This tab also has an update checker, for user convenience, without leaving app, 
 
 ---
 
-## 🔧 How about maintenance?
+## 🤝 Open-source contributions
 
-I will only add modifications and new features **when I have free time to do so**. Until then, there will only be major bug fixes and small updates (including library updates).
+This project is developed and maintained **independently**.
+Contributions are very welcome and appreciated!
+
+If you’d like to help improve this project, you can:
+
+- report bugs or suggest improvements via GitHub Issues,
+- submit pull requests (bug fixes, refactors, documentation),
+- improve documentation or examples.
+
+Whether it’s a small typo fix or a larger feature proposal — every contribution helps.
+Please keep changes focused and well-documented.
+
+Thank you for helping make this project better ❤️
+
+## ❤️ Support this project
+
+This project is **free and open source** and will remain that way.
+
+If you find it useful and want to support its development, you can do so voluntarily:
+
+- ⭐ Star the repository
+- 💖 Sponsor the project on GitHub
+
+Sponsorship is **100% optional** and does not unlock or restrict any features.
+It simply helps cover spent time, maintenance, and future improvements.
+
+Thank you for your support!
 
 ## 📜 License
 
