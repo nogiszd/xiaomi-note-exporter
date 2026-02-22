@@ -65,6 +65,8 @@ pub struct ScrapedImageInput {
 pub struct ScrapedNoteInput {
     pub title: String,
     pub content: String,
+    #[serde(default)]
+    pub content_html: String,
     pub created_string: String,
     pub unsupported: bool,
     #[serde(default)]

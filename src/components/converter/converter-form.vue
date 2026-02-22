@@ -9,6 +9,15 @@ const emit = defineEmits<{
   convert: [sourcePath: string, outputPath: string];
 }>();
 
+const props = withDefaults(
+  defineProps<{
+    initialSourcePath?: string;
+  }>(),
+  {
+    initialSourcePath: "",
+  },
+);
+
 const converterSchema = yup.object({
   sourcePath: yup.string().trim().required("Source path is required."),
   outputPath: yup
@@ -24,7 +33,7 @@ const converterSchema = yup.object({
 });
 
 const initialValues = {
-  sourcePath: "",
+  sourcePath: props.initialSourcePath,
   outputPath: "",
 };
 const sourceMode = ref<"file" | "directory">("file");

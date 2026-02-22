@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { MdEditor } from "md-editor-v3";
-import "md-editor-v3/lib/style.css";
+
 import { listExportFiles, readExportFile, writeExportFile } from "@/lib/api";
 import { useSessionsStore } from "@/stores/sessions";
 import { useSettingsStore } from "@/stores/settings";
@@ -10,6 +11,13 @@ import type { FileEntry } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  isRemoteOrSpecialSource,
+  resolveRelativePath,
+  toNativeFilePath,
+} from "@/lib/image";
+
+import "md-editor-v3/lib/style.css";
 
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +30,9 @@ const content = ref("");
 const loading = ref(false);
 const errorMessage = ref("");
 const saveStatus = ref("");
-const editorTheme = computed(() => (settingsStore.isDarkTheme ? "dark" : "light"));
+const editorTheme = computed(() =>
+  settingsStore.isDarkTheme ? "dark" : "light",
+);
 
 const sessionId = computed(() => {
   const param = route.params.sessionId;
@@ -33,6 +43,42 @@ const activeFile = computed(
   () =>
     files.value.find((entry) => entry.path === activeFilePath.value) || null,
 );
+
+function resolveImageSource(src: string) {
+  const raw = src.trim();
+  if (!raw || isRemoteOrSpecialSource(raw)) {
+    return raw;
+  }
+
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  })();
+
+  const isAbsolutePath =
+    /^[a-zA-Z]:[\\/]/.test(decoded) ||
+    decoded.startsWith("/") ||
+    decoded.startsWith("\\");
+
+  const resolvedPath =
+    isAbsolutePath || !activeFilePath.value
+      ? toNativeFilePath(decoded)
+      : resolveRelativePath(activeFilePath.value, decoded);
+
+  return convertFileSrc(resolvedPath);
+}
+
+function sanitizePreviewHtml(html: string) {
+  const document = new DOMParser().parseFromString(html, "text/html");
+  for (const image of document.querySelectorAll("img[src]")) {
+    const source = image.getAttribute("src") ?? "";
+    image.setAttribute("src", resolveImageSource(source));
+  }
+  return document.body.innerHTML;
+}
 
 async function loadActiveFile() {
   if (!activeFilePath.value) {
@@ -95,7 +141,10 @@ async function saveFile() {
 }
 
 function goToConverter() {
-  void router.push("/converter");
+  void router.push({
+    name: "converter",
+    query: activeFilePath.value ? { sourcePath: activeFilePath.value } : {},
+  });
 }
 
 watch(
@@ -170,6 +219,7 @@ onMounted(() => {
         preview-theme="github"
         code-theme="atom"
         language="en-US"
+        :sanitize="sanitizePreviewHtml"
         :style="{ height: '80vh', borderRadius: '0.475rem' }"
         @on-save="saveFile"
       />

@@ -338,6 +338,7 @@
         const content = unsupported
           ? ""
           : (noteContainer.innerText || "").trim();
+        const contentHtml = unsupported ? "" : noteContainer.innerHTML || "";
         const images = await collectImages(invoke, noteContainer, createdString);
 
         await invoke("append_scraped_note", {
@@ -345,6 +346,7 @@
           note: {
             title,
             content,
+            contentHtml,
             createdString,
             unsupported,
             images,

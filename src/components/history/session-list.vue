@@ -3,6 +3,7 @@ import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { openInExplorer } from "@/lib/api";
 import { useSessionsStore } from "@/stores/sessions";
+import { useExportStore } from "@/stores/export";
 import type { Session } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,9 +44,13 @@ defineProps<{
 
 const deleteFilesBySession = reactive<Record<string, boolean>>({});
 const sessionsStore = useSessionsStore();
+const exportStore = useExportStore();
 const router = useRouter();
 
 function viewSession(sessionId: string) {
+  if (exportStore.isRunning) {
+    return;
+  }
   void router.push(`/viewer/${sessionId}`);
 }
 
@@ -121,6 +126,7 @@ async function removeSession(sessionId: string) {
                         size="sm"
                         variant="outline"
                         type="button"
+                        :disabled="exportStore.isRunning"
                         @click="viewSession(session.id)"
                       >
                         <Eye />
