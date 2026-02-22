@@ -393,7 +393,7 @@ pub fn append_scraped_note(
             } else {
                 format!("{images_dir_name}/{image_name}")
             };
-            image_links.push(format!("![image {}]({relative_path})", index + 1));
+            image_links.push(format!("![image {}](<{relative_path}>)", index + 1));
         }
     }
 
