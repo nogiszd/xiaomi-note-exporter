@@ -128,6 +128,132 @@
     return (candidate?.textContent || "").trim();
   };
 
+  const normalizeNoteId = (value) => {
+    if (value === null || value === undefined) return "";
+    const raw = String(value).trim();
+    if (!raw) return "";
+
+    const directMatch = raw.match(/^[A-Za-z0-9_-]{10,}$/);
+    if (directMatch) {
+      return directMatch[0];
+    }
+
+    const pathMatch = raw.match(/\/note\/note\/([A-Za-z0-9_-]{10,})/i);
+    if (pathMatch) {
+      return pathMatch[1];
+    }
+
+    return "";
+  };
+
+  const findNoteIdInObject = (value, depth = 0, seen = new Set()) => {
+    if (depth > 5 || value === null || value === undefined) {
+      return "";
+    }
+
+    if (typeof value === "string" || typeof value === "number") {
+      return normalizeNoteId(value);
+    }
+
+    if (typeof value !== "object") {
+      return "";
+    }
+
+    if (seen.has(value)) {
+      return "";
+    }
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = findNoteIdInObject(item, depth + 1, seen);
+        if (found) return found;
+      }
+      return "";
+    }
+
+    for (const [key, nested] of Object.entries(value)) {
+      const keyNormalized = key.toLowerCase();
+      if (
+        keyNormalized === "id" ||
+        keyNormalized === "noteid" ||
+        keyNormalized === "entryid"
+      ) {
+        const found = normalizeNoteId(nested);
+        if (found) return found;
+      }
+    }
+
+    const preferredKeys = [
+      "note",
+      "entry",
+      "item",
+      "props",
+      "memoizedProps",
+      "pendingProps",
+      "children",
+    ];
+
+    for (const key of preferredKeys) {
+      if (!(key in value)) continue;
+      const found = findNoteIdInObject(value[key], depth + 1, seen);
+      if (found) return found;
+    }
+
+    return "";
+  };
+
+  const extractNoteId = (card) => {
+    if (!(card instanceof HTMLElement)) {
+      return "";
+    }
+
+    const dataSetCandidates = [
+      card.dataset.noteId,
+      card.dataset.noteid,
+      card.dataset.id,
+      card.dataset.entryId,
+      card.dataset.entryid,
+    ];
+    for (const candidate of dataSetCandidates) {
+      const normalized = normalizeNoteId(candidate);
+      if (normalized) return normalized;
+    }
+
+    const attributeCandidates = [
+      "data-note-id",
+      "data-noteid",
+      "data-id",
+      "data-entry-id",
+      "note-id",
+      "noteid",
+      "id",
+    ];
+    for (const attributeName of attributeCandidates) {
+      const normalized = normalizeNoteId(card.getAttribute(attributeName));
+      if (normalized) return normalized;
+    }
+
+    const linkedNode = card.querySelector("a[href*='/note/note/']");
+    if (linkedNode instanceof HTMLAnchorElement) {
+      const normalized = normalizeNoteId(linkedNode.href);
+      if (normalized) return normalized;
+    }
+
+    const internalKeys = Object.keys(card).filter(
+      (key) =>
+        key.startsWith("__reactProps$") ||
+        key.startsWith("__reactFiber$") ||
+        key.startsWith("__vueParentComponent"),
+    );
+    for (const key of internalKeys) {
+      const found = findNoteIdInObject(card[key]);
+      if (found) return found;
+    }
+
+    return "";
+  };
+
   const getImageSrc = (img) => {
     if (!(img instanceof HTMLImageElement)) return "";
     return img.currentSrc || img.src || "";
@@ -315,6 +441,8 @@
         await sleep(240);
 
         const createdString = extractCreatedString(target);
+        const noteId = extractNoteId(target);
+        const cookieHeader = document.cookie || "";
         const contentReady = await waitFor(
           () => !!document.querySelector("div[class*='pm-container']"),
           5000,
@@ -348,6 +476,8 @@
             content,
             contentHtml,
             createdString,
+            noteId: noteId || null,
+            cookieHeader: cookieHeader || null,
             unsupported,
             images,
           },

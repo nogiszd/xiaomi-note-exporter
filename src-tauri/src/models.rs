@@ -68,6 +68,10 @@ pub struct ScrapedNoteInput {
     #[serde(default)]
     pub content_html: String,
     pub created_string: String,
+    #[serde(default)]
+    pub note_id: Option<String>,
+    #[serde(default)]
+    pub cookie_header: Option<String>,
     pub unsupported: bool,
     #[serde(default)]
     pub images: Vec<ScrapedImageInput>,
