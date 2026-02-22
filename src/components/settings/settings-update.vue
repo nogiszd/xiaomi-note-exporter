@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { getVersion } from "@tauri-apps/api/app";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { checkLatestReleaseVersion } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RELEASES_LATEST_URL } from "@/lib/update";
+import { useUpdateStore } from "@/stores/update";
 import {
   Card,
   CardAction,
@@ -14,105 +15,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const RELEASES_LATEST_URL =
-  "https://github.com/nogiszd/xiaomi-note-exporter/releases/latest";
-
-const currentVersion = ref("");
-const latestVersion = ref("");
-const checking = ref(false);
-const errorMessage = ref("");
-const hasChecked = ref(false);
-
-function normalizeVersion(value: string): string {
-  return value.trim().replace(/^v/i, "");
-}
-
-function parseVersionParts(version: string): number[] | null {
-  const normalized = normalizeVersion(version);
-  if (!normalized) {
-    return null;
-  }
-
-  const parts = normalized.split(".");
-  if (parts.length === 0) {
-    return null;
-  }
-
-  const parsed = parts.map((part) => Number.parseInt(part, 10));
-  if (parsed.some((part) => !Number.isFinite(part))) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function compareVersions(left: string, right: string): number | null {
-  const leftParts = parseVersionParts(left);
-  const rightParts = parseVersionParts(right);
-  if (!leftParts || !rightParts) {
-    return null;
-  }
-
-  const maxLength = Math.max(leftParts.length, rightParts.length);
-
-  for (let index = 0; index < maxLength; index += 1) {
-    const leftValue = leftParts[index] ?? 0;
-    const rightValue = rightParts[index] ?? 0;
-    if (leftValue > rightValue) {
-      return 1;
-    }
-    if (leftValue < rightValue) {
-      return -1;
-    }
-  }
-
-  return 0;
-}
-
-const normalizedCurrentVersion = computed(() =>
-  normalizeVersion(currentVersion.value),
-);
-const normalizedLatestVersion = computed(() =>
-  normalizeVersion(latestVersion.value),
-);
-const comparisonResult = computed(() => {
-  if (!normalizedCurrentVersion.value || !normalizedLatestVersion.value) {
-    return null;
-  }
-  return compareVersions(
-    normalizedCurrentVersion.value,
-    normalizedLatestVersion.value,
-  );
-});
-const hasUpdate = computed(
-  () => comparisonResult.value !== null && comparisonResult.value < 0,
-);
-const upToDate = computed(
-  () => comparisonResult.value !== null && comparisonResult.value >= 0,
-);
-
-async function loadCurrentVersion() {
-  try {
-    currentVersion.value = normalizeVersion(await getVersion());
-  } catch {
-    currentVersion.value = "unknown";
-  }
-}
+const updateStore = useUpdateStore();
+const {
+  checking,
+  errorMessage,
+  hasChecked,
+  hasUpdate,
+  upToDate,
+  normalizedCurrentVersion,
+  normalizedLatestVersion,
+} = storeToRefs(updateStore);
 
 async function checkUpdates() {
-  checking.value = true;
-  hasChecked.value = false;
-  errorMessage.value = "";
-
-  try {
-    latestVersion.value = normalizeVersion(await checkLatestReleaseVersion());
-    hasChecked.value = true;
-  } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : "Failed to check for updates.";
-  } finally {
-    checking.value = false;
-  }
+  await updateStore.checkUpdates();
 }
 
 async function openLatestReleasePage() {
@@ -120,7 +35,7 @@ async function openLatestReleasePage() {
 }
 
 onMounted(() => {
-  void loadCurrentVersion();
+  void updateStore.loadCurrentVersion();
 });
 </script>
 
