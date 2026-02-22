@@ -413,11 +413,9 @@ pub fn append_scraped_note(
         return Err(AppError::SessionMismatch.to_string());
     }
 
-    let created_at = fetch_created_at_from_note_details(
-        note.note_id.as_deref(),
-        note.cookie_header.as_deref(),
-    )
-    .unwrap_or_else(|| date_parser::parse_created_date(&note.created_string));
+    let created_at =
+        fetch_created_at_from_note_details(note.note_id.as_deref(), note.cookie_header.as_deref())
+            .unwrap_or_else(|| date_parser::parse_created_date(&note.created_string));
     let note_index = export.notes_count + 1;
 
     let mut image_links = Vec::new();
