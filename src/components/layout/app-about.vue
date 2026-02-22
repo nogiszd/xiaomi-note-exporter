@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const appName = "Xiaomi Note Exporter";
-const appVersion = "2.0.0";
+const appVersion = "2.1.0";
 const appLicense = "GNU General Public License v3.0 (GPL-3.0)";
 
 const libraries = [
