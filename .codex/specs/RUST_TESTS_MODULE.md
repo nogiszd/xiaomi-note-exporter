@@ -12,6 +12,8 @@ This module covers service-level tests for:
 - `services::converter`
 - `services::files`
 - `services::markdown`
+- `services::scraper`
+- `services::update`
 
 ### Layout
 
@@ -21,6 +23,8 @@ This module covers service-level tests for:
   - `src-tauri/src/tests/converter_tests.rs`
   - `src-tauri/src/tests/files_tests.rs`
   - `src-tauri/src/tests/markdown_tests.rs`
+  - `src-tauri/src/tests/scraper_tests.rs`
+  - `src-tauri/src/tests/update_tests.rs`
 
 ### Wiring
 
@@ -34,6 +38,8 @@ The test root file imports each test file as a module:
 - `mod converter_tests;`
 - `mod files_tests;`
 - `mod markdown_tests;`
+- `mod scraper_tests;`
+- `mod update_tests;`
 
 ### Access Pattern
 
