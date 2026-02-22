@@ -1,7 +1,7 @@
 {
   "name": "xiaomi-note-exporter",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,24 +11,24 @@
     "tauri:dev": "tauri dev"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.0",
     "@tanstack/vue-table": "^8.21.3",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2",
     "@vee-validate/yup": "^4.15.1",
-    "@vueuse/core": "^14.2.0",
+    "@vueuse/core": "^14.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-vue-next": "^0.563.0",
-    "md-editor-v3": "^4.21.3",
+    "lucide-vue-next": "^0.575.0",
+    "md-editor-v3": "^6.3.1",
     "pinia": "^3.0.4",
-    "reka-ui": "^2.8.0",
-    "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.18",
+    "reka-ui": "^2.8.2",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.0",
     "vee-validate": "^4.15.1",
-    "vue": "^3.5.13",
-    "vue-router": "^5.0.2",
+    "vue": "^3.5.28",
+    "vue-router": "^5.0.3",
     "yup": "^1.7.1"
   },
   "devDependencies": {
