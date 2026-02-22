@@ -111,3 +111,14 @@
 - Theme is applied from settings on boot in [src/stores/settings.ts](src/stores/settings.ts).
 - Viewer uses `md-editor-v3` and writes edits back via `write_export_file`.
 - MCP server: use the shadcn-vue MCP server to lookup component docs/props since these components are used across the app.
+
+### Module References
+
+- Detailed module references live in `.codex/specs/`.
+- Current spec:
+  - `.codex/specs/RUST_TESTS_MODULE.md` (centralized Rust tests architecture and conventions).
+  - `.codex/specs/THOROUGH_EXPORT_IMPLEMENTED.md` (implemented rich HTML-to-Markdown export behavior).
+- For any task touching a module:
+  1. Check `.codex/specs/` for a matching module reference first.
+  2. If no module spec exists, use this file's structure map and inspect source files directly.
+  3. When introducing a new module pattern, add/update a spec file in `.codex/specs`.

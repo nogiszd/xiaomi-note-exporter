@@ -19,7 +19,7 @@ fn sha256_hex(input: &str) -> String {
         .collect::<String>()
 }
 
-fn is_markdown_file(path: &Path) -> bool {
+pub(crate) fn is_markdown_file(path: &Path) -> bool {
     path.extension()
         .and_then(|ext| ext.to_str())
         .map(|ext| {
@@ -29,7 +29,7 @@ fn is_markdown_file(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-fn parse_single_note(raw: &str) -> AppResult<NoteDto> {
+pub(crate) fn parse_single_note(raw: &str) -> AppResult<NoteDto> {
     let mut lines = raw
         .replace("\r\n", "\n")
         .split('\n')
@@ -73,7 +73,7 @@ fn parse_single_note(raw: &str) -> AppResult<NoteDto> {
     })
 }
 
-fn parse_notes_from_markdown(content: &str) -> AppResult<Vec<NoteDto>> {
+pub(crate) fn parse_notes_from_markdown(content: &str) -> AppResult<Vec<NoteDto>> {
     let sections = if content.contains("****") {
         content
             .split("****")

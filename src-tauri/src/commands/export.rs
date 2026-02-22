@@ -139,7 +139,7 @@ pub fn start_export(
         total_notes: 0,
         notes_count: 0,
         images_count: 0,
-        started_at: std::time::Instant::now(),
+        started_at: None,
         auth_window_label: scraper::auth_window_label(&session_id),
     };
 
@@ -321,6 +321,9 @@ pub fn report_export_total(
     }
 
     export.total_notes = total.max(1);
+    if export.started_at.is_none() {
+        export.started_at = Some(std::time::Instant::now());
+    }
     emit_progress(
         &app,
         export,
@@ -397,6 +400,11 @@ pub fn append_scraped_note(
     let markdown_note = crate::services::markdown::build_note_markdown(
         &note.title,
         &note.content,
+        if note.content_html.trim().is_empty() {
+            None
+        } else {
+            Some(note.content_html.as_str())
+        },
         &image_links,
         created_at,
         note.unsupported,
@@ -479,7 +487,10 @@ pub fn finish_scrape(
         ExportCompleteEvent {
             session_id: export.session_id,
             total: export.notes_count,
-            elapsed_ms: export.started_at.elapsed().as_millis() as u64,
+            elapsed_ms: export
+                .started_at
+                .map(|started_at| started_at.elapsed().as_millis() as u64)
+                .unwrap_or(0),
             output_path: export.output_root.to_string_lossy().to_string(),
         },
     );

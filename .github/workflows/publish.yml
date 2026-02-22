@@ -103,6 +103,9 @@ jobs:
         with:
           workspaces: ./src-tauri -> target
 
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+
       - name: Install frontend dependencies
         run: npm ci
 

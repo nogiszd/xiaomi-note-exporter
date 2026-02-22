@@ -95,7 +95,10 @@ async function saveFile() {
 }
 
 function goToConverter() {
-  void router.push("/converter");
+  void router.push({
+    name: "converter",
+    query: activeFilePath.value ? { sourcePath: activeFilePath.value } : {},
+  });
 }
 
 watch(

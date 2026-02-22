@@ -32,6 +32,6 @@ pub struct ActiveExportState {
     pub total_notes: u32,
     pub notes_count: u32,
     pub images_count: u32,
-    pub started_at: Instant,
+    pub started_at: Option<Instant>,
     pub auth_window_label: String,
 }

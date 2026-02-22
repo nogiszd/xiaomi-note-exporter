@@ -33,3 +33,4 @@ uuid = { version = "1", features = ["v4"] }
 walkdir = "2.5"
 url = "2.5"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
+scraper = "0.20"

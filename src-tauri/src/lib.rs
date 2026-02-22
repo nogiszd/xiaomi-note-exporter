@@ -4,6 +4,8 @@ mod error;
 mod models;
 mod services;
 mod state;
+#[cfg(test)]
+mod tests;
 
 use std::{fs, io};
 
@@ -33,6 +35,7 @@ fn close_splashscreen(app: tauri::AppHandle) -> Result<(), String> {
 pub fn run() {
     #[cfg(target_os = "windows")]
     {
+        // Safety: this runs at startup before worker threads are spawned.
         std::env::set_var(
             "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
             "--disable-features=CalculateNativeWinOcclusion",
