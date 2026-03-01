@@ -10,30 +10,16 @@ Xiaomi Note Exporter
 
 I wanted to export my own notes from Mi Cloud but there is no option for that. The only option was to rewrite the notes one by one. So I decided to make an app that would do it for me.
 
-## 💁 How to use?
+## [💾 Download](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest)
 
-**DISCLAIMER: This software will work only if you have your notes stored on [Mi Cloud](https://i.mi.com/)**
+### You can find help in [Wikis](https://github.com/nogiszd/xiaomi-note-exporter/wiki), or use direct links below:
 
-### Prerequisites :
+* ### [💻 Setup and Requirements](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Setup)
+* ### [💁 How to use?](https://github.com/nogiszd/xiaomi-note-exporter/wiki/How-to-use)
+* ### [✨ Features](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Features)
+* ### [❓ FAQ](https://github.com/nogiszd/xiaomi-note-exporter/wiki/FAQ)
 
-- **Windows machine (MacOS/Linux support coming soon)**
-
-**Download [latest release](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest)**, install the app as prompted, and launch.
-
-![Export tab](https://i.imgur.com/R3P98i7.png)
-
-### Normal usage:
-
-1.  Launch the app - you will be greeted with main screen.
-2.  Main tab allows you to input a Mi Cloud domain (if it differs than default one), choose if you want to split notes, and whether you want to export the images.
-3.  Pressing `Start Export` will open another window. You should sign-in to your Mi Cloud account.
-4.  After succeeding, app will automatically start to export your notes. Wait until process is done, and you'll be left with _Markdown_ file with your notes exported!
-5.  The session is persistent, so if you decide to export again, you shouldn't be asked to sign-in again.
-
-### _Warning!_
-
-Installer **can trigger** Windows SmartScreen because the code is unsigned.  
-In that case you can click **More info** and **Run anyway**.
+---
 
 ## 🦀 Rust rewrite
 
@@ -47,58 +33,6 @@ This release marks a major development milestone, significantly streamlining the
 
 Old code (C#) will be available on [legacy](https://github.com/nogiszd/xiaomi-note-exporter/tree/legacy) branch, and old executables are still available to download via **Releases**, but they're **out of support**.
 
-## 🗓️ History:
-
-App allows you to see history of your exports.  
-Files and export results are stored in OS's default Documents directory.
-
-Below are defaults that are used by the app:
-
-```
-Windows: C:\Users\<username>\Documents
-Linux: XDG_DOCUMENTS_DIR
-MacOS: $HOME/Documents
-```
-
-![History tab](https://i.imgur.com/HKBbi7B.png)
-
-App creates a folder named `Xiaomi Note Exporter` in your default Documents directory.
-
-Each export has few actions, that are described below:
-
-1. View - you can preview the markdown file (or multiple if export was selected as "split"), and here you can make manual edits, or convert them to JSON.
-2. Open directory - it will open directory where the file/folder is stored.
-3. Delete - you can delete the entry from the history, pop-up will ask you if you want to delete produced files too.
-
-## 🗒️ Note splitting
-
-On `Export` tab there is an option to select if your notes should be splitted into separate files.
-
-If so, an directory will be created and each note will be stored in separate file.
-
-This option shows another field to input specific format for timestamp - **but it must be compatible with [.NET specification](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings)**.
-
-## 🖼️ Image export
-
-As it is with note splitting, there is also an option to decide whether images stored in the notes should be exported along the notes.
-
-It is selected by default, but user can choose not to export them.
-
-## 🔗 Convert to JSON
-
-Third `Converter` tab is a tool that allows user to select a file (or folder if notes were split) and convert them to JSON format.
-
-![Converter tab](https://i.imgur.com/aFFjwCr.png)
-
-## ⚙️ Settings
-
-App has built in settings tab, that allows user to choose default export directory (instead of default created in Documents folder), and to choose theme (default is system deferred).
-
-This tab also has an update checker, for user convenience, without leaving app, you can check if your app is up to date.
-
-![Settings tab](https://i.imgur.com/Lyaoldl.png)
-
----
 
 ## 🤝 Open-source contributions
 
