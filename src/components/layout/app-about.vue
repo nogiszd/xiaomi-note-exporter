@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { getVersion } from "@tauri-apps/api/app";
+import { ref, onMounted } from "vue";
+
 import logo from "@/assets/logo.png";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,8 +23,12 @@ const emit = defineEmits<{
 }>();
 
 const appName = "Xiaomi Note Exporter";
-const appVersion = "2.1.0";
+const appVersion = ref("");
 const appLicense = "GNU General Public License v3.0 (GPL-3.0)";
+
+onMounted(async () => {
+  appVersion.value = await getVersion();
+});
 
 const libraries = [
   { name: "Tauri", license: "MIT" },

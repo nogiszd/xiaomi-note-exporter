@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 
 use base64::Engine as _;
-use chrono::{Local, Utc};
+use chrono::{Local, TimeZone, Utc};
 use reqwest::{blocking::Client, header};
+use serde_json::Value;
 use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
 use uuid::Uuid;
@@ -51,6 +52,67 @@ fn is_allowed_image_host(host: &str) -> bool {
         || host.ends_with(".i.mi.com")
         || host.ends_with(".micloud.xiaomi.net")
         || host.ends_with(".xmssdn.micloud.xiaomi.net")
+}
+
+fn parse_unix_timestamp_to_local(timestamp: i64) -> Option<chrono::DateTime<Local>> {
+    if timestamp.abs() >= 1_000_000_000_000 {
+        let seconds = timestamp.div_euclid(1_000);
+        let millis = timestamp.rem_euclid(1_000) as u32;
+        return Utc
+            .timestamp_opt(seconds, millis * 1_000_000)
+            .single()
+            .map(|dt| dt.with_timezone(&Local));
+    }
+
+    Utc.timestamp_opt(timestamp, 0)
+        .single()
+        .map(|dt| dt.with_timezone(&Local))
+}
+
+fn fetch_created_at_from_note_details(
+    note_id: Option<&str>,
+    cookie_header: Option<&str>,
+) -> Option<chrono::DateTime<Local>> {
+    let normalized_note_id = note_id?.trim();
+    if normalized_note_id.is_empty() {
+        return None;
+    }
+
+    let url = format!("https://us.i.mi.com/note/note/{normalized_note_id}");
+    let client = Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .user_agent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
+             (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        )
+        .build()
+        .ok()?;
+
+    let mut request = client.get(url);
+    if let Some(cookie) = cookie_header
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        request = request.header(header::COOKIE, cookie);
+    }
+
+    let response = request.send().ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+
+    let payload: Value = response.json().ok()?;
+    let created_timestamp = payload
+        .get("data")
+        .and_then(|data| data.get("entry"))
+        .and_then(|entry| entry.get("createdDate"))
+        .and_then(|value| {
+            value
+                .as_i64()
+                .or_else(|| value.as_str().and_then(|raw| raw.parse::<i64>().ok()))
+        })?;
+
+    parse_unix_timestamp_to_local(created_timestamp)
 }
 
 #[tauri::command]
@@ -351,7 +413,9 @@ pub fn append_scraped_note(
         return Err(AppError::SessionMismatch.to_string());
     }
 
-    let created_at = date_parser::parse_created_date(&note.created_string);
+    let created_at =
+        fetch_created_at_from_note_details(note.note_id.as_deref(), note.cookie_header.as_deref())
+            .unwrap_or_else(|| date_parser::parse_created_date(&note.created_string));
     let note_index = export.notes_count + 1;
 
     let mut image_links = Vec::new();

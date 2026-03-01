@@ -13,7 +13,7 @@ struct LatestReleaseApiResponse {
     tag_name: String,
 }
 
-fn normalize_version_tag(raw: &str) -> String {
+pub(crate) fn normalize_version_tag(raw: &str) -> String {
     raw.trim()
         .trim_start_matches(|c: char| c == 'v' || c == 'V')
         .to_string()
@@ -30,8 +30,15 @@ pub fn fetch_latest_release_version() -> AppResult<String> {
 }
 
 fn fetch_latest_release_version_from_api(client: &Client) -> AppResult<String> {
+    fetch_latest_release_version_from_api_url(client, LATEST_RELEASE_API_URL)
+}
+
+pub(crate) fn fetch_latest_release_version_from_api_url(
+    client: &Client,
+    api_url: &str,
+) -> AppResult<String> {
     let response = client
-        .get(LATEST_RELEASE_API_URL)
+        .get(api_url)
         .send()
         .map_err(|e| AppError::Message(format!("Failed to fetch latest release API: {e}")))?;
 

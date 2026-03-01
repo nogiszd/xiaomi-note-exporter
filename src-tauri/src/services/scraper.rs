@@ -18,7 +18,7 @@ pub fn auth_window_label(session_id: &str) -> String {
     format!("{AUTH_WINDOW_LABEL_PREFIX}-{session_id}")
 }
 
-fn build_scrape_script(session_id: &str, export_images: bool) -> String {
+pub(crate) fn build_scrape_script(session_id: &str, export_images: bool) -> String {
     SCRAPE_SCRIPT_TEMPLATE
         .replace("__SESSION_ID__", session_id)
         .replace(
@@ -27,13 +27,19 @@ fn build_scrape_script(session_id: &str, export_images: bool) -> String {
         )
 }
 
+pub(crate) fn build_notes_url(domain: &str) -> AppResult<Url> {
+    Ok(Url::parse(&format!(
+        "https://{domain}/note/h5/?_locale=en-US"
+    ))?)
+}
+
 pub fn create_auth_window(
     app: &AppHandle,
     session_id: &str,
     domain: &str,
     export_images: bool,
 ) -> AppResult<String> {
-    let notes_url = Url::parse(&format!("https://{domain}/note/h5/?_locale=en-US"))?;
+    let notes_url = build_notes_url(domain)?;
 
     let window_label = auth_window_label(session_id);
     let session_id_for_close = session_id.to_string();

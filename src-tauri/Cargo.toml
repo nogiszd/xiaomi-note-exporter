@@ -1,6 +1,6 @@
 [package]
 name = "xiaomi-note-exporter"
-version = "2.1.0"
+version = "2.2.0"
 description = "Tool for exporting notes from Mi Cloud"
 authors = ["you"]
 edition = "2021"
@@ -33,4 +33,4 @@ uuid = { version = "1", features = ["v4"] }
 walkdir = "2.5"
 url = "2.5"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
-scraper = "0.20"
+scraper = "0.25.0"
