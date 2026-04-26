@@ -208,6 +208,10 @@ jobs:
 
   create-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
     needs:
       - prepare-platforms
       - build-installers
