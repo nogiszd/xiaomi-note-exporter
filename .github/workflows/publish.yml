@@ -210,7 +210,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-      packages: write
+      id-token: write
       attestations: write
     needs:
       - prepare-platforms
