@@ -268,7 +268,7 @@ jobs:
           subject-path: ${{ steps.collect-installers.outputs.subject_path }}
 
       - name: Create Draft Release
-        uses: ncipollo/release-action@v1.20.0
+        uses: ncipollo/release-action@v1.21.0
         with:
           commit: ${{ github.sha }}
           tag: v${{ inputs.version }}
