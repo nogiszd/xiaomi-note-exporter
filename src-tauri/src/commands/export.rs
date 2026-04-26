@@ -419,6 +419,7 @@ pub fn append_scraped_note(
     let note_index = export.notes_count + 1;
 
     let mut image_links = Vec::new();
+    let mut skipped_images: u32 = 0;
     if export.export_images {
         let images_dir_name = export
             .images_dir
@@ -449,7 +450,10 @@ pub fn append_scraped_note(
             }
 
             let image_path = export.images_dir.join(&image_name);
-            files::save_base64_image(&image_path, &image.data_base64).map_err(|e| e.to_string())?;
+            if files::save_base64_image(&image_path, &image.data_base64).is_err() {
+                skipped_images += 1;
+                continue;
+            }
             export.images_count += 1;
 
             let relative_path = if export.split {
@@ -500,11 +504,16 @@ pub fn append_scraped_note(
     )
     .map_err(|e| e.to_string())?;
 
-    let log_line = if note.unsupported {
+    let mut log_line = if note.unsupported {
         format!("Processed note {} (unsupported type).", export.notes_count)
     } else {
         format!("Processed note {}: {}", export.notes_count, note.title)
     };
+    if skipped_images > 0 {
+        log_line.push_str(&format!(
+            " ({skipped_images} image(s) skipped due to errors)"
+        ));
+    }
     emit_progress(&app, export, &note.title, &log_line);
 
     Ok(())
