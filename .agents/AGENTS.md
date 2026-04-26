@@ -114,11 +114,11 @@
 
 ### Module References
 
-- Detailed module references live in `.codex/specs/`.
+- Detailed module references live in `.agents/specs/`.
 - Current spec:
-  - `.codex/specs/RUST_TESTS_MODULE.md` (centralized Rust tests architecture and conventions).
-  - `.codex/specs/THOROUGH_EXPORT_IMPLEMENTED.md` (implemented rich HTML-to-Markdown export behavior).
+  - `.agents/specs/RUST_TESTS_MODULE.md` (centralized Rust tests architecture and conventions).
+  - `.agents/specs/THOROUGH_EXPORT_IMPLEMENTED.md` (implemented rich HTML-to-Markdown export behavior).
 - For any task touching a module:
-  1. Check `.codex/specs/` for a matching module reference first.
+  1. Check `.agents/specs/` for a matching module reference first.
   2. If no module spec exists, use this file's structure map and inspect source files directly.
-  3. When introducing a new module pattern, add/update a spec file in `.codex/specs`.
+  3. When introducing a new module pattern, add/update a spec file in `.agents/specs`.
