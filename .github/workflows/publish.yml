@@ -4,6 +4,7 @@ permissions:
   contents: write
   id-token: write
   attestations: write
+  artifact-metadata: write
 
 on:
   workflow_dispatch:
@@ -61,9 +62,50 @@ jobs:
           platforms_json="[$(IFS=,; echo "${platforms[*]}")]"
           echo "platforms_json=$platforms_json" >> "$GITHUB_OUTPUT"
 
+  run-tests:
+    name: Test (${{ matrix.platform }})
+    needs: prepare-platforms
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.prepare-platforms.outputs.platforms_json) }}
+    runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || matrix.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install Rust stable
+        if: matrix.platform != 'macos'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rust stable (macOS Apple Silicon target)
+        if: matrix.platform == 'macos'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2.9.1
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+
   build-installers:
     name: Build installer (${{ matrix.platform }})
-    needs: prepare-platforms
+    needs:
+      - prepare-platforms
+      - run-tests
     strategy:
       fail-fast: false
       matrix:
@@ -99,12 +141,9 @@ jobs:
           targets: aarch64-apple-darwin
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2.8.2
+        uses: swatinem/rust-cache@v2.9.1
         with:
           workspaces: ./src-tauri -> target
-
-      - name: Run Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
 
       - name: Install frontend dependencies
         run: npm ci
@@ -224,7 +263,7 @@ jobs:
           "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Attest release artifact
-        uses: actions/attest-build-provenance@v3.2.0
+        uses: actions/attest-build-provenance@v4.1.0
         with:
           subject-path: ${{ steps.collect-installers.outputs.subject_path }}
 
