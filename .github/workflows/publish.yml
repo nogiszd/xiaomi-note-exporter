@@ -97,6 +97,7 @@ jobs:
         uses: swatinem/rust-cache@v2.9.1
         with:
           workspaces: ./src-tauri -> target
+          shared-key: rust-${{ matrix.platform }}
 
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
@@ -144,6 +145,7 @@ jobs:
         uses: swatinem/rust-cache@v2.9.1
         with:
           workspaces: ./src-tauri -> target
+          shared-key: rust-${{ matrix.platform }}
 
       - name: Install frontend dependencies
         run: npm ci
