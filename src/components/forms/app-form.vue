@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useYupForm } from "@/composables/use-yup-form";
 
 const props = withDefaults(
   defineProps<{

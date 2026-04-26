@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   AlertDialog,
@@ -11,8 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useUpdateStore } from "@/stores/update";
-import { RELEASES_LATEST_URL } from "@/lib/update";
 
 const updateStore = useUpdateStore();
 const { launchDialogOpen, normalizedCurrentVersion, normalizedLatestVersion } =

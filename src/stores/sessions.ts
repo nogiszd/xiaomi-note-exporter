@@ -1,5 +1,3 @@
-import { defineStore } from "pinia";
-import { deleteSession, getSession, getSessions } from "@/lib/api";
 import type { Session } from "@/types";
 
 interface SessionsState {

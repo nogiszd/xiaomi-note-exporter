@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { storeToRefs } from "pinia";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RELEASES_LATEST_URL } from "@/lib/update";
-import { useUpdateStore } from "@/stores/update";
 import {
   Card,
   CardAction,

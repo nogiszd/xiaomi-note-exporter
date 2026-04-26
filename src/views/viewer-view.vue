@@ -1,21 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { MdEditor } from "md-editor-v3";
 
-import { listExportFiles, readExportFile, writeExportFile } from "@/lib/api";
-import { useSessionsStore } from "@/stores/sessions";
-import { useSettingsStore } from "@/stores/settings";
 import type { FileEntry } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  isRemoteOrSpecialSource,
-  resolveRelativePath,
-  toNativeFilePath,
-} from "@/lib/image";
 
 import "md-editor-v3/lib/style.css";
 

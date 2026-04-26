@@ -1,6 +1,4 @@
-import { defineStore } from "pinia";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { cancelExport, startExport } from "@/lib/api";
 import type {
   ExportCompleteEvent,
   ExportErrorEvent,

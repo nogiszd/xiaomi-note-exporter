@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
 import { useField } from "vee-validate";
 import { FolderOpen, FileSearch, X } from "lucide-vue-next";
 import { open, save, type DialogFilter } from "@tauri-apps/plugin-dialog";

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getVersion } from "@tauri-apps/api/app";
-import { ref, onMounted } from "vue";
 
 import logo from "@/assets/logo.png";
 import { Badge } from "@/components/ui/badge";

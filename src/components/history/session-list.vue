@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import { reactive } from "vue";
-import { useRouter } from "vue-router";
-import { openInExplorer } from "@/lib/api";
-import { useSessionsStore } from "@/stores/sessions";
-import { useExportStore } from "@/stores/export";
 import type { Session } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +30,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { firstLetterToUpperCase } from "@/lib/utils";
 import { Eye, FolderOpen, Trash2 } from "lucide-vue-next";
 
 defineProps<{

@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { RouterView } from "vue-router";
 import AppSidebar from "@/components/layout/app-sidebar.vue";
 import AppHeader from "@/components/layout/app-header.vue";
 import UpdateAvailableDialog from "@/components/update/update-available-dialog.vue";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useExportStore } from "@/stores/export";
-import { useUpdateStore } from "@/stores/update";
 
 const exportStore = useExportStore();
 const updateStore = useUpdateStore();

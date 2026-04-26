@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { openInExplorer } from "@/lib/api";
-import { useExportStore } from "@/stores/export";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,7 +1,4 @@
-import { defineStore } from "pinia";
 import { getVersion } from "@tauri-apps/api/app";
-import { checkLatestReleaseVersion } from "@/lib/api";
-import { compareVersions, normalizeVersion } from "@/lib/update";
 
 interface UpdateState {
   currentVersion: string;

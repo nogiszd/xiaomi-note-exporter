@@ -2,8 +2,6 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
-import { useSettingsStore } from "@/stores/settings";
-import { closeSplashscreen } from "@/lib/api";
 import "./style.css";
 
 const SPLASH_DELAY_MS = import.meta.env.DEV ? 10_000 : 2_000;

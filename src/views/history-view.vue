@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SessionList from "@/components/history/session-list.vue";
-import { useSessionsStore } from "@/stores/sessions";
 
 const sessionsStore = useSessionsStore();
 

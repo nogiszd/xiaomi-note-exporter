@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
 import * as yup from "yup";
 import AppForm from "@/components/forms/app-form.vue";
 import AppFormPathField from "@/components/forms/app-form-path-field.vue";
@@ -19,8 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { openInExplorer } from "@/lib/api";
-import { useSettingsStore } from "@/stores/settings";
 import type { AppSettings } from "@/types";
 
 const settingsStore = useSettingsStore();

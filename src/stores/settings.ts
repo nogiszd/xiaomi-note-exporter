@@ -1,5 +1,3 @@
-import { defineStore } from "pinia";
-import { getAppSettings, updateAppSettings } from "@/lib/api";
 import type { AppSettings } from "@/types";
 
 const FALLBACK_SETTINGS: AppSettings = {

@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import ExportForm from "@/components/export/export-form.vue";
 import ExportProgress from "@/components/export/export-progress.vue";
-import { useExportStore } from "@/stores/export";
 import type { StartExportPayload } from "@/types";
 
 const exportStore = useExportStore();
