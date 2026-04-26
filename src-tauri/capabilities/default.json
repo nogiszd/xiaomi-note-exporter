@@ -7,6 +7,7 @@
     "urls": [
       "https://*.i.mi.com/*",
       "https://*.micloud.mi.com/*",
+      "https://*.xiaomi.net/*",
       "https://i.mi.com/*",
       "https://account.xiaomi.com/*",
       "https://github.com/*"

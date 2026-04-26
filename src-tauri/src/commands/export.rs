@@ -50,8 +50,8 @@ fn emit_progress(app: &AppHandle, export: &ActiveExportState, last_title: &str, 
 fn is_allowed_image_host(host: &str) -> bool {
     host == "i.mi.com"
         || host.ends_with(".i.mi.com")
-        || host.ends_with(".micloud.xiaomi.net")
-        || host.ends_with(".xmssdn.micloud.xiaomi.net")
+        || host.ends_with(".xiaomi.net")
+        || host.ends_with(".mi.com")
 }
 
 fn parse_unix_timestamp_to_local(timestamp: i64) -> Option<chrono::DateTime<Local>> {
