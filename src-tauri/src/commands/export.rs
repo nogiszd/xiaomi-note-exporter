@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use base64::Engine as _;
+use sha2::{Digest, Sha256};
 use chrono::{Local, TimeZone, Utc};
 use reqwest::{blocking::Client, header};
 use serde_json::Value;
@@ -428,23 +429,19 @@ pub fn append_scraped_note(
             .unwrap_or("images")
             .to_string();
 
+        let ts_hash = {
+            let mut hasher = Sha256::new();
+            hasher.update(created_at.to_rfc3339().as_bytes());
+            let result = hasher.finalize();
+            result.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+        };
+
         for (index, image) in note.images.iter().enumerate() {
             if image.data_base64.trim().is_empty() {
                 continue;
             }
 
-            let source_name = if image.name.trim().is_empty() {
-                format!(
-                    "note_img_{}_{}_{}.png",
-                    note_index,
-                    index,
-                    created_at.format(&export.chrono_timestamp_format)
-                )
-            } else {
-                image.name.clone()
-            };
-
-            let mut image_name = markdown::sanitize_filename(&source_name);
+            let mut image_name = format!("note_img_{}_{}_{}.png", note_index, index + 1, ts_hash);
             if !image_name.to_ascii_lowercase().ends_with(".png") {
                 image_name.push_str(".png");
             }
@@ -482,9 +479,8 @@ pub fn append_scraped_note(
         let mut file_name = markdown::sanitize_filename(&format!(
             "note_{}_{:04}.md",
             created_at.format(&export.chrono_timestamp_format),
-            note_index
+            note_index,
         ));
-
         if !file_name.to_ascii_lowercase().ends_with(".md") {
             file_name.push_str(".md");
         }

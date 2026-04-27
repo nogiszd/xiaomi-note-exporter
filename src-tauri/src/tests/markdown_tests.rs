@@ -1,4 +1,76 @@
-use crate::services::markdown::to_markdown_from_html;
+use crate::services::markdown::{dotnet_to_chrono_format, sanitize_filename, to_markdown_from_html};
+
+fn make_split_filename(formatted_date: &str, note_index: u32) -> String {
+    let mut name = sanitize_filename(&format!("note_{}_{:04}.md", formatted_date, note_index));
+    if !name.to_ascii_lowercase().ends_with(".md") {
+        name.push_str(".md");
+    }
+    name
+}
+
+#[test]
+fn dotnet_to_chrono_format_converts_underscore_format() {
+    assert_eq!(
+        dotnet_to_chrono_format("dd-MM-yyyy_HH-mm-ss"),
+        "%d-%m-%Y_%H-%M-%S"
+    );
+}
+
+#[test]
+fn dotnet_to_chrono_format_converts_slash_and_colon_format() {
+    assert_eq!(
+        dotnet_to_chrono_format("yyyy/MM/dd HH:mm:ss"),
+        "%Y/%m/%d %H:%M:%S"
+    );
+}
+
+#[test]
+fn dotnet_to_chrono_format_falls_back_on_empty_input() {
+    assert_eq!(dotnet_to_chrono_format(""), "%d-%m-%Y_%H-%M-%S");
+}
+
+#[test]
+fn dotnet_to_chrono_format_falls_back_on_unrecognized_input() {
+    assert_eq!(dotnet_to_chrono_format("not-a-format"), "%d-%m-%Y_%H-%M-%S");
+}
+
+#[test]
+fn split_filename_safe_format_passes_through_unchanged() {
+    assert_eq!(
+        make_split_filename("01-04-2026_14-30-00", 1),
+        "note_01-04-2026_14-30-00_0001.md"
+    );
+}
+
+#[test]
+fn split_filename_sanitizes_slashes_in_date() {
+    assert_eq!(
+        make_split_filename("01/04/2026_14-30-00", 2),
+        "note_01_04_2026_14-30-00_0002.md"
+    );
+}
+
+#[test]
+fn split_filename_sanitizes_colons_in_date() {
+    assert_eq!(
+        make_split_filename("2026-04-01 14:30:00", 3),
+        "note_2026-04-01 14_30_00_0003.md"
+    );
+}
+
+#[test]
+fn split_filename_zero_pads_note_index_to_four_digits() {
+    assert_eq!(
+        make_split_filename("01-04-2026_14-30-00", 42),
+        "note_01-04-2026_14-30-00_0042.md"
+    );
+}
+
+#[test]
+fn split_filename_always_ends_with_md_extension() {
+    let name = make_split_filename("01-04-2026_14-30-00", 1);
+    assert!(name.ends_with(".md"));
+}
 
 #[test]
 fn maps_heading_classes() {

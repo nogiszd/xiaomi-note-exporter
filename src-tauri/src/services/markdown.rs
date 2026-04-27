@@ -100,11 +100,9 @@ pub fn dotnet_to_chrono_format(input: &str) -> String {
         ("mm", "%M"),
         ("ss", "%S"),
     ];
-
     for (dotnet, chrono) in replacements {
         output = output.replace(dotnet, chrono);
     }
-
     if output.contains('%') {
         output
     } else {

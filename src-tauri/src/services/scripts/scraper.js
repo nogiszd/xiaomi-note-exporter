@@ -335,12 +335,7 @@
           cookieHeader: cookieHeader || null,
         });
         if (!base64) continue;
-        const sanitizedCreated =
-          (createdString || "").replace(/[^0-9a-zA-Z_-]+/g, "_") || "unknown";
-        images.push({
-          name: `note_img_${index}_${sanitizedCreated}.png`,
-          dataBase64: base64,
-        });
+        images.push({ dataBase64: base64 });
       } catch (e) {
         console.error("Failed to fetch image", { src }, e);
       }
