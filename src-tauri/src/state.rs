@@ -25,7 +25,9 @@ impl AppState {
 pub struct ActiveExportState {
     pub session_id: String,
     pub split: bool,
+    pub name_by_title: bool,
     pub chrono_timestamp_format: String,
+    pub chrono_created_date_format: String,
     pub export_images: bool,
     pub output_root: PathBuf,
     pub images_dir: PathBuf,

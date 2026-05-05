@@ -90,7 +90,7 @@ impl ParsedBlock {
     }
 }
 
-pub fn dotnet_to_chrono_format(input: &str) -> String {
+fn dotnet_to_chrono_with_fallback(input: &str, fallback: &str) -> String {
     let mut output = input.to_string();
     let replacements = [
         ("yyyy", "%Y"),
@@ -106,8 +106,16 @@ pub fn dotnet_to_chrono_format(input: &str) -> String {
     if output.contains('%') {
         output
     } else {
-        "%d-%m-%Y_%H-%M-%S".to_string()
+        fallback.to_string()
     }
+}
+
+pub fn dotnet_to_chrono_format(input: &str) -> String {
+    dotnet_to_chrono_with_fallback(input, "%d-%m-%Y_%H-%M-%S")
+}
+
+pub fn dotnet_to_chrono_created_date_format(input: &str) -> String {
+    dotnet_to_chrono_with_fallback(input, "%d/%m/%Y %H:%M")
 }
 
 pub fn sanitize_filename(input: &str) -> String {
@@ -645,6 +653,7 @@ pub fn build_note_markdown(
     content_html: Option<&str>,
     image_links: &[String],
     created_at: DateTime<Local>,
+    created_date_format: &str,
     unsupported: bool,
 ) -> String {
     let safe_title = if title.trim().is_empty() {
@@ -680,7 +689,7 @@ pub fn build_note_markdown(
 
     markdown.push_str(&format!(
         "*Created at: {}*\n",
-        created_at.format("%d/%m/%Y %H:%M")
+        created_at.format(created_date_format)
     ));
 
     markdown

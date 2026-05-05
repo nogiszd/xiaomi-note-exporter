@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { MdEditor } from "md-editor-v3";
+import { ChevronLeft } from "lucide-vue-next";
 
 import type { FileEntry } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -96,14 +97,16 @@ async function loadSessionFiles() {
     }
 
     try {
-      files.value = await listExportFiles(session.outputPath);
+      const entries = await listExportFiles(session.outputPath);
+      files.value = entries.filter((entry) =>
+        entry.name.toLowerCase().endsWith(".md"),
+      );
     } catch {
-      files.value = [
-        {
-          name: session.outputPath.split(/[\\/]/).pop() || session.outputPath,
-          path: session.outputPath,
-        },
-      ];
+      const fallbackName =
+        session.outputPath.split(/[\\/]/).pop() || session.outputPath;
+      files.value = fallbackName.toLowerCase().endsWith(".md")
+        ? [{ name: fallbackName, path: session.outputPath }]
+        : [];
     }
 
     activeFilePath.value = files.value[0]?.path || "";
@@ -150,12 +153,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="grid h-full gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-    <Card>
+  <section class="grid h-full min-h-0 gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+    <Card class="flex h-full min-h-0 flex-col overflow-hidden">
       <CardHeader>
         <CardTitle class="text-base">Files</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent class="min-h-0 flex-1 overflow-hidden">
         <ScrollArea class="h-full">
           <div class="grid gap-2">
             <Button
@@ -176,43 +179,50 @@ onMounted(() => {
       </CardContent>
     </Card>
 
-    <div class="grid gap-4">
-      <div class="flex flex-wrap items-center gap-2">
-        <Button type="button" @click="saveFile">Save</Button>
-        <Button type="button" variant="outline" @click="goToConverter"
-          >Export to JSON</Button
-        >
-        <span v-if="saveStatus" class="text-xs text-muted-foreground">{{
-          saveStatus
-        }}</span>
+    <div class="flex h-full min-h-0 flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <Button type="button" @click="saveFile">Save</Button>
+          <Button type="button" variant="outline" @click="goToConverter">
+            Export to JSON
+          </Button>
+          <span v-if="saveStatus" class="text-xs text-muted-foreground">
+            {{ saveStatus }}
+          </span>
+        </div>
+        <Button type="button" variant="outline" @click="router.back()">
+          <ChevronLeft /> Go Back
+        </Button>
       </div>
 
-      <Card v-if="loading">
-        <CardContent class="pt-6 text-sm text-muted-foreground"
-          >Loading files...</CardContent
-        >
+      <Card v-if="loading" class="flex-1">
+        <CardContent class="pt-6 text-sm text-muted-foreground">
+          Loading files...
+        </CardContent>
       </Card>
-      <Card v-else-if="errorMessage" class="border-destructive/50">
-        <CardContent class="pt-6 text-sm text-destructive">{{
-          errorMessage
-        }}</CardContent>
+      <Card v-else-if="errorMessage" class="flex-1 border-destructive/50">
+        <CardContent class="pt-6 text-sm text-destructive">
+          {{ errorMessage }}
+        </CardContent>
       </Card>
-      <Card v-else-if="!activeFile">
-        <CardContent class="pt-6 text-sm text-muted-foreground"
-          >No file selected.</CardContent
-        >
+      <Card v-else-if="!activeFile" class="flex-1">
+        <CardContent class="pt-6 text-sm text-muted-foreground">
+          No file selected.
+        </CardContent>
       </Card>
-      <MdEditor
-        v-else
-        v-model="content"
-        :theme="editorTheme"
-        preview-theme="github"
-        code-theme="atom"
-        language="en-US"
-        :sanitize="sanitizePreviewHtml"
-        :style="{ height: '80vh', borderRadius: '0.475rem' }"
-        @on-save="saveFile"
-      />
+      <div v-else class="min-h-0 flex-1">
+        <MdEditor
+          v-model="content"
+          :theme="editorTheme"
+          preview-theme="github"
+          code-theme="atom"
+          language="en-US"
+          :sanitize="sanitizePreviewHtml"
+          :toolbars-exclude="['fullscreen', 'save', 'htmlPreview', 'github']"
+          :style="{ height: '100%', borderRadius: '0.475rem' }"
+          @on-save="saveFile"
+        />
+      </div>
     </div>
   </section>
 </template>

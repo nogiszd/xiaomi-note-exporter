@@ -123,7 +123,9 @@ pub fn start_export(
     domain: String,
     output_dir: String,
     split: bool,
+    name_by_title: bool,
     timestamp_format: String,
+    created_date_format: String,
     export_images: bool,
 ) -> CommandResult<String> {
     {
@@ -183,6 +185,7 @@ pub fn start_export(
         notes_count: 0,
         images_count: 0,
         split_mode: split,
+        name_by_title,
         timestamp_format: timestamp_format.clone(),
         images_enabled: export_images,
         output_path: output_root.to_string_lossy().to_string(),
@@ -195,7 +198,11 @@ pub fn start_export(
     let active_export = ActiveExportState {
         session_id: session_id.clone(),
         split,
+        name_by_title,
         chrono_timestamp_format: markdown::dotnet_to_chrono_format(&timestamp_format),
+        chrono_created_date_format: markdown::dotnet_to_chrono_created_date_format(
+            &created_date_format,
+        ),
         export_images,
         output_root: output_root.clone(),
         images_dir,
@@ -472,15 +479,21 @@ pub fn append_scraped_note(
         },
         &image_links,
         created_at,
+        &export.chrono_created_date_format,
         note.unsupported,
     );
 
     if export.split {
-        let mut file_name = markdown::sanitize_filename(&format!(
-            "note_{}_{:04}.md",
-            created_at.format(&export.chrono_timestamp_format),
-            note_index,
-        ));
+        let trimmed_title = note.title.trim();
+        let mut file_name = if export.name_by_title && !trimmed_title.is_empty() {
+            markdown::sanitize_filename(&format!("{}_{:04}.md", trimmed_title, note_index))
+        } else {
+            markdown::sanitize_filename(&format!(
+                "note_{}_{:04}.md",
+                created_at.format(&export.chrono_timestamp_format),
+                note_index,
+            ))
+        };
         if !file_name.to_ascii_lowercase().ends_with(".md") {
             file_name.push_str(".md");
         }
@@ -503,7 +516,12 @@ pub fn append_scraped_note(
     let mut log_line = if note.unsupported {
         format!("Processed note {} (unsupported type).", export.notes_count)
     } else {
-        format!("Processed note {}: {}", export.notes_count, note.title)
+        let display_title = if note.title.trim().is_empty() {
+            "No title"
+        } else {
+            note.title.trim()
+        };
+        format!("Processed note {}: {}", export.notes_count, display_title)
     };
     if skipped_images > 0 {
         log_line.push_str(&format!(
