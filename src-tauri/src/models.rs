@@ -11,6 +11,7 @@ pub struct Session {
     pub notes_count: u32,
     pub images_count: u32,
     pub split_mode: bool,
+    pub name_by_title: bool,
     pub timestamp_format: String,
     pub images_enabled: bool,
     pub output_path: String,

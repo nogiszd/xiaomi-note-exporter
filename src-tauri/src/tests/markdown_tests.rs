@@ -1,4 +1,9 @@
-use crate::services::markdown::{dotnet_to_chrono_format, sanitize_filename, to_markdown_from_html};
+use chrono::{Local, TimeZone};
+
+use crate::services::markdown::{
+    build_note_markdown, dotnet_to_chrono_created_date_format, dotnet_to_chrono_format,
+    sanitize_filename, to_markdown_from_html,
+};
 
 fn make_split_filename(formatted_date: &str, note_index: u32) -> String {
     let mut name = sanitize_filename(&format!("note_{}_{:04}.md", formatted_date, note_index));
@@ -32,6 +37,156 @@ fn dotnet_to_chrono_format_falls_back_on_empty_input() {
 #[test]
 fn dotnet_to_chrono_format_falls_back_on_unrecognized_input() {
     assert_eq!(dotnet_to_chrono_format("not-a-format"), "%d-%m-%Y_%H-%M-%S");
+}
+
+#[test]
+fn dotnet_to_chrono_created_date_format_converts_default_format() {
+    assert_eq!(
+        dotnet_to_chrono_created_date_format("dd/MM/yyyy HH:mm"),
+        "%d/%m/%Y %H:%M"
+    );
+}
+
+#[test]
+fn dotnet_to_chrono_created_date_format_converts_iso_like_format() {
+    assert_eq!(
+        dotnet_to_chrono_created_date_format("yyyy-MM-dd HH:mm:ss"),
+        "%Y-%m-%d %H:%M:%S"
+    );
+}
+
+#[test]
+fn dotnet_to_chrono_created_date_format_falls_back_on_empty_input() {
+    assert_eq!(dotnet_to_chrono_created_date_format(""), "%d/%m/%Y %H:%M");
+}
+
+#[test]
+fn dotnet_to_chrono_created_date_format_falls_back_on_unrecognized_input() {
+    assert_eq!(
+        dotnet_to_chrono_created_date_format("not-a-format"),
+        "%d/%m/%Y %H:%M"
+    );
+}
+
+#[test]
+fn dotnet_to_chrono_created_date_format_uses_distinct_fallback_from_filename_format() {
+    assert_ne!(
+        dotnet_to_chrono_created_date_format(""),
+        dotnet_to_chrono_format("")
+    );
+}
+
+#[test]
+fn build_note_markdown_uses_default_created_date_format() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .expect("valid local datetime");
+    let chrono_format = dotnet_to_chrono_created_date_format("dd/MM/yyyy HH:mm");
+
+    let output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &chrono_format,
+        false,
+    );
+
+    assert!(
+        output.ends_with("*Created at: 05/05/2026 13:42*\n"),
+        "output did not end with default-format footer: {output:?}"
+    );
+}
+
+#[test]
+fn build_note_markdown_honors_custom_created_date_format() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .expect("valid local datetime");
+    let chrono_format = dotnet_to_chrono_created_date_format("yyyy-MM-dd HH:mm:ss");
+
+    let output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &chrono_format,
+        false,
+    );
+
+    assert!(
+        output.ends_with("*Created at: 2026-05-05 13:42:00*\n"),
+        "output did not end with custom-format footer: {output:?}"
+    );
+}
+
+#[test]
+fn build_note_markdown_falls_back_to_default_when_format_is_empty() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .expect("valid local datetime");
+    let chrono_format = dotnet_to_chrono_created_date_format("");
+
+    let output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &chrono_format,
+        false,
+    );
+
+    assert!(
+        output.ends_with("*Created at: 05/05/2026 13:42*\n"),
+        "output did not fall back to default format: {output:?}"
+    );
+}
+
+#[test]
+fn build_note_markdown_falls_back_to_default_when_format_is_unrecognized() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .expect("valid local datetime");
+    let chrono_format = dotnet_to_chrono_created_date_format("not-a-format");
+
+    let output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &chrono_format,
+        false,
+    );
+
+    assert!(
+        output.ends_with("*Created at: 05/05/2026 13:42*\n"),
+        "output did not fall back to default format: {output:?}"
+    );
+}
+
+#[test]
+fn build_note_markdown_default_and_custom_formats_differ() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .expect("valid local datetime");
+    let default_format = dotnet_to_chrono_created_date_format("dd/MM/yyyy HH:mm");
+    let custom_format = dotnet_to_chrono_created_date_format("yyyy-MM-dd");
+
+    let default_output =
+        build_note_markdown("Title", "body", None, &[], created_at, &default_format, false);
+    let custom_output =
+        build_note_markdown("Title", "body", None, &[], created_at, &custom_format, false);
+
+    assert_ne!(default_output, custom_output);
 }
 
 #[test]

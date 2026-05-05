@@ -13,7 +13,9 @@ export async function startExport(
     domain: payload.domain,
     outputDir: payload.outputDir,
     split: payload.split,
+    nameByTitle: payload.nameByTitle,
     timestampFormat: payload.timestampFormat,
+    createdDateFormat: payload.createdDateFormat,
     exportImages: payload.exportImages,
   });
 }

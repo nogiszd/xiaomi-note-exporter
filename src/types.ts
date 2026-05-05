@@ -9,6 +9,7 @@ export interface Session {
   notesCount: number;
   imagesCount: number;
   splitMode: boolean;
+  nameByTitle: boolean;
   timestampFormat: string;
   imagesEnabled: boolean;
   outputPath: string;
@@ -25,7 +26,9 @@ export interface StartExportPayload {
   domain: string;
   outputDir: string;
   split: boolean;
+  nameByTitle: boolean;
   timestampFormat: string;
+  createdDateFormat: string;
   exportImages: boolean;
 }
 

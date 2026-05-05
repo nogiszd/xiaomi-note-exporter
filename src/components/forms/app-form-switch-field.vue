@@ -15,19 +15,24 @@ const props = withDefaults(
     label: string;
     description?: string;
     disabled?: boolean;
+    borderless?: boolean;
   }>(),
   {
     description: "",
     disabled: false,
+    borderless: false,
   },
 );
 
 const { value, errorMessage, setValue } = useField<boolean>(() => props.name);
 const fieldId = computed(() => `field-${props.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`);
+const wrapperClass = computed(() =>
+  props.borderless ? "items-center" : "items-center rounded-lg border p-3",
+);
 </script>
 
 <template>
-  <Field orientation="horizontal" class="items-center rounded-lg border p-3">
+  <Field orientation="horizontal" :class="wrapperClass">
     <FieldContent>
       <FieldLabel :for="fieldId">{{ label }}</FieldLabel>
       <FieldDescription v-if="description">{{ description }}</FieldDescription>

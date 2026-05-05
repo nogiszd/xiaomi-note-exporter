@@ -10,10 +10,11 @@ struct Migration {
     sql: &'static str,
 }
 
-const MIGRATIONS: &[Migration] = &[Migration {
-    version: 1,
-    name: "0001_create_sessions_table",
-    sql: "CREATE TABLE IF NOT EXISTS sessions (
+const MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "0001_create_sessions_table",
+        sql: "CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
             domain TEXT NOT NULL,
             started_at TEXT NOT NULL,
@@ -28,9 +29,15 @@ const MIGRATIONS: &[Migration] = &[Migration {
             images_dir_name TEXT,
             error_message TEXT
         );",
-}];
+    },
+    Migration {
+        version: 2,
+        name: "0002_add_name_by_title",
+        sql: "ALTER TABLE sessions ADD COLUMN name_by_title INTEGER NOT NULL DEFAULT 0;",
+    },
+];
 // Add new migrations here with strictly increasing versions.
-// Example: Migration { version: 2, name: "0002_add_new_column", sql: "ALTER TABLE ..." }
+// Example: Migration { version: 3, name: "0003_add_new_column", sql: "ALTER TABLE ..." }
 
 fn validate_migrations() -> AppResult<()> {
     let mut prev_version = 0;
