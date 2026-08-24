@@ -14,7 +14,7 @@ fn auth_window_label_prefixes_session_id() {
 fn build_notes_url_uses_expected_micloud_notes_path() {
     let url = build_notes_url("us.i.mi.com").expect("valid domain should produce URL");
 
-    assert_eq!(url.as_str(), "https://us.i.mi.com/note/h5/?_locale=en-US");
+    assert_eq!(url.as_str(), "https://us.i.mi.com/note/h5/?_locale=en_US");
 }
 
 #[test]

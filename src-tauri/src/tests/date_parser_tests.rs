@@ -3,6 +3,7 @@ use chrono::{DateTime, Datelike, Local, Timelike, Utc};
 use crate::services::date_parser::{
     parse_created_date, parse_created_line_to_rfc3339, parse_markdown_created_line,
 };
+use crate::services::markdown::dotnet_to_chrono_format;
 
 #[test]
 fn parses_rfc3339_created_line_without_changing_instant() {
@@ -50,6 +51,29 @@ fn parses_simplified_month_day_and_time() {
     assert_eq!(parsed.day(), 31);
     assert_eq!(parsed.hour(), 23);
     assert_eq!(parsed.minute(), 59);
+}
+
+#[test]
+fn formats_ambiguous_scraped_date_in_configured_filename_order() {
+    let parsed = parse_created_date("05/12/2026 13:42");
+    let timestamp_format = dotnet_to_chrono_format("yyyy/MM/dd HH:mm");
+
+    assert_eq!(
+        parsed.format(&timestamp_format).to_string(),
+        "2026/05/12 13:42"
+    );
+}
+
+#[test]
+fn keeps_ambiguous_exported_markdown_dates_day_first() {
+    let output = parse_markdown_created_line("*Created at: 05/12/2026 13:42*")
+        .expect("markdown created line should parse");
+    let parsed_local = DateTime::parse_from_rfc3339(&output)
+        .expect("valid output rfc3339")
+        .with_timezone(&Local);
+
+    assert_eq!(parsed_local.month(), 12);
+    assert_eq!(parsed_local.day(), 5);
 }
 
 #[test]

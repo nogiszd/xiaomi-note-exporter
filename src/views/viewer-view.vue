@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { MdEditor } from "md-editor-v3";
-import { ChevronLeft } from "lucide-vue-next";
+import { ChevronLeft } from "@lucide/vue";
 
 import type { FileEntry } from "@/types";
 import { Button } from "@/components/ui/button";

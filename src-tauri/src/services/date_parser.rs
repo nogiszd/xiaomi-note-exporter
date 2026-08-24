@@ -62,7 +62,7 @@ fn parse_simplified_md_hm(input: &str) -> Option<DateTime<Local>> {
     local_from_parts(Local::now().year(), month, day, hour, minute)
 }
 
-pub fn parse_created_date(input: &str) -> DateTime<Local> {
+fn parse_created_date_with_order(input: &str, month_first: bool) -> DateTime<Local> {
     let normalized = input.trim();
     if normalized.is_empty() {
         return Local::now();
@@ -87,7 +87,16 @@ pub fn parse_created_date(input: &str) -> DateTime<Local> {
         return parsed;
     }
 
-    let formats = [
+    let month_first_formats = [
+        "%m/%d/%Y %H:%M",
+        "%d/%m/%Y %H:%M",
+        "%Y/%m/%d %H:%M",
+        "%m/%d/%Y %-H:%M",
+        "%d/%m/%Y %-H:%M",
+        "%m/%d/%Y %I:%M %p",
+        "%-m/%-d/%Y %-I:%M %p",
+    ];
+    let day_first_formats = [
         "%d/%m/%Y %H:%M",
         "%m/%d/%Y %H:%M",
         "%Y/%m/%d %H:%M",
@@ -96,6 +105,11 @@ pub fn parse_created_date(input: &str) -> DateTime<Local> {
         "%m/%d/%Y %I:%M %p",
         "%-m/%-d/%Y %-I:%M %p",
     ];
+    let formats = if month_first {
+        month_first_formats
+    } else {
+        day_first_formats
+    };
 
     for format in formats {
         if let Ok(naive) = NaiveDateTime::parse_from_str(normalized, format) {
@@ -115,6 +129,10 @@ pub fn parse_created_date(input: &str) -> DateTime<Local> {
     Local::now()
 }
 
+pub fn parse_created_date(input: &str) -> DateTime<Local> {
+    parse_created_date_with_order(input, true)
+}
+
 pub fn parse_created_line_to_rfc3339(input: &str) -> AppResult<String> {
     let cleaned = input.trim();
 
@@ -122,7 +140,7 @@ pub fn parse_created_line_to_rfc3339(input: &str) -> AppResult<String> {
         return Ok(parsed_rfc.with_timezone(&Utc).to_rfc3339());
     }
 
-    let parsed = parse_created_date(cleaned);
+    let parsed = parse_created_date_with_order(cleaned, false);
     Ok(parsed.with_timezone(&Utc).to_rfc3339())
 }
 

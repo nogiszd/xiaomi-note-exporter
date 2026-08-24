@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  Download,
-  FileJson2,
-  FileText,
-  History,
-  Settings,
-} from "lucide-vue-next";
+import { Download, FileJson2, FileText, History, Settings } from "@lucide/vue";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 

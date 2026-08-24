@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useField } from "vee-validate";
-import { FolderOpen, FileSearch, X } from "lucide-vue-next";
+import { FolderOpen, FileSearch, X } from "@lucide/vue";
 import { open, save, type DialogFilter } from "@tauri-apps/plugin-dialog";
 import {
   Field,
@@ -35,8 +35,12 @@ const props = withDefaults(
   },
 );
 
-const { value, errorMessage, handleBlur, setValue } = useField<string>(() => props.name);
-const fieldId = computed(() => `field-${props.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`);
+const { value, errorMessage, handleBlur, setValue } = useField<string>(
+  () => props.name,
+);
+const fieldId = computed(
+  () => `field-${props.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`,
+);
 const isPicking = ref(false);
 
 const browseLabel = computed(() => {
@@ -45,7 +49,9 @@ const browseLabel = computed(() => {
   }
   return props.operation === "save" ? "Save As" : "Browse File";
 });
-const browseIcon = computed(() => (props.mode === "directory" ? FolderOpen : FileSearch));
+const browseIcon = computed(() =>
+  props.mode === "directory" ? FolderOpen : FileSearch,
+);
 const resolvedDialogTitle = computed(() => {
   if (props.dialogTitle.trim()) {
     return props.dialogTitle;

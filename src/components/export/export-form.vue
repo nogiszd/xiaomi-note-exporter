@@ -11,6 +11,7 @@ const emit = defineEmits<{
 
 const defaultTimestampFormat = "dd-MM-yyyy_HH-mm-ss";
 const defaultCreatedDateFormat = "dd/MM/yyyy HH:mm";
+const filenameSafeTimestampPattern = /^[^<>:"/\\|?*\u0000-\u001f]+$/;
 
 const exportSchema = yup.object({
   domain: yup
@@ -28,7 +29,11 @@ const exportSchema = yup.object({
     then: (schema) =>
       schema
         .trim()
-        .required("Timestamp format is required when naming files by date."),
+        .required("Timestamp format is required when naming files by date.")
+        .matches(
+          filenameSafeTimestampPattern,
+          'Use filename-safe separators. These characters are not allowed: < > : " / \\ | ? *',
+        ),
     otherwise: (schema) => schema.default(defaultTimestampFormat),
   }),
   createdDateFormat: yup
@@ -109,7 +114,7 @@ function handleSubmit(values: Record<string, unknown>) {
             name="timestampFormat"
             label="Timestamp format"
             placeholder="dd-MM-yyyy_HH-mm-ss"
-            description=".NET-style timestamp format used in split file names."
+            description=".NET-style timestamp format used in split filenames. Use filename-safe separators such as - and _."
           />
         </template>
       </div>

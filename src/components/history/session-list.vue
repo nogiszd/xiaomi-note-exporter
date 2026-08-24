@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Eye, FolderOpen, Trash2 } from "@lucide/vue";
 import type { Session } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Eye, FolderOpen, Trash2 } from "lucide-vue-next";
 
 defineProps<{
   sessions: Session[];

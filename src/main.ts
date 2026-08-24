@@ -4,7 +4,7 @@ import App from "./App.vue";
 import router from "./router";
 import "./style.css";
 
-const SPLASH_DELAY_MS = import.meta.env.DEV ? 10_000 : 2_000;
+const SPLASH_DELAY_MS = 1_500;
 
 function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => {

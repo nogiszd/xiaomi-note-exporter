@@ -11,7 +11,7 @@ import {
   LoaderCircle,
   Play,
   Settings,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,

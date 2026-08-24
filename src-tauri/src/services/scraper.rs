@@ -29,7 +29,7 @@ pub(crate) fn build_scrape_script(session_id: &str, export_images: bool) -> Stri
 
 pub(crate) fn build_notes_url(domain: &str) -> AppResult<Url> {
     Ok(Url::parse(&format!(
-        "https://{domain}/note/h5/?_locale=en-US"
+        "https://{domain}/note/h5/?_locale=en_US"
     ))?)
 }
 
