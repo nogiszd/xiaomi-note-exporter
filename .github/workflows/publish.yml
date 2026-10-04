@@ -71,7 +71,7 @@ jobs:
         platform: ${{ fromJSON(needs.prepare-platforms.outputs.platforms_json) }}
     runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || matrix.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.1
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
@@ -94,7 +94,7 @@ jobs:
           targets: aarch64-apple-darwin
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2.9.1
+        uses: swatinem/rust-cache@v2.9.2
         with:
           workspaces: ./src-tauri -> target
           shared-key: rust-${{ matrix.platform }}
@@ -113,7 +113,7 @@ jobs:
         platform: ${{ fromJSON(needs.prepare-platforms.outputs.platforms_json) }}
     runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || matrix.platform == 'linux' && 'ubuntu-24.04' || 'macos-15' }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.1
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
@@ -126,7 +126,7 @@ jobs:
             patchelf
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: lts/*
           cache: npm
@@ -142,7 +142,7 @@ jobs:
           targets: aarch64-apple-darwin
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2.9.1
+        uses: swatinem/rust-cache@v2.9.2
         with:
           workspaces: ./src-tauri -> target
           shared-key: rust-${{ matrix.platform }}
@@ -152,7 +152,7 @@ jobs:
 
       - name: Build Tauri installer (Windows NSIS only)
         if: matrix.platform == 'windows'
-        uses: tauri-apps/tauri-action@v0.6.1
+        uses: tauri-apps/tauri-action@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -160,7 +160,7 @@ jobs:
 
       - name: Build Tauri installer
         if: matrix.platform != 'windows'
-        uses: tauri-apps/tauri-action@v0.6.1
+        uses: tauri-apps/tauri-action@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -200,7 +200,7 @@ jobs:
           }
 
       - name: Upload installer artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: installer-${{ matrix.platform }}
           path: ${{ github.workspace }}/release-assets
@@ -217,7 +217,7 @@ jobs:
       - build-installers
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8.0.1
         with:
           path: ${{ github.workspace }}/release-assets
 
@@ -269,7 +269,7 @@ jobs:
           "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Attest release artifact
-        uses: actions/attest-build-provenance@v4.1.0
+        uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-path: ${{ steps.collect-installers.outputs.subject_path }}
 
