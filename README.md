@@ -14,25 +14,12 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 ### You can find help in [Wikis](https://github.com/nogiszd/xiaomi-note-exporter/wiki), or use direct links below:
 
-* ### [💻 Setup and Requirements](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Setup)
-* ### [💁 How to use?](https://github.com/nogiszd/xiaomi-note-exporter/wiki/How-to-use)
-* ### [✨ Features](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Features)
-* ### [❓ FAQ](https://github.com/nogiszd/xiaomi-note-exporter/wiki/FAQ)
+- ### [💻 Setup and Requirements](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Setup)
+- ### [💁 How to use?](https://github.com/nogiszd/xiaomi-note-exporter/wiki/How-to-use)
+- ### [✨ Features](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Features)
+- ### [❓ FAQ](https://github.com/nogiszd/xiaomi-note-exporter/wiki/FAQ)
 
 ---
-
-## 🦀 Rust rewrite
-
-Version `v2.0.0` is a complete rewrite of the application in Rust. The project has evolved from a CLI tool into a fully-featured graphical application.
-
-This release marks a major development milestone, significantly streamlining the export process by eliminating redundant dependencies:
-
-- Selenium has been removed and replaced with a pure JavaScript implementation that replicates the previous behavior.
-- The entire application is now built with Tauri, providing a modern GUI and fully asynchronous export execution.
-- The application is distributed as a standalone, installable executable, requiring no external runtime or dependencies.
-
-Old code (C#) will be available on [legacy](https://github.com/nogiszd/xiaomi-note-exporter/tree/legacy) branch, and old executables are still available to download via **Releases**, but they're **out of support**.
-
 
 ## 🤝 Open-source contributions
 
