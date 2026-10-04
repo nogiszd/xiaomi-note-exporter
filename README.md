@@ -12,7 +12,7 @@ I wanted to export my own notes from Mi Cloud but there is no option for that. T
 
 ## [💾 Download](https://github.com/nogiszd/xiaomi-note-exporter/releases/latest)
 
-### You can find help in [Wikis](https://github.com/nogiszd/xiaomi-note-exporter/wiki/%E2%80%90-%F0%9F%8F%A0-Home), or use direct links below:
+### You can find help in [Wikis](https://github.com/nogiszd/xiaomi-note-exporter/wiki), or use direct links below:
 
 - ### [💻 Setup and Requirements](https://github.com/nogiszd/xiaomi-note-exporter/wiki/Setup)
 - ### [💁 How to use?](https://github.com/nogiszd/xiaomi-note-exporter/wiki/How-to-use)
