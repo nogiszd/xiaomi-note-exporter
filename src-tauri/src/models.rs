@@ -58,6 +58,7 @@ pub struct ExportErrorEvent {
 #[serde(rename_all = "camelCase")]
 pub struct ScrapedImageInput {
     pub data_base64: String,
+    pub position: usize,
 }
 
 #[derive(Debug, Clone, Deserialize)]

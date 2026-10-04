@@ -181,10 +181,24 @@ fn build_note_markdown_default_and_custom_formats_differ() {
     let default_format = dotnet_to_chrono_created_date_format("dd/MM/yyyy HH:mm");
     let custom_format = dotnet_to_chrono_created_date_format("yyyy-MM-dd");
 
-    let default_output =
-        build_note_markdown("Title", "body", None, &[], created_at, &default_format, false);
-    let custom_output =
-        build_note_markdown("Title", "body", None, &[], created_at, &custom_format, false);
+    let default_output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &default_format,
+        false,
+    );
+    let custom_output = build_note_markdown(
+        "Title",
+        "body",
+        None,
+        &[],
+        created_at,
+        &custom_format,
+        false,
+    );
 
     assert_ne!(default_output, custom_output);
 }
@@ -352,4 +366,69 @@ fn adds_blank_line_after_blockquote_before_following_text() {
     let output = to_markdown_from_html(html);
 
     assert_eq!(output, "> Quoted\n\nAfter quote");
+}
+
+#[test]
+fn places_images_between_their_surrounding_paragraphs() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .unwrap();
+    let html = r#"<p>Before</p><div class="image-view"><img src="first"></div><p>Middle</p><div class="image-view"><img src="second"></div><p>After</p>"#;
+    let links = [
+        (0, "![image 1](<images/first.png>)".to_string()),
+        (1, "![image 2](<images/second.png>)".to_string()),
+    ];
+
+    let output = build_note_markdown("Title", "", Some(html), &links, created_at, "%Y", false);
+
+    assert!(output.contains("Before  \n\n![image 1](<images/first.png>)\n\nMiddle  \n\n![image 2](<images/second.png>)\n\nAfter"), "{output}");
+}
+
+#[test]
+fn keeps_image_positions_when_an_earlier_download_fails() {
+    let html = r#"<p>Before</p><div class="image-view"><img src="failed"></div><p>Middle</p><div class="image-view"><img src="saved"></div><p>After</p>"#;
+    let output = to_markdown_from_html(html);
+    assert_eq!(output, "Before  \nMiddle  \nAfter");
+
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .unwrap();
+    let note = build_note_markdown(
+        "Title",
+        "",
+        Some(html),
+        &[(1, "![image 2](<images/saved.png>)".to_string())],
+        created_at,
+        "%Y",
+        false,
+    );
+    assert!(
+        note.contains("Middle  \n\n![image 2](<images/saved.png>)\n\nAfter"),
+        "{note}"
+    );
+}
+
+#[test]
+fn places_image_inside_paragraph_between_text_fragments() {
+    let created_at = Local
+        .with_ymd_and_hms(2026, 5, 5, 13, 42, 0)
+        .single()
+        .unwrap();
+    let html = r#"<p>Before <span class="image-view"><img src="saved"></span> after</p>"#;
+    let note = build_note_markdown(
+        "Title",
+        "",
+        Some(html),
+        &[(0, "![image 1](<images/saved.png>)".to_string())],
+        created_at,
+        "%Y",
+        false,
+    );
+
+    assert!(
+        note.contains("Before  \n\n![image 1](<images/saved.png>)\n\nafter"),
+        "{note}"
+    );
 }

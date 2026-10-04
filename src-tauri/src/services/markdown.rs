@@ -9,6 +9,7 @@ const UNORDERED_LIST_INDENT_SPACES: usize = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum BlockKind {
     Blank,
+    Image(usize),
     Paragraph,
     Heading(u8),
     Quote,
@@ -26,6 +27,15 @@ struct ParsedBlock {
 }
 
 impl ParsedBlock {
+    fn image(position: usize) -> Self {
+        Self {
+            kind: BlockKind::Image(position),
+            text: String::new(),
+            indentation: 0,
+            order_start: None,
+        }
+    }
+
     fn blank() -> Self {
         Self {
             kind: BlockKind::Blank,
@@ -271,6 +281,7 @@ fn is_block_element(element: &ElementRef<'_>) -> bool {
     tag == "br"
         || tag == "p"
         || tag == "blockquote"
+        || has_class(element, "image-view")
         || has_class(element, "pm-order-list")
         || has_class(element, "pm-bullet-list")
         || has_class(element, "pm-checklist")
@@ -298,13 +309,27 @@ fn flush_inline_buffer_as_paragraph(inline_buffer: &mut String, blocks: &mut Vec
 fn append_known_block_from_element(
     element: &ElementRef<'_>,
     blocks: &mut Vec<ParsedBlock>,
+    image_position: &mut usize,
 ) -> bool {
+    if has_class(element, "image-view") {
+        if let Ok(selector) = Selector::parse("img") {
+            for _ in element.select(&selector) {
+                blocks.push(ParsedBlock::image(*image_position));
+                *image_position += 1;
+            }
+        }
+        return true;
+    }
+
     if element.value().name() == "br" {
         blocks.push(ParsedBlock::blank());
         return true;
     }
 
     if element.value().name() == "p" {
+        if has_descendant_image(element) {
+            return false;
+        }
         let text = normalize_multiline_text(&render_inline_children(element));
         if let Some(level) = parse_heading_level(element) {
             blocks.push(ParsedBlock::heading(level, text));
@@ -351,8 +376,12 @@ fn append_known_block_from_element(
     false
 }
 
-fn append_blocks_from_element(element: &ElementRef<'_>, blocks: &mut Vec<ParsedBlock>) {
-    if append_known_block_from_element(element, blocks) {
+fn append_blocks_from_element(
+    element: &ElementRef<'_>,
+    blocks: &mut Vec<ParsedBlock>,
+    image_position: &mut usize,
+) {
+    if append_known_block_from_element(element, blocks, image_position) {
         return;
     }
 
@@ -364,10 +393,10 @@ fn append_blocks_from_element(element: &ElementRef<'_>, blocks: &mut Vec<ParsedB
                 if let Some(child_element) = ElementRef::wrap(child) {
                     if is_block_element(&child_element) {
                         flush_inline_buffer_as_paragraph(&mut inline_buffer, blocks);
-                        append_blocks_from_element(&child_element, blocks);
+                        append_blocks_from_element(&child_element, blocks, image_position);
                     } else if has_descendant_block_elements(&child_element) {
                         flush_inline_buffer_as_paragraph(&mut inline_buffer, blocks);
-                        append_blocks_from_element(&child_element, blocks);
+                        append_blocks_from_element(&child_element, blocks, image_position);
                     } else {
                         inline_buffer.push_str(&render_inline_element(&child_element));
                     }
@@ -392,7 +421,7 @@ fn parse_blocks_from_html(content_html: &str) -> Vec<ParsedBlock> {
     };
 
     let mut blocks = Vec::new();
-    append_blocks_from_element(&root, &mut blocks);
+    append_blocks_from_element(&root, &mut blocks, &mut 0);
     blocks
 }
 
@@ -440,7 +469,7 @@ fn push_paragraph_lines(lines: &mut Vec<String>, text: &str) {
     }
 }
 
-fn render_blocks_to_markdown(blocks: &[ParsedBlock]) -> String {
+fn render_blocks_to_markdown(blocks: &[ParsedBlock], image_links: &[(usize, String)]) -> String {
     if blocks.is_empty() {
         return String::new();
     }
@@ -461,6 +490,20 @@ fn render_blocks_to_markdown(blocks: &[ParsedBlock]) -> String {
         }
 
         match block.kind {
+            BlockKind::Image(position) => {
+                if let Some((_, link)) = image_links.iter().find(|(index, _)| *index == position) {
+                    if !lines.is_empty() && !lines.last().is_some_and(|line| line.is_empty()) {
+                        lines.push(String::new());
+                    }
+                    lines.push(link.clone());
+                    lines.push(String::new());
+                }
+                previous_is_list = false;
+                previous_was_ordered = false;
+                previous_was_quote = false;
+                list_base_indentation = None;
+                ordered_counters.fill(1);
+            }
             BlockKind::Blank => {
                 if !lines.last().is_some_and(|line| line.is_empty()) {
                     lines.push(String::new());
@@ -638,20 +681,48 @@ fn render_blocks_to_markdown(blocks: &[ParsedBlock]) -> String {
     lines.join("\n")
 }
 
+#[cfg(test)]
 pub(crate) fn to_markdown_from_html(content_html: &str) -> String {
+    to_markdown_from_html_with_images(content_html, &[])
+}
+
+fn has_descendant_image(element: &ElementRef<'_>) -> bool {
+    element.children().any(|child| {
+        ElementRef::wrap(child).is_some_and(|child_element| {
+            has_class(&child_element, "image-view") || has_descendant_image(&child_element)
+        })
+    })
+}
+
+fn to_markdown_from_html_with_images(
+    content_html: &str,
+    image_links: &[(usize, String)],
+) -> String {
     if content_html.trim().is_empty() {
         return String::new();
     }
 
     let blocks = parse_blocks_from_html(content_html);
-    render_blocks_to_markdown(&blocks)
+    let mut markdown = render_blocks_to_markdown(&blocks, image_links);
+    for (position, link) in image_links {
+        if !blocks
+            .iter()
+            .any(|block| block.kind == BlockKind::Image(*position))
+        {
+            if !markdown.is_empty() {
+                markdown.push_str("\n\n");
+            }
+            markdown.push_str(link);
+        }
+    }
+    markdown
 }
 
 pub fn build_note_markdown(
     title: &str,
     content: &str,
     content_html: Option<&str>,
-    image_links: &[String],
+    image_links: &[(usize, String)],
     created_at: DateTime<Local>,
     created_date_format: &str,
     unsupported: bool,
@@ -665,7 +736,9 @@ pub fn build_note_markdown(
     let body = if unsupported {
         "**Unsupported note type (Mind-map or Sound note)**".to_string()
     } else {
-        let rich = content_html.map(to_markdown_from_html).unwrap_or_default();
+        let rich = content_html
+            .map(|html| to_markdown_from_html_with_images(html, image_links))
+            .unwrap_or_default();
         if rich.trim().is_empty() {
             to_markdown_linebreaks(content)
         } else {
@@ -679,8 +752,8 @@ pub fn build_note_markdown(
     markdown.push_str(&body);
     markdown.push_str("\n\n");
 
-    if !image_links.is_empty() {
-        for link in image_links {
+    if !image_links.is_empty() && content_html.is_none() {
+        for (_, link) in image_links {
             markdown.push_str(link);
             markdown.push('\n');
         }

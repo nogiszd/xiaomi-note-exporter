@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
 use base64::Engine as _;
-use sha2::{Digest, Sha256};
 use chrono::{Local, TimeZone, Utc};
 use reqwest::{blocking::Client, header};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
 use uuid::Uuid;
@@ -440,7 +440,11 @@ pub fn append_scraped_note(
             let mut hasher = Sha256::new();
             hasher.update(created_at.to_rfc3339().as_bytes());
             let result = hasher.finalize();
-            result.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+            result
+                .iter()
+                .take(8)
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
         };
 
         for (index, image) in note.images.iter().enumerate() {
@@ -465,7 +469,10 @@ pub fn append_scraped_note(
             } else {
                 format!("{images_dir_name}/{image_name}")
             };
-            image_links.push(format!("![image {}](<{relative_path}>)", index + 1));
+            image_links.push((
+                image.position,
+                format!("![image {}](<{relative_path}>)", image.position + 1),
+            ));
         }
     }
 

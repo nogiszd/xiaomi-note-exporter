@@ -287,7 +287,7 @@
     return true;
   };
 
-  const collectImages = async (invoke, container, createdString) => {
+  const collectImages = async (invoke, container) => {
     if (!exportImages || !container) {
       return [];
     }
@@ -313,13 +313,10 @@
       container.querySelectorAll(".image-view img"),
     );
     const cookieHeader = document.cookie || "";
-    let index = 0;
-
-    for (const img of imageNodes) {
+    for (const [position, img] of imageNodes.entries()) {
       if (!isRealImageLoaded(img)) {
         const ready = await waitForImageReady(img, 1500);
         if (!ready) {
-          index += 1;
           continue;
         }
       }
@@ -335,12 +332,10 @@
           cookieHeader: cookieHeader || null,
         });
         if (!base64) continue;
-        images.push({ dataBase64: base64 });
+        images.push({ dataBase64: base64, position });
       } catch (e) {
         console.error("Failed to fetch image", { src }, e);
       }
-
-      index += 1;
     }
 
     return images;
@@ -461,8 +456,8 @@
         const content = unsupported
           ? ""
           : (noteContainer.innerText || "").trim();
+        const images = await collectImages(invoke, noteContainer);
         const contentHtml = unsupported ? "" : noteContainer.innerHTML || "";
-        const images = await collectImages(invoke, noteContainer, createdString);
 
         await invoke("append_scraped_note", {
           sessionId,
